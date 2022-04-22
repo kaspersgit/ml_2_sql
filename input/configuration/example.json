@@ -1,0 +1,22 @@
+{
+  "features": [
+    "feature_1",
+    "feature_2"
+  ],
+  "model_params": {
+    "interactions": 4,
+    "max_bins": 50,
+    "max_interaction_bins": 6
+  },
+  "post_params": {
+    "calibration": "false"
+  },
+  "pre_params": {
+    "cv_type": "timeseriesplit",
+    "impute_missing_values": "true",
+    "max_rows": 100000,
+    "time_sensitive_column": "date_column",
+    "upsampling": "false"
+  },
+  "target": "target"
+}

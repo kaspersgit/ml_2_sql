@@ -1,0 +1,4 @@
+{"target":"collection_rate_bin"
+  , "features":["external_score","incoming_capital","days_purchase_to_dc","internal_score","random_two_classes","random_three_classes"]
+  , "params":{"interactions":4, "max_interaction_bins":4, "max_bins":4}
+}

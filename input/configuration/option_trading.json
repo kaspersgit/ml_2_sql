@@ -1,0 +1,3 @@
+{"target":"reachedStrikePrice"
+, "pre_params": {"impute_missing_values":"True", "cv_type": "timeseriesplit", "time_sensitive_column": "exportedAt"}
+}
