@@ -1,17 +1,18 @@
 #!/bin/bash
-# Let's call it SQL decision tree (made at http://www.kammerl.de/ascii/AsciiSignature.php)
+# Let's call it ML 2 SQL (made at http://www.kammerl.de/ascii/AsciiSignature.php)
 cat << 'EOF'
 
 
- dP"8   e88 88e   888            888                  ,e,       ,e,                       d8
-C8b Y  d888 888b  888        e88 888  ,e e,   e88'888  "   dP"Y  "   e88 88e  888 8e     d88   888,8,  ,e e,   ,e e,
- Y8b  C8888 8888D 888       d888 888 d88 88b d888  '8 888 C88b  888 d888 888b 888 88b   d88888 888 "  d88 88b d88 88b
-b Y8D  Y888 888P  888  ,d   Y888 888 888   , Y888   , 888  Y88D 888 Y888 888P 888 888    888   888    888   , 888   ,
-8edP    "88 88"   888,d88    "88 888  "YeeP"  "88,e8' 888 d,dP  888  "88 88"  888 888    888   888     "YeeP"  "YeeP"
-            b
-            8b,
 
-
+`7MMM.     ,MMF'`7MMF'                        .M"""bgd   .g8""8q. `7MMF'
+  MMMb    dPMM    MM                         ,MI    "Y .dP'    `YM. MM
+  M YM   ,M MM    MM             pd*"*b.     `MMb.     dM'      `MM MM
+  M  Mb  M' MM    MM            (O)   j8       `YMMNq. MM        MM MM
+  M  YM.P'  MM    MM      ,         ,;j9     .     `MM MM.      ,MP MM      ,
+  M  `YM'   MM    MM     ,M      ,-='        Mb     dM `Mb.    ,dP' MM     ,M
+.JML. `'  .JMML..JMMmmmmMMM     Ammmmmmm     P"Ybmmd"    `"bmmd"' .JMMmmmmMMM
+                                                             MMb
+                                                              `bood'
 
 EOF
 
