@@ -7,7 +7,15 @@ if you can write down the model in a basic logical language (SQL) you should be 
 
 This project tries to make the process simple enough for any SQL user to train a model, check the performance and deploy that model in SQL.
 
-## How to use
+## Pre requisites
+1. Create virtual environment and install packages, on mac run:
+   ```
+   python3 -m venv .ml2sql
+   source .ml2sql/bin/activate
+   pip install -r requirements.txt
+   ```
+
+## How to use main script
 1. Save csv file containing target and all features in the `input/data/` folder
 2. Save a settings json file in the `input/configuration/` folder which can contain:
    1. "target" -- name of target column (required)
