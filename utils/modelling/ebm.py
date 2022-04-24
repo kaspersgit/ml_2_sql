@@ -139,20 +139,32 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
         classificationReportSave(given_name, y_test, y_test_pred, data_type='test')
 
         if len(clf.classes_) == 2:
+            # Also create pr curve for class 0
+            y_all_neg = np.array([1 - j for j in list(y_all)])
+            y_all_prob_neg = np.array([1 - j for j in list(y_all_prob)])
+
+            y_test_list_neg = [[1 - j for j in i] for i in y_test_list]
+            y_test_prob_list_neg = [[1 - j for j in i] for i in y_test_prob_list]
+
             # Threshold independant
-            plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='roc', data_type='final train')
+            plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='roc', data_type='final_train')
             plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='roc', data_type='test')
-            plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='pr', data_type='final train')
-            plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='pr', data_type='test')
-            plotCalibrationCurve(given_name, y_all, y_all_prob, data_type='final train')
+
+            plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='pr', data_type='final_train_class1')
+            plotClassificationCurve(given_name, y_all_neg, y_all_prob_neg, curve_type='pr', data_type='final_train_class0')
+
+            plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='pr', data_type='test_data_class1')
+            plotClassificationCurve(given_name, y_test_list_neg, y_test_prob_list_neg, curve_type='pr', data_type='test_data_class0')
+
+            plotCalibrationCurve(given_name, y_all, y_all_prob, data_type='final_train')
             plotCalibrationCurve(given_name, y_test_list, y_test_prob_list, data_type='test')
-            plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final train')
+            plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final_train')
             plotProbabilityDistribution(given_name, y_test, y_test_prob, data_type='test')
 
 
     elif model_type == 'regression':
         plotYhatVsYSave(given_name, y_test, y_test_pred, data_type='test')
-        plotYhatVsYSave(given_name, y_all, y_all_pred, data_type='final train')
+        plotYhatVsYSave(given_name, y_all, y_all_pred, data_type='final_train')
 
         adjustedR2 = 1 - (1 - clf.score(X_all, y_all)) * (len(y_all) - 1) / (len(y_all) - X_all.shape[1] - 1)
         print('Adjusted R2: {adjustedR2}'.format(adjustedR2=adjustedR2))

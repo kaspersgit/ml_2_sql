@@ -59,7 +59,7 @@ def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type):
         curve_ = 'roc'
 
     elif ('recall' in curve_type and 'precision' in curve_type) or curve_type == 'pr':
-        title = 'Precision-Recall curve - {data_type} data'.format(data_type=data_type)
+        title = 'Precision-Recall curve - {data_type}'.format(data_type=data_type)
         xlabel = 'True Positive Rate (Recall)'
         ylabel = 'Precision'
         diagCor1 = [0, 0]
