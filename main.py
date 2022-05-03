@@ -51,8 +51,8 @@ model = args.model
 # for debugging
 # given_name='trained_models/kasper'
 # logging.basicConfig(format='%(asctime)s %(message)s', filename=given_name+'/logging.log', encoding='utf-8', level=logging.DEBUG)
-# data_ = pd.read_csv('input/data/0_trimmed_fi_2021.csv')
-# with open('input/configuration/AA_fi_cr_pred.json') as json_file:
+# data_ = pd.read_csv('input/data/test.csv')
+# with open('input/configuration/test.json') as json_file:
 #     configuration = json.load(json_file)
 # model = 'ebm'
 #############################################
