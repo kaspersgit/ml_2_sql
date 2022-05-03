@@ -17,21 +17,55 @@ This project tries to make the process simple enough for any SQL user to train a
 
 ## How to use main script
 1. Save csv file containing target and all features in the `input/data/` folder
-2. Save a settings json file in the `input/configuration/` folder which can contain:
-   1. "target" -- name of target column (required)
-   2. "features" -- list of names of features used (optional,  otherwise all columns except for target are used)
-   3. "model_params" --  parameters used for the Explainable Boosting Machine (optional, [model documentation](https://interpret.ml/docs/ebm.html))
-   4. "pre_params" --  parameters used for data pre processing (optional, check example file for parameters)
-   5. "post_params" --  parameters used for post modeling (optional, check example file for parameters)
-3. NULL handling is currently done in a hacky way which only works if numeric variables are >= 0 (as they are imputed with -1)
-4. In the terminal run: `bash run.sh`
-5. Follow the instruction on screen
-6. The output will be saved in the folder `trained_models/<current_date>_<your_model_name>/`
-7. The `.sql` file will contain a SQL Case When statement imitating the decision tree/EBM
+2. Save a settings json file in the `input/configuration/` (explained below at `Configuration json`)
+3. In the terminal run: `bash run.sh`
+4. Follow the instruction on screen
+5. The output will be saved in the folder `trained_models/<current_date>_<your_model_name>/`
+6. The `.sql` file will contain a SQL Case When statement imitating the decision tree/EBM
+
+### Configuration json
+#### features
+List with names of the columns which should be used as feature (optional)
+
+#### model_params
+Dictionary of parameters that can be used with model of choice (optional). Check the model's documentation:
+- EBM ([model documentation](https://interpret.ml/docs/ebm.html))
+
+#### post_params
+`calibration` options (optional, not fully implemented):
+- `sigmoid`, platt scaling applied
+- `isotonic`, isotonic regression applied
+- `auto`/`true`, either platt scaling or isotonic regression applied based on datasize
+- any other value, not calibration applied
+
+#### pre_params
+`cv_type` options (optional):
+- `timeseriesplit`, perform 5 fold timeseries split ([sklearn implementation](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html))
+- any other value, perform 5 fold stratified cross validation
+
+`impute_missing_values` options (optional):
+- `true`, NULL values will be imputed by either `-1` (numeric) or `none_category` (categorical)
+- any other value, imputing is not done
+
+`max_rows` options (not used currently):
+- Any kind of whole positive number, will limit the data set to this limit for faster training
+
+`time_sensitive_column` options (optional):
+- Name of date column
+  - used when `cv_type = timeseriesplit`  
+  - used when out-of-time dataset is created (not implemented yet)
+
+`upsampling` options (optional):
+- `true`, applying the SMOTE(NC) algorithm on the minority class to balance the data
+- `false`, not applying any resampling technique
+
+#### target 
+Name of target column (required)
 
 ### Notes
 - Preferably you impute any NULL values before running this script
 - Data imbalance treatments (e.g. oversampling + model calibration) not fully implemented
+- Resampling (almost) always makes the trained model ill calibrated
 - Multiclass and regression are experimental
 
 ### TODO list
