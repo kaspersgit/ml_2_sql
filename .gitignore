@@ -1,6 +1,6 @@
 # files and data
 input/data/*.csv
-input/target_features/*.json
+input/configuration/*.json
 !input/configuration/example.json
 trained_models/*
 
