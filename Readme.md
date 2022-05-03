@@ -51,7 +51,9 @@ Dictionary of parameters that can be used with model of choice (optional). Check
 - Any kind of whole positive number, will limit the data set to this limit for faster training
 
 `time_sensitive_column` options (optional):
-- Name of column,  used when `cv_type = timeseriesplit` and when out-of-time dataset is created (not implemented yet)
+- Name of date column
+  - used when `cv_type = timeseriesplit`  
+  - used when out-of-time dataset is created (not implemented yet)
 
 `upsampling` options (optional):
 - `true`, applying the SMOTE(NC) algorithm on the minority class to balance the data
@@ -63,6 +65,7 @@ Name of target column (required)
 ### Notes
 - Preferably you impute any NULL values before running this script
 - Data imbalance treatments (e.g. oversampling + model calibration) not fully implemented
+- Resampling (almost) always makes the trained model ill calibrated
 - Multiclass and regression are experimental
 
 ### TODO list
