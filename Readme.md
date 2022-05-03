@@ -29,27 +29,16 @@ This project tries to make the process simple enough for any SQL user to train a
 6. The output will be saved in the folder `trained_models/<current_date>_<your_model_name>/`
 7. The `.sql` file will contain a SQL Case When statement imitating the decision tree/EBM
 
+### Notes
+- Preferably you impute any NULL values before running this script
+- Data imbalance treatments (e.g. oversampling + model calibration) not fully implemented
+- Multiclass and regression are experimental
+
 ### TODO list
-- Add functionality to specify model parameters (done)
-- Add AUC plots for classification (done)
-- Add calibration plot (done)
-- Save actual model (pickled) (done)
-- Extend EBM to do multiclass (done)
-- Extend EBM SQL for interaction terms (done)
-- Allow for categorical features (done)
-- Remove last bound and last score instead of adding inf (done)
-- When training final model, make sure to train it on 1 copy of upsampled data (not un multiple copies of it) (done)
-- Add logger in python files and save in folder (done)
-- Add constant for EBM (as seen in the explain local plots) (done)
-- Make EBM SQL code handle null values (filtered out atm) (done kind of by doing a hacky null impute by -1)
-- make sure calibration data is not share of upsampled dataset (done)
-- Time series splitting fix this one (done)
-- Collect all param handling in one script (done)
-- Group all X_ and y_ datasets into one dict (done)
 - Get csv file from s3 link
 - Add regression next to classification (also for SQL)
 - Add MCC-F1 (curve?)
-- plots for regression (idea https://towardsdatascience.com/visualizing-linear-ridge-and-lasso-regression-performance-6dda7affa251)
+- plots for regression 
 - Discovery on calibration (and how it can be written in SQL)
 - Simplify interaction lookup df (make separate column per feature and perform a groupby)
 - Use sklearn pipelines to simplify and streamline whole modelling process
