@@ -4,14 +4,13 @@ from interpret.glassbox import ExplainableBoostingClassifier
 from contextlib import redirect_stdout
 
 def extractLookupTable(ebm):
-    """ Provides global explanation for model.
+    """ Provides reformatted structure of EBM
 
     Args:
-        ebm: A trained EBM classifier=
+        ebm: A trained EBM
 
     Returns:
-        An explanation object,
-        A dict of dataframe including information to creat SQL code
+        A dict of dataframes including information to create SQL code
     """
 
     # Add per feature graph

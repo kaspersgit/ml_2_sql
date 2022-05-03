@@ -27,11 +27,11 @@
     "max_interaction_bins": 6
   },
   "post_params": {
-    "calibration": "False"
+    "calibration": "false"
   },
   "pre_params": {
     "cv_type": "timeseriesplit",
-    "impute_missing_values": "True",
+    "impute_missing_values": "false",
     "max_rows": 100000,
     "resample": "false",
     "time_sensitive_column": "dc_date"
