@@ -175,21 +175,12 @@ def single_feature_2_sql(df):
         if feature_nr > 0:
             print('+\nCASE')
 
-        # Keep track if null values is handled
-        treated_null = False
-        treated_lower_bound = False
-
         for index, row in feature_df.iterrows():
 
             # check if string/category
             if row['feat_type'] == 'categorical':
                 # check for manual imputed null values
-                if row['feat_bound'] == 'none_category' and not treated_null:
-                    print(' WHEN {feature} IS NULL THEN {score}'.format(feature=f,
-                                                                        score=row['score']))
-                    treated_null = True
-                else:
-                    print(" WHEN {feature} = '{lb}' THEN {score}".format(feature=f, lb=row['feat_bound'],
+                print(" WHEN {feature} = '{lb}' THEN {score}".format(feature=f, lb=row['feat_bound'],
                                                                              score=row['score']))
                 # Add ELSE 0.0 as last entry
                 if index == feature_df.index[-1]:
@@ -206,24 +197,17 @@ def single_feature_2_sql(df):
 
             # otherwise it should be a float
             elif isinstance(row['feat_bound'], float):
-                # Check if first bound (null handling)
-                if index == 0 and not treated_null:
-                    print(' WHEN {feature} IS NULL THEN {score}'.format(feature=f, score=row['score']))
-                    treated_null = True
+                # First bound
+                if index == 0:
+                    print(' WHEN {feature} <= {ub} THEN {score}'.format(feature=f,
+                                                                                 ub=row['feat_bound'],
+                                                                                 score=row['score']))
 
-                # still use either first or second bound (based on if they are for made for null handling or not
-                if row['feat_bound'] > 0:
-                    if not treated_lower_bound:
-                        print(' WHEN {feature} <= {ub} THEN {score}'.format(feature=f,
-                                                                                     ub=row['feat_bound'],
-                                                                                     score=row['score']))
-                        treated_lower_bound = True
-
-                    else:
-                        print(' WHEN {feature} > {lb} AND {feature} <= {ub} THEN {score}'.format(feature=f,
-                                                                                                     lb=feature_df.iloc[index-1, :]['feat_bound'],
-                                                                                                     ub=row['feat_bound'],
-                                                                                                     score=row['score']))
+                else:
+                    print(' WHEN {feature} > {lb} AND {feature} <= {ub} THEN {score}'.format(feature=f,
+                                                                                                 lb=feature_df.iloc[index-1, :]['feat_bound'],
+                                                                                                 ub=row['feat_bound'],
+                                                                                                 score=row['score']))
                 # Add ELSE 0.0 as last entry
                 if index == feature_df.index[-1]:
                     print(" ELSE 0.0")
@@ -258,20 +242,11 @@ def double_feature_2_sql(df):
 
         scores = pd.DataFrame(df_row['score'])
 
-        # Keep track if null values is handled
-        first_treated_null = False
-        first_treated_lower_bound = False
-
         # first feature
         for f_ind in range(first_feature_nbounds):
             # check if string/category
             if first_feat_type == 'categorical':
-                # check for manual imputed null values
-                if first_feat_bound[f_ind] == 'none_category' and not first_treated_null:
-                    print(' WHEN {feature} IS NULL THEN \n  CASE'.format(feature=first_feature))
-                    first_treated_null = True
-                else:
-                    print(" WHEN {feature} = '{b}' THEN \n  CASE".format(feature=first_feature
+                print(" WHEN {feature} = '{b}' THEN \n  CASE".format(feature=first_feature
                                                                             , b=first_feat_bound[f_ind]))
             elif first_feat_bound[f_ind] == np.PINF:
                 print(' WHEN {feature} > {b} THEN \n   CASE'.format(feature=first_feature,
@@ -280,24 +255,14 @@ def double_feature_2_sql(df):
 
             # otherwise it should be a float
             elif isinstance(first_feat_bound[f_ind], float):
-                # Check if first bound (null handling)
-                if f_ind == 0 and not first_treated_null:
-                    print(' WHEN {feature} IS NULL'.format(feature=first_feature), end='')
-                    first_treated_null = True
-                    # still use either first or second bound (based on if they are for made for null handling or not
-                    if first_feat_bound[f_ind] > 0 and not first_treated_lower_bound:
-                        print(' OR {feature} <= {b}'.format(feature=first_feature,
-                                                                                     b=first_feat_bound[f_ind]), end='')
-                        first_treated_lower_bound = True
+                # Check if first bound
+                if f_ind == 0:
+                    print(' WHEN {feature} <= {b}'.format(feature=first_feature,
+                                                        b=first_feat_bound[f_ind]), end='')
                     print(' THEN \n  CASE')
                 else:
-                    # Treat this as first bound based on set flag
-                    if not first_treated_lower_bound:
-                        print(' WHEN {feature} <= {b} THEN \n  CASE'.format(feature=first_feature,
-                                                                                     b=first_feat_bound[f_ind]))
-                        first_treated_lower_bound = True
-                    else:
-                        print(' WHEN {feature} > {lb} AND {feature} <= {ub} THEN \n     CASE'.format(feature=first_feature,
+                    # After first bound set interval
+                    print(' WHEN {feature} > {lb} AND {feature} <= {ub} THEN \n     CASE'.format(feature=first_feature,
                                                                                                      lb=first_feat_bound[
                                                                                                          f_ind-1],
                                                                                                      ub=first_feat_bound[
@@ -305,79 +270,50 @@ def double_feature_2_sql(df):
             else:
                 raise "not sure what to do"
 
-
-            # Keep track if null values is handled
-            second_treated_null = False
-            second_treated_lower_bound = False
-
             # second feature
             for s_ind in range(second_feature_nbounds):
                 # check if string/category
                 if second_feat_type == 'categorical':
-                    # check for manual imputed null values
-                    if second_feat_bound[s_ind] == 'none_category' and not second_treated_null:
-                        print('         WHEN {feature} IS NULL THEN {score}'.format(feature=second_feature,
-                                                                            score=scores.iloc[f_ind, s_ind]))
-                        second_treated_null = True
-                    else:
-                        print("         WHEN {feature} = '{b}' THEN {score}".format(feature=second_feature,
-                                                                            b=second_feat_bound[s_ind],
-                                                                            score=scores.iloc[f_ind, s_ind]
-                                                                                    ))
-                    # Add ELSE 0.0 as last entry
-                    if s_ind == second_feature_nbounds:
-                        print("         ELSE 0.0")
+                    print("         WHEN {feature} = '{b}' THEN {score}".format(feature=second_feature,
+                                                                        b=second_feat_bound[s_ind],
+                                                                        score=scores.iloc[f_ind, s_ind]
+                                                                                ))
 
                 elif second_feat_bound[s_ind] == np.PINF:
                     print('         WHEN {feature} > {b} THEN {score}'.format(feature=second_feature,
                                                                          b=second_feat_bound[s_ind - 1],
                                                                         score=scores.iloc[f_ind, s_ind]
                                                                          ))
-                    # Add ELSE 0.0 as last entry
-                    if s_ind == second_feature_nbounds:
-                        print("         ELSE 0.0")
 
                 # otherwise it should be a float
                 elif isinstance(second_feat_bound[s_ind], float):
-                    # Check if first bound (null handling)
-                    if s_ind == 0 and not second_treated_null:
-                        print('         WHEN {feature} IS NULL THEN {score}'.format(feature=second_feature,
-                                                                            score=scores.iloc[
-                                                                                f_ind, s_ind]))
-                        second_treated_null = True
-
-                        # still use either first or second bound (based on if they are for made for null handling or not
-                        if second_feat_bound[s_ind] > 0 and not second_treated_lower_bound:
-                            print('         WHEN {feature} <= {b} THEN {score}'.format(feature=second_feature,
-                                                                            b=second_feat_bound[s_ind],
-                                                                            score=scores.iloc[
-                                                                                f_ind, s_ind]))
-                            second_treated_lower_bound = True
+                    # still use either first or second bound (based on if they are for made for null handling or not
+                    if s_ind == 0:
+                        print('         WHEN {feature} <= {b} THEN {score}'.format(feature=second_feature,
+                                                                        b=second_feat_bound[s_ind],
+                                                                        score=scores.iloc[
+                                                                            f_ind, s_ind]))
                     else:
-                        # still use either first or second bound (based on if they are for made for null handling or not
-                        if not second_treated_lower_bound:
-                            print('         WHEN {feature} <= {b} THEN {score}'.format(feature=second_feature,
-                                                                            b=second_feat_bound[s_ind],
-                                                                            score=scores.iloc[
-                                                                                f_ind, s_ind]))
-                            second_treated_lower_bound = True
-                        else:
-                            print('         WHEN {feature} > {lb} AND {feature} <= {ub} THEN {score}'.format(
-                                                                                            feature=second_feature,
-                                                                                            lb=second_feat_bound[
-                                                                                                s_ind - 1],
-                                                                                            ub=second_feat_bound[
-                                                                                                s_ind],
-                                                                                            score=scores.iloc[
-                                                                                                f_ind, s_ind]))
-                    # Add ELSE 0.0 as last entry
-                    if s_ind == second_feature_nbounds:
-                        print("         ELSE 0.0")
+                        print('         WHEN {feature} > {lb} AND {feature} <= {ub} THEN {score}'.format(
+                                                                                        feature=second_feature,
+                                                                                        lb=second_feat_bound[
+                                                                                            s_ind - 1],
+                                                                                        ub=second_feat_bound[
+                                                                                            s_ind],
+                                                                                        score=scores.iloc[
+                                                                                            f_ind, s_ind]))
+
 
                 else:
                     raise "not sure what to do"
 
+                # Add ELSE 0.0 as last entry
+                if s_ind == (second_feature_nbounds - 1):
+                    print("         ELSE 0.0")
+
             print('     END')
+        # Catch anything else
+        print(' ELSE 0.0')
         print('END')
 
 
@@ -396,12 +332,8 @@ def lookup_df_to_sql_multiclass(df, classes):
                 print('+\nCASE')
 
             for index, row in feature_df.iterrows():
-                # check for null handling
-                if pd.isnull(row['feat_bound']):
-                    print(' WHEN {feature} IS NULL THEN {score}'.format(feature=f,
-                                                                            score=row['score'][class_nr]))
                 # check for last numeric bound
-                elif row['feat_bound'] == np.PINF:
+                if row['feat_bound'] == np.PINF:
                     print(' WHEN {feature} >= {lb} THEN {score}'.format(feature=f,
                                                                             lb=feature_df.iloc[index - 1, :]['feat_bound'],
                                                                             score=row['score'][class_nr]))
@@ -415,10 +347,7 @@ def lookup_df_to_sql_multiclass(df, classes):
                                                                                 score=row['score'][class_nr]))
                 # otherwise it should be a float
                 elif isinstance(row['feat_bound'], float):
-                    # Check if first bound (null handling)
                     if index == 0:
-                        print(' WHEN {feature} IS NULL THEN {score}'.format(feature=f, score=row['score'][class_nr]))
-
                         # still use either first or second bound (based on if they are for made for null handling or not
                         if row['feat_bound'] > 0:
                             print(' WHEN {feature} <= {ub} THEN {score}'.format(feature=f,

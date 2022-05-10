@@ -27,10 +27,6 @@ def config_handling(configuration, logging):
     else:
         pre_params = {}
 
-    # Impute missing values
-    if 'impute_missing_values' not in pre_params.keys():
-        pre_params['impute_missing_values'] = 'false'
-
     if not ('oot_set' in pre_params.keys()) & ('oot_rows' in pre_params.keys()):
         pre_params['oot_set'] = 'false'
 

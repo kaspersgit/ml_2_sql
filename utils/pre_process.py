@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import RandomOverSampler, SMOTE, SMOTENC
 
-def cleanAndCastColumns(data, feature_cols, target_col, model_type, impute_missing_values, logging):
+def cleanAndCastColumns(data, feature_cols, target_col, model_type, logging):
     # make copy of data
     _data = data.copy()
 
@@ -31,16 +31,11 @@ def cleanAndCastColumns(data, feature_cols, target_col, model_type, impute_missi
         logging.info('Columns with NaN values: \n{nans}'.format(nans=nan_cols.isna().sum()))
 
     # Adjust this to allow for categorical features
-    # for object columns Impute Nan by False
     for col in _data[feature_cols].select_dtypes(include=['object']).columns:
         # Check if values are true/false/None then boolean
         if all(val in [True, False, None, np.NaN] for val in _data[col].unique()):
-            if impute_missing_values == 'true':
-                _data[col].fillna(-1, inplace=True) ## TODO what if variable has negative values of itself
             _data[col] = _data[col].astype(int)
         else:  # otherwise assume categorical
-            if impute_missing_values == 'true':
-                _data[col].fillna('none_category', inplace=True)
             _data[col] = _data[col].astype({col: 'category'})
 
     # Overview of _data types
@@ -49,12 +44,6 @@ def cleanAndCastColumns(data, feature_cols, target_col, model_type, impute_missi
     # change boolean into 0's and 1's
     for col in _data[feature_cols].select_dtypes(include=['bool']).columns:
         _data[col] = _data[col].astype(int)
-
-    ## Imputing Nan values for all other columns
-    if impute_missing_values == 'true':
-        nan_cols = _data[feature_cols].columns[_data[feature_cols].isna().sum() / len(_data[feature_cols]) > 0.0]
-        for col in nan_cols:
-            _data[col].fillna(-1, inplace=True)
 
     return _data.reset_index(drop=True)
 
@@ -98,8 +87,8 @@ def pre_process(data, target_col, feature_cols, logging, random_seed=42):
 
 def pre_process_kfold(data, target_col, feature_cols, model_type, logging, pre_params, random_seed=42):
 
-    # clean cast and impute
-    data_clean = cleanAndCastColumns(data, feature_cols, target_col, model_type, pre_params['impute_missing_values'], logging)
+    # clean and cast
+    data_clean = cleanAndCastColumns(data, feature_cols, target_col, model_type, logging)
 
     # create kfolds in a statified manner
     from sklearn.model_selection import StratifiedKFold, KFold, TimeSeriesSplit

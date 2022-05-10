@@ -13,7 +13,6 @@
   },
   "pre_params": {
     "cv_type": "timeseriesplit",
-    "impute_missing_values": "true",
     "max_rows": 100000,
     "time_sensitive_column": "date_column",
     "upsampling": "false"

@@ -43,12 +43,8 @@ Dictionary of parameters that can be used with model of choice (optional). Check
 - `timeseriesplit`, perform 5 fold timeseries split ([sklearn implementation](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html))
 - any other value, perform 5 fold stratified cross validation
 
-`impute_missing_values` options (optional):
-- `true`, NULL values will be imputed by either `-1` (numeric) or `none_category` (categorical)
-- any other value, imputing is not done
-
 `max_rows` options (not used currently):
-- Any kind of whole positive number, will limit the data set to this limit for faster training
+- Any kind of whole positive number, will limit the data set in order to train faster (as simple as that)
 
 `time_sensitive_column` options (optional):
 - Name of date column
@@ -63,12 +59,13 @@ Dictionary of parameters that can be used with model of choice (optional). Check
 Name of target column (required)
 
 ### Notes
-- Preferably you impute any NULL values before running this script
+- Any NULL values should be imputed before using this script
 - Data imbalance treatments (e.g. oversampling + model calibration) not fully implemented
 - Resampling (almost) always makes the trained model ill calibrated
 - Multiclass and regression are experimental
 
 ### TODO list
+- Remove custom imputing (better to wait for EBM null handling) (done)
 - Get csv file from s3 link
 - Add regression next to classification (also for SQL)
 - Add MCC-F1 (curve?)
