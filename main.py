@@ -84,5 +84,5 @@ datasets = pre_process_kfold(data, target_col, feature_cols
 clf = globals()[model].make_model(given_name, datasets, model_type=model_type, model_params=model_params, post_params=post_params, logging=logging)
 
 # Create SQL version of model and save it
-globals()[model + '_as_code'].save_model_and_extras(clf, given_name, logging)
+globals()[model + '_as_code'].save_model_and_extras(clf, given_name, post_params['sql_split'], logging)
 

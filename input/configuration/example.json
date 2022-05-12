@@ -9,7 +9,8 @@
     "max_interaction_bins": 6
   },
   "post_params": {
-    "calibration": "false"
+    "calibration": "false",
+    "sql_split": "true"
   },
   "pre_params": {
     "cv_type": "timeseriesplit",

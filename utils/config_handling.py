@@ -60,4 +60,13 @@ def config_handling(configuration, logging):
         else:
             post_params['calibration'] = 'false'
 
+    # If not present set split to false
+    if 'sql_split' in post_params.keys():
+        if post_params['sql_split'] == 'true':
+            post_params['sql_split'] = True
+        else:
+            post_params['sql_split'] = False
+    else:
+        post_params['sql_split'] = False
+
     return target_col, feature_cols, model_params, pre_params, post_params
