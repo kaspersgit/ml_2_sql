@@ -38,6 +38,10 @@ Dictionary of parameters that can be used with model of choice (optional). Check
 - `auto`/`true`, either platt scaling or isotonic regression applied based on datasize
 - any other value, not calibration applied
 
+`sql_split` options:
+- `false`, outputs the SQL model as one column by adding all separate scores up directly
+- `true`, outputs the SQL model as one column for each feature and a total score columns afterwards. This might be needed to avoid some memory related (stackoverflow) error.
+
 #### pre_params
 `cv_type` options (optional):
 - `timeseriesplit`, perform 5 fold timeseries split ([sklearn implementation](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html))
@@ -65,19 +69,15 @@ Name of target column (required)
 - Multiclass and regression are experimental
 
 ### TODO list
-- Remove custom imputing (better to wait for EBM null handling) (done)
 - Get csv file from s3 link
-- Add regression next to classification (also for SQL)
-- Add MCC-F1 (curve?)
-- plots for regression 
-- Discovery on calibration (and how it can be written in SQL)
-- Simplify interaction lookup df (make separate column per feature and perform a groupby)
+- Make regression EBM work fully
+- Make multi class classification EBM work fully
 - Use sklearn pipelines to simplify and streamline whole modelling process
 - Spatial Cross-validation
 - Extend logging granularity (add model parameters)
-- Improve logging file clarity
 - Add platt scaling and isotonic regression
 - Add calibrated classifier from sklearn for model.sav and performance
 - Add isotonic or logistic regression for sql version of model
 - Make upsampling optional as a parameter
 - Use menu function bash for model type choosing
+- Implement null handling (there is an implementation mentioned [here](https://github.com/interpretml/interpret/issues/18))

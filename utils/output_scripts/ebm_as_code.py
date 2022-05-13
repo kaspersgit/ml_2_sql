@@ -435,6 +435,11 @@ def save_model_and_extras(ebm, model_name, split, logging):
     # extract lookup table from EBM
     lookup_df = extractLookupTable(ebm)
 
+    # In case of regression
+    if not hasattr(ebm, 'classes_'):
+        ebm.classes_ = [0]
+        lookup_df['intercept'] = [lookup_df['intercept']]
+
     # Write printed output to file
     with open('{model_name}/model/ebm_in_sql.sql'.format(model_name=model_name), 'w') as f:
         with redirect_stdout(f):

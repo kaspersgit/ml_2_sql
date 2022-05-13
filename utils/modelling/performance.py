@@ -31,7 +31,7 @@ def plotYhatVsYSave(given_name, y_true, y_pred, data_type):
 
     plot_df = pd.DataFrame({'y_true':y_true, 'y_pred':y_pred})
     fig = px.scatter(plot_df, 'y_true', 'y_pred')
-    fig.write_image('{given_name}/performance/{data_type}_confusion_matrix.png'.format(given_name=given_name, data_type=data_type))
+    fig.write_image('{given_name}/performance/{data_type}_scatter_yhat_vs_y.png'.format(given_name=given_name, data_type=data_type))
 
     print(f'Scatter plot of yhat vs y saved for {data_type}')
 

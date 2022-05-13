@@ -65,7 +65,7 @@ target_col, feature_cols, model_params, pre_params, post_params = config_handlin
 data = data_.copy()
 
 # set model type based on target value
-if data[target_col].dtype == 'float':
+if (data[target_col].dtype == 'float') | (data[target_col].dtype == 'int' & data[target_col].nunique() > 10):
     model_type = 'regression'
 else:
     model_type = 'classification'
