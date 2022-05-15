@@ -65,7 +65,7 @@ target_col, feature_cols, model_params, pre_params, post_params = config_handlin
 data = data_.copy()
 
 # set model type based on target value
-if data[target_col].dtype == 'float':
+if (data[target_col].dtype == 'float') | (data[target_col].dtype == 'int' & data[target_col].nunique() > 10):
     model_type = 'regression'
 else:
     model_type = 'classification'
@@ -84,5 +84,5 @@ datasets = pre_process_kfold(data, target_col, feature_cols
 clf = globals()[model].make_model(given_name, datasets, model_type=model_type, model_params=model_params, post_params=post_params, logging=logging)
 
 # Create SQL version of model and save it
-globals()[model + '_as_code'].save_model_and_extras(clf, given_name, logging)
+globals()[model + '_as_code'].save_model_and_extras(clf, given_name, post_params['sql_split'], logging)
 

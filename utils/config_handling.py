@@ -27,10 +27,6 @@ def config_handling(configuration, logging):
     else:
         pre_params = {}
 
-    # Impute missing values
-    if 'impute_missing_values' not in pre_params.keys():
-        pre_params['impute_missing_values'] = 'false'
-
     if not ('oot_set' in pre_params.keys()) & ('oot_rows' in pre_params.keys()):
         pre_params['oot_set'] = 'false'
 
@@ -63,5 +59,14 @@ def config_handling(configuration, logging):
             post_params['calibration'] = 'auto'
         else:
             post_params['calibration'] = 'false'
+
+    # If not present set split to false
+    if 'sql_split' in post_params.keys():
+        if post_params['sql_split'] == 'true':
+            post_params['sql_split'] = True
+        else:
+            post_params['sql_split'] = False
+    else:
+        post_params['sql_split'] = False
 
     return target_col, feature_cols, model_params, pre_params, post_params

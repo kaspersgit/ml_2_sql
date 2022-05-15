@@ -79,14 +79,16 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
             # discrete predictions
             y_test_pred_list.append(clf.predict(X_test[fold_id]))
 
-            # probability predictions
-            y_test_prob_list.append(clf.predict_proba(X_test[fold_id])[:,1])
+            if model_type == 'classification':
+                # probability predictions
+                y_test_prob_list.append(clf.predict_proba(X_test[fold_id])[:,1])
 
         # Merge list of prediction lists into one list
         y_test_pred = np.concatenate(y_test_pred_list, axis=0)
 
-        # Merge list of prediction probabilities lists into one list
-        y_test_prob = np.concatenate(y_test_prob_list, axis=0)
+        if model_type == 'classification':
+            # Merge list of prediction probabilities lists into one list
+            y_test_prob = np.concatenate(y_test_prob_list, axis=0)
 
         y_test = np.concatenate(y_test, axis=0)
 
@@ -97,8 +99,9 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
         # discrete prediction
         y_test_pred = clf.predict(X_test)
 
-        # probability prediction
-        y_test_prob = clf.predict_proba(X_test)[:,1]
+        if model_type == 'classification':
+            # probability prediction
+            y_test_prob = clf.predict_proba(X_test)[:,1]
 
     # train model one last time on all samples (upsampled)
     print('Train final model on all data')
@@ -116,7 +119,8 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
 
     # train set prediction of final model
     y_all_pred = clf.predict(X_all)
-    y_all_prob = clf.predict_proba(X_all)[:,1]
+    if model_type == 'classification':
+        y_all_prob = clf.predict_proba(X_all)[:,1]
 
     if post_params['calibration'] != 'false':
         cal_clf, cal_reg = calibrateModel(clf, X_cal, y_cal, logging, method=post_params['calibration'], final_model=True)
@@ -127,7 +131,9 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
 
         # train set prediction of final model
         y_all_pred = cal_clf.predict(X_all)
-        y_all_prob = cal_clf.predict_proba(X_all)[:, 1]
+
+        if model_type == 'classification':
+            y_all_prob = cal_clf.predict_proba(X_all)[:, 1]
 
 
 
