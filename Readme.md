@@ -7,6 +7,12 @@ if you can write down the model in a basic logical language (SQL) you should be 
 
 This project tries to make the process simple enough for any SQL user to train a model, check the performance and deploy that model in SQL.
 
+## Current state
+- Only EBM is implemented (decision tree, logistic regression and rule set not yet)
+- Automated model training is working for binary classification and regression.
+- SQL creation of model is working fully for binary clasification.
+- SQL for regression and the whole process for multiclass classification is wip.
+
 ## Pre requisites
 1. Create virtual environment and install packages, on mac run:
    ```
