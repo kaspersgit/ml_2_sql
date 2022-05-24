@@ -13,6 +13,19 @@ def cleanAndCastColumns(data, feature_cols, target_col, model_type, logging):
 
     _data = _data.loc[_data[target_col].notna(), :].reset_index(drop=True)
 
+    # Clean out feature which only has 1 unique value
+    one_nunique = _data[feature_cols].columns[_data[feature_cols].nunique() == 1]
+
+    if len(one_nunique) > 0:
+        _data = _data.loc[:, ~_data.columns.isin(one_nunique)]
+        print(f'\nFeatures being removed due to single unique value: {one_nunique} \n')
+        logging.info(f'Features being removed due to single unique value: {one_nunique} \n')
+
+        # Remove feature from feature_cols if in there
+        for f in one_nunique:
+            if f in feature_cols:
+                feature_cols.remove(f)
+
     if model_type == 'classification':
         # Remove classes with only one occurence
         one_occurence_class = _data[target_col].value_counts()[_data[target_col].value_counts() == 1].index
@@ -57,7 +70,7 @@ def imbalanceness(labels):
 
     return (max_class_size - min_class_size)/(total_size - nclasses)
 
-def pre_process(data, target_col, feature_cols, logging, random_seed=42):
+def pre_process_simple(data, target_col, feature_cols, logging, random_seed=42):
     data = cleanAndCastColumns(data, feature_cols, target_col)
 
     # Warning is caused when a class has very few records and stratisfy is used
@@ -89,6 +102,13 @@ def pre_process_kfold(data, target_col, feature_cols, model_type, logging, pre_p
 
     # clean and cast
     data_clean = cleanAndCastColumns(data, feature_cols, target_col, model_type, logging)
+
+    # Limit dataset with respect to the max_rows parameter
+    if 'max_rows' in pre_params:
+        max_rows = pre_params['max_rows']
+        data_clean = data_clean.sample(n=max_rows).reset_index(drop=True)
+        print(f'Limited dataset to {max_rows}')
+        logging.info(f'Limited dataset to {max_rows}')
 
     # create kfolds in a statified manner
     from sklearn.model_selection import StratifiedKFold, KFold, TimeSeriesSplit
@@ -122,7 +142,7 @@ def pre_process_kfold(data, target_col, feature_cols, model_type, logging, pre_p
         X_trim, y_trim = trimPreUpsampleDataRows(X, y, max_cells, logging)
 
         # upsample by trying SMOTE algo
-        X_ups, y_ups = upsampleData(X_trim, y_trim, model_type, logging, random_seed=42)
+        X_ups, y_ups = upsampleData(X, y_trim, model_type, logging, random_seed=42)
 
         # Add to datasets
         datasets['final_train'] = {'X': X_ups, 'y': y_ups}
@@ -163,25 +183,30 @@ def pre_process_kfold(data, target_col, feature_cols, model_type, logging, pre_p
         y_train, y_test = y[train_ix], y[test_ix]
 
         if pre_params['upsampling'] != 'false':
-            # Make sure total rows after upsampling won't hit x nr of cells
-            max_cells = 10000
-
             # report on nr rows
             print(f'Nr rows pre trimming: {len(X_train)}')
             print(f'imbalanceness pre trimming: \n {y_train.value_counts()}')
+            logging.info(f'Nr rows pre trimming: {len(X_train)}')
+            logging.info(f'imbalanceness pre trimming: \n {y_train.value_counts()}')
 
             X_train_trim, y_train_trim = trimPreUpsampleDataRows(X_train, y_train, max_cells, logging)
 
             # Nr rows after trimming down dataset
             print(f'Nr rows pre upsampling: {len(X_train_trim)}')
             print(f'imbalanceness pre upsampling: \n {y_train_trim.value_counts()}')
+            logging.info(f'Nr rows pre upsampling: {len(X_train_trim)}')
+            logging.info(f'imbalanceness pre upsampling: \n {y_train_trim.value_counts()}')
 
             # upsample by trying SMOTE algo
             X_train, y_train = upsampleData(X_train_trim, y_train_trim, model_type, logging, random_seed=42)
 
         # Nr rows of training set
         print(f'Nr rows train set: {len(X_train)}')
-        print(f'imbalanceness: \n {y_train.value_counts()}')
+        print(f'Nr rows test set: {len(X_test)}')
+        print(f'imbalanceness train: \n {y_train.value_counts()}')
+        logging.info(f'Nr rows train set: {len(X_train)}')
+        logging.info(f'Nr rows test set: {len(X_test)}')
+        logging.info(f'imbalanceness train: \n {y_train.value_counts()}')
 
         # append to the lists
         X_train_list.append(X_train)

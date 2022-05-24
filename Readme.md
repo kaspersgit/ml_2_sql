@@ -75,15 +75,17 @@ Name of target column (required)
 - Multiclass and regression are experimental
 
 ### TODO list
-- Get csv file from s3 link
-- Make regression EBM work fully
+- Add calibration (platt scaling/isotonic regression)
+- Implement null handling (there is an implementation mentioned [here](https://github.com/interpretml/interpret/issues/18))
+- Add option to save plots as html file (interactive)
 - Make multi class classification EBM work fully
-- Use sklearn pipelines to simplify and streamline whole modelling process
+- Make regression EBM work fully
+- Make `max_rows` work to quickly test the script (done)
+- Add decision tree
+- Add logistic regression
+- Add Skope rules
+- Add check for variables to just have 1 value
+- Get csv file from s3 link
 - Spatial Cross-validation
 - Extend logging granularity (add model parameters)
-- Add platt scaling and isotonic regression
-- Add calibrated classifier from sklearn for model.sav and performance
-- Add isotonic or logistic regression for sql version of model
-- Make upsampling optional as a parameter
 - Use menu function bash for model type choosing
-- Implement null handling (there is an implementation mentioned [here](https://github.com/interpretml/interpret/issues/18))

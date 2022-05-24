@@ -139,9 +139,9 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
 
     if model_type == 'classification':
         # Threshold dependant
-        plotConfusionMatrixSave(given_name, y_all, y_all_pred, data_type='final train')
+        plotConfusionMatrixSave(given_name, y_all, y_all_pred, data_type='final_train')
         plotConfusionMatrixSave(given_name, y_test, y_test_pred, data_type='test')
-        classificationReportSave(given_name, y_all, y_all_pred, data_type='final train')
+        classificationReportSave(given_name, y_all, y_all_pred, data_type='final_train')
         classificationReportSave(given_name, y_test, y_test_pred, data_type='test')
 
         if len(clf.classes_) == 2:
@@ -166,6 +166,31 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
             plotCalibrationCurve(given_name, y_test_list, y_test_prob_list, data_type='test')
             plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final_train')
             plotProbabilityDistribution(given_name, y_test, y_test_prob, data_type='test')
+
+        elif len(clf.classes_) > 2:
+            # loop through classes
+            for c in clf.classes_:
+                # creating a list of all the classes except the current class
+                other_class = [x for x in clf.classes_ if x != c]
+
+                # marking the current class as 1 and all other classes as 0
+                y_test_list_ova = [[0 if x in other_class else 1 for x in fold_] for fold_ in y_test_list]
+                y_test_prob_list_ova = [[0 if x in c else 1 for x in fold_] for fold_ in y_test_prob_list]
+
+                # Threshold independant
+                plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='roc', data_type='final_train')
+                plotClassificationCurve(given_name, new_actual_class, new_pred_class, curve_type='roc', data_type=f'test_class_{c}')
+
+                plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='pr', data_type='final_train_class1')
+                plotClassificationCurve(given_name, y_all_neg, y_all_prob_neg, curve_type='pr', data_type=f'test_class_{c}')
+
+                plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='pr', data_type='test_data_class1')
+                plotClassificationCurve(given_name, y_test_list_neg, y_test_prob_list_neg, curve_type='pr', data_type='test_data_class0')
+
+                plotCalibrationCurve(given_name, y_all, y_all_prob, data_type='final_train')
+                plotCalibrationCurve(given_name, y_test_list, y_test_prob_list, data_type='test')
+                plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final_train')
+                plotProbabilityDistribution(given_name, y_test, y_test_prob, data_type='test')
 
 
     elif model_type == 'regression':

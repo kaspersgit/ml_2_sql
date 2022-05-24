@@ -48,7 +48,7 @@ def tree_to_sql(tree):
             samples = tree_.n_node_samples[node]
             max_value = int(np.max(class_values))
             predicted_class = tree.classes_[np.argmax(class_values)]
-            print("{} '{}' -- train data precision: {:.2f} ({}/{})".format(indent, predicted_class, max_value / samples, max_value,
+            print("{} {} -- train data precision: {:.2f} ({}/{})".format(indent, max_value / samples, max_value / samples, max_value,
                                                                 samples))
 
     recurse(0, 1)
@@ -250,11 +250,9 @@ def getDecisionsPerLeafNode(clf, model_name):
     print('Decisions per leaf node saved')
 
 
-def save_model_and_extras(clf, model_name):
+def save_model_and_extras(clf, model_name, sql_split, logging):
     # Write printed output to file
-    with open('{model_name}/tree_in_sql.sql'.format(model_name=model_name), 'w') as f:
+    with open('{model_name}/model/tree_in_sql.sql'.format(model_name=model_name), 'w') as f:
         with redirect_stdout(f):
             tree_to_sql(clf)
     print('SQL version of decision tree saved')
-
-    getDecisionsPerLeafNode(clf, model_name + '/feature_importance')

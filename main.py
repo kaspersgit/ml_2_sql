@@ -51,8 +51,8 @@ model = args.model
 # for debugging
 # given_name='trained_models/kasper'
 # logging.basicConfig(format='%(asctime)s %(message)s', filename=given_name+'/logging.log', encoding='utf-8', level=logging.DEBUG)
-# data_ = pd.read_csv('input/data/test.csv')
-# with open('input/configuration/test.json') as json_file:
+# data_ = pd.read_csv('input/data/uk_inv_train.csv')
+# with open('input/configuration/uk_inv_cr.json') as json_file:
 #     configuration = json.load(json_file)
 # model = 'ebm'
 #############################################
@@ -63,6 +63,9 @@ target_col, feature_cols, model_params, pre_params, post_params = config_handlin
 # pre processing
 # make copy (doesn't change anything but for future use)
 data = data_.copy()
+
+# Log parameters
+logging.info(f'Configuration file content: \n{configuration}')
 
 # set model type based on target value
 if (data[target_col].dtype == 'float') | ((data[target_col].dtype == 'int') & (data[target_col].nunique() > 10)):
