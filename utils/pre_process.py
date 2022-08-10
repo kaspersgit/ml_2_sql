@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import RandomOverSampler, SMOTE, SMOTENC
 
-def cleanAndCastColumns(data, feature_cols, target_col, model_type, logging):
+def cleanAndCastColumns(data, feature_cols, target_col, model_name, model_type, logging):
     # make copy of data
     _data = data.copy()
 
@@ -50,6 +50,15 @@ def cleanAndCastColumns(data, feature_cols, target_col, model_type, logging):
             _data[col] = _data[col].astype(int)
         else:  # otherwise assume categorical
             _data[col] = _data[col].astype({col: 'category'})
+
+    if model_name != 'ebm': # otherwise model can't handle categorical features
+        cat_col = _data[feature_cols].select_dtypes(include=['category']).columns
+        print(f'\nFeatures being removed due to type being categorical: {cat_col} \n')
+        logging.info(f'Features being removed due to  type being categorical: {cat_col} \n')
+        # Remove feature from feature_cols if in there
+        for f in cat_col:
+            if f in feature_cols:
+                feature_cols.remove(f)
 
     # Overview of _data types
     print('Column types in data set (including target)\n{col_types} \n'.format(col_types=_data[feature_cols].dtypes.value_counts()))
@@ -98,14 +107,14 @@ def pre_process_simple(data, target_col, feature_cols, logging, random_seed=42):
 
     return X_train, X_train_ups, X_test, y_train, y_train_ups, y_test
 
-def pre_process_kfold(data, target_col, feature_cols, model_type, logging, pre_params, random_seed=42):
+def pre_process_kfold(data, target_col, feature_cols, model_name, model_type, logging, pre_params, random_seed=42):
 
     # clean and cast
-    data_clean = cleanAndCastColumns(data, feature_cols, target_col, model_type, logging)
+    data_clean = cleanAndCastColumns(data, feature_cols, target_col, model_name, model_type, logging)
 
     # Limit dataset with respect to the max_rows parameter
     if 'max_rows' in pre_params:
-        max_rows = pre_params['max_rows']
+        max_rows = min(pre_params['max_rows'], len(data_clean))
         data_clean = data_clean.sample(n=max_rows).reset_index(drop=True)
         print(f'Limited dataset to {max_rows}')
         logging.info(f'Limited dataset to {max_rows}')
