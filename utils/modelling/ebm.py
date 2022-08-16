@@ -28,18 +28,27 @@ def trainEBM(X_train, y_train, params, model_type, logging):
     return clf
 
 
-def featureExplanationSave(ebm, given_name, logging):
+def featureExplanationSave(ebm, given_name, file_type, logging):
 
     ebm_global = ebm.explain_global()
 
     # Save overall feature importance graph
     plotly_fig = ebm_global.visualize()
-    plotly_fig.write_image('{given_name}/1_overall_feature_importance.png'.format(given_name=given_name))
+
+    if file_type == 'png':
+        plotly_fig.write_image('{given_name}/1_overall_feature_importance.png'.format(given_name=given_name))
+    elif file_type == 'html':
+        plotly_fig.write_html('{given_name}/1_overall_feature_importance.html'.format(given_name=given_name))
 
     # Save feature specific explanation graphs
     for index, value in enumerate(ebm.feature_groups_):
         plotly_fig = ebm_global.visualize(index)
-        plotly_fig.write_image('{given_name}/explain_{feature}.png'.format(given_name=given_name, feature=ebm.feature_names[index]))
+
+        if file_type == 'png':
+            plotly_fig.write_image('{given_name}/explain_{feature}.png'.format(given_name=given_name, feature=ebm.feature_names[index]))
+        elif file_type == 'html':
+            # or as html file
+            plotly_fig.write_html('{given_name}/explain_{feature}.html'.format(given_name=given_name, feature=ebm.feature_names[index]))
 
     print('Explanation plots of {n_features} features saved'.format(n_features=index+1))
     logging.info('Explanation plots of {n_features} features saved'.format(n_features=index+1))
@@ -202,6 +211,6 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
         logging.info('Adjusted R2: {adjustedR2}'.format(adjustedR2=adjustedR2))
 
     # Plot explanation of feature importances
-    featureExplanationSave(clf, given_name + '/feature_importance', logging)
+    featureExplanationSave(clf, given_name + '/feature_importance', post_params['file_type'], logging)
 
     return clf

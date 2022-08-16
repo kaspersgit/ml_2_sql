@@ -69,4 +69,13 @@ def config_handling(configuration, logging):
     else:
         post_params['sql_split'] = False
 
+    # If not present set file type to png
+    if 'file_type' in post_params.keys():
+        if post_params['file_type'].lower() == 'html':
+            post_params['file_type'] = 'html'
+        else:
+            post_params['file_type'] = 'png'
+    else:
+        post_params['file_type'] = 'png'
+
     return target_col, feature_cols, model_params, pre_params, post_params

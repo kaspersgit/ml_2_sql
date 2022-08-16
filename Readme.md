@@ -1,8 +1,8 @@
 # Machine learning to SQL
 ## Background
-Due to SQL being the main language being used for data manipulation and thus has extensive support in terms of compute and scheduling, 
-why not perform inference with a machine learning model written in SQL code? The big limitation here is SQL itself, that's why we attempt to use 
-machine learning models which have a simple structure it is writable in SQL. One additional benefit of this is that the model is interpretable, 
+Due to SQL being the main language being used for data manipulation and thus has extensive support in terms of compute and scheduling,
+why not perform inference with a machine learning model written in SQL code? The big limitation here is SQL itself, that's why we attempt to use
+machine learning models which have a simple structure it is writable in SQL. One additional benefit of this is that the model is interpretable,
 if you can write down the model in a basic logical language (SQL) you should be able to understand it (with limitation ofcourse).
 
 This project tries to make the process simple enough for any SQL user to train a model, check the performance and deploy that model in SQL.
@@ -42,11 +42,15 @@ Dictionary of parameters that can be used with model of choice (optional). Check
 - `sigmoid`, platt scaling applied
 - `isotonic`, isotonic regression applied
 - `auto`/`true`, either platt scaling or isotonic regression applied based on datasize
-- any other value, not calibration applied
+- any other value, no calibration applied
 
 `sql_split` options:
 - `false`, outputs the SQL model as one column by adding all separate scores up directly
 - `true`, outputs the SQL model as one column for each feature and a total score columns afterwards. This might be needed to avoid some memory related (stackoverflow) error.
+
+`file_type` options (optional):
+- `png`, output of features importance graphs will be static .png (smaller file).
+- `html`, output of features importance graphs will be dynamic .html (bigger file and opens in browser).
 
 #### pre_params
 `cv_type` options (optional):
@@ -61,11 +65,11 @@ Dictionary of parameters that can be used with model of choice (optional). Check
   - used when `cv_type = timeseriesplit`  
   - used when out-of-time dataset is created (not implemented yet)
 
-`upsampling` options (optional):
+`upsampling` options (optional, should not be used without calibration):
 - `true`, applying the SMOTE(NC) algorithm on the minority class to balance the data
 - `false`, not applying any resampling technique
 
-#### target 
+#### target
 Name of target column (required)
 
 ### Notes
@@ -80,12 +84,11 @@ Name of target column (required)
 - Add option to save plots as html file (interactive)
 - Make multi class classification EBM work fully
 - Make regression EBM work fully
-- Make `max_rows` work to quickly test the script (done)
 - Add decision tree
 - Add logistic regression
 - Add Skope rules
 - Add check for variables to just have 1 value
 - Get csv file from s3 link
-- Spatial Cross-validation
+- Spatial Cross-validation discovery
 - Extend logging granularity (add model parameters)
 - Use menu function bash for model type choosing
