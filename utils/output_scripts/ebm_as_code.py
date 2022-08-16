@@ -257,7 +257,7 @@ def double_features_2_sql(df, split=True):
         elif split:
             print(',\nCASE')
 
-        double_feature_2_sql_old(df_index, df_row)
+        double_feature_2_sql(df_index, df_row)
 
         feature_list.append(f'{feature_name}_score')
 
@@ -266,7 +266,7 @@ def double_features_2_sql(df, split=True):
 
     return feature_list
 
-def double_feature_2_sql_old(df_index, df_row):
+def double_feature_2_sql(df_index, df_row):
     first_feature = df_row['feature'][0]
     second_feature = df_row['feature'][1]
 
@@ -410,23 +410,112 @@ def lookup_df_to_sql_multiclass(df, classes):
 
             feature_nr += 1
 
-        print('AS {classification}'.format(classification=c))
+        print('AS score_{classification}'.format(classification=c))
 
         class_nr += 1
 
     for c in classes:
         if c == classes[0]:
-            print(', EXP({classification})'.format(classification=c), end='')
+            print(', EXP(score_{classification})'.format(classification=c), end='')
         else:
-            print(' + EXP({classification})'.format(classification=c), end='')
+            print(' + EXP(score_{classification})'.format(classification=c), end='')
     print(' AS total_score')
 
     for c in classes:
-        print(', EXP({classification}) / (total_score) AS probability_{classification}'.format(classification=c), end='\n')
+        print(', EXP(score_{classification}) / (total_score) AS probability_{classification}'.format(classification=c), end='\n')
+
+def lookup_df_to_sql_multiclass_new(df, classes, split=True):
+    class_nr = 0
+    for c in classes:
+        feature_nr = 0
+        feature_list = []
+        for f in df['feature'].unique():
+            feature_df = df[df['feature'] == f].reset_index(drop=True)
+
+            if (feature_nr == 0) & (class_nr == 0):
+                print('CASE')
+            elif (feature_nr == 0) & (class_nr > 0):
+                print(', CASE')
+            elif not split:
+                print('+\nCASE')
+            elif split:
+                print(',\nCASE')
+
+            single_feature_2_sql_multiclass(feature_df, f, class_nr)
+
+            if split:
+                print(f'AS {f}_score_{c}')
+                feature_list.append(f'{f}_score_{c}')
+
+            feature_nr += 1
+
+        if not split:
+            print(f'AS score_{c}')
+        elif split:
+            # sum up all separate scores
+            print(', ', end='')
+            print(*feature_list, sep=' + ')
+            print(f' AS score_{c}')
+
+        class_nr += 1
+
+    for c in classes:
+        if c == classes[0]:
+            print(f', EXP(score_{c})', end='')
+        else:
+            print(f' + EXP(score_{c})', end='')
+    print(' AS total_score')
+
+    for c in classes:
+        print(f', EXP(score_{c}) / (total_score) AS probability_{c}', end='\n')
+
+def single_feature_2_sql_multiclass(df, feature, class_nr):
+    for index, row in df.iterrows():
+        # check if string/category
+        if row['feat_type'] == 'categorical':
+            # check for manual imputed null values
+            print(" WHEN {feature} = '{lb}' THEN {score}".format(feature=feature, lb=row['feat_bound'],
+                                                                 score=row['score'][class_nr]))
+            # Add ELSE 0.0 as last entry
+            if index == df.index[-1]:
+                print(" ELSE 0.0")
+
+        # check for last numeric bound
+        elif row['feat_bound'] == np.PINF:
+            print(' WHEN {feature} >= {lb} THEN {score}'.format(feature=feature,
+                                                                lb=df.iloc[index - 1, :]['feat_bound'],
+                                                                score=row['score'][class_nr]))
+            # Add ELSE 0.0 as last entry
+            if index == df.index[-1]:
+                print(" ELSE 0.0")
+
+        # otherwise it should be a float
+        elif isinstance(row['feat_bound'], float):
+            # First bound
+            if index == 0:
+                print(' WHEN {feature} <= {ub} THEN {score}'.format(feature=feature,
+                                                                    ub=row['feat_bound'],
+                                                                    score=row['score'][class_nr]))
+
+            else:
+                print(' WHEN {feature} > {lb} AND {feature} <= {ub} THEN {score}'.format(feature=feature,
+                                                                                         lb=
+                                                                                         df.iloc[index - 1, :][
+                                                                                             'feat_bound'],
+                                                                                         ub=row['feat_bound'],
+                                                                                         score=row['score'][class_nr]))
+            # Add ELSE 0.0 as last entry
+            if index == df.index[-1]:
+                print(" ELSE 0.0")
+
+        else:
+            raise "not sure what to do"
+
+    print('END')
 
 def ebm_to_sql(df, classes, split=True):
     if len(classes) > 2:
-        lookup_df_to_sql_multiclass(df['feature_single'], classes)
+        lookup_df_to_sql_multiclass_new(df['feature_single'], classes, split=True)
     else:
         lookup_df_to_sql(df, split)
 

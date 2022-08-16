@@ -19,7 +19,7 @@ EOF
 printf "\n\n"
 
 # Check if AWS cli and aws login tool are installed
-printf "Package versions:\n"
+# printf "Package versions:\n"
 # pip list | grep -F sklearn || { printf "sklearn not installed, please install by running: pip install sklearn"; exit 1; }
 # pip list | grep -F matplotlib || { printf "matplotlib not installed, please install by running: pip install matplotlib"; exit 1; }
 # pip list | grep -F imbalanced-learn || { printf "imblearn not installed, please install by running: pip install imblearn"; exit 1; }
@@ -37,10 +37,11 @@ CSVPATH=$FILEPATH
 # check if file path is s3 path and download file if that is the case
 if [[ "${CSVPATH}" == "s3://"*".csv" ]]; then
   printf "${CSVPATH} is a CSV on an S3 location"
-  aws s3 cp ${CSVPATH} input/data/. --profile iam-sync/lakehouse-redshift/lakehouse-redshift.IdP_risk_general_eu@klarna-data-production || printf "Install AWS CLI by following: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html" && exit
+  echo "Give aws profile name to login and download file"
+  read -e AWS_PROFILE
+  aws s3 cp ${CSVPATH} input/data/. --profile ${AWS_PROFILE} || printf "Install AWS CLI by following: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html" && exit
 elif [[ "${CSVPATH}" == "s3://"* ]]; then
-  printf "${CSVPATH} is an S3 location but not a CSV file"
-  aws s3 cp ${CSVPATH} input/data/. --profile iam-sync/lakehouse-redshift/lakehouse-redshift.IdP_risk_general_eu@klarna-data-production || printf "Install AWS CLI by following: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html" && exit
+  printf "${CSVPATH} is an S3 location but not a CSV file" && exit
 else
   printf "${CSVPATH} is not an S3 location"
 fi
@@ -57,7 +58,7 @@ JSONPATH=$FILEPATH
 # https://askubuntu.com/questions/1705/how-can-i-create-a-select-menu-in-a-shell-script
 printf "\nWhat type of model do you want? \n"
 PS3="Choose a number: "
-types=("Decision tree" "Explainable boosting machine")
+types=("Decision tree" "Explainable boosting machine" "Decision list")
 select type in "${types[@]}"
 do
     case $type in
@@ -69,6 +70,11 @@ do
         "Explainable boosting machine")
             printf "You chose $type \n\n"
             MODEL_TYPE='ebm'
+            break
+            ;;
+        "Decision list")
+            printf "You chose $type \n\n"
+            MODEL_TYPE='decision_list'
             break
             ;;
         *) printf "invalid option $REPLY \n";;

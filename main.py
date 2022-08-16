@@ -6,6 +6,7 @@ import logging
 import random
 from utils.modelling import decision_tree
 from utils.modelling import ebm
+from utils.modelling import decision_list
 from utils.config_handling import *
 from utils.pre_process import *
 from utils.output_scripts import decision_tree_as_code
@@ -20,7 +21,7 @@ parser.add_argument("--data_path", type=str, help="Enter path to csv file",
                     nargs='?', default='no_data', const='no_data')
 parser.add_argument("--configuration", type=str, help="Enter path to json file",
                     nargs='?')
-parser.add_argument("--model", type=str, help="Enter model type",
+parser.add_argument("--model_name", type=str, help="Enter model type",
                     nargs='?', default='decision_tree', const='full')
 
 args = parser.parse_args()
@@ -44,17 +45,17 @@ data_ = pd.read_csv(args.data_path)
 with open(args.configuration) as json_file:
     configuration = json.load(json_file)
 
-# get model type (decision tree and ExplainableBoosting(Classifier/Regressor)
-model = args.model
+# get model name  (decision tree and ExplainableBoosting(Classifier/Regressor)
+model_name = args.model_name
 
 #############################################
 # for debugging
 # given_name='trained_models/kasper'
-# logging.basicConfig(format='%(asctime)s %(message)s', filename=given_name+'/logging.log', encoding='utf-8', level=logging.DEBUG)
-# data_ = pd.read_csv('input/data/test.csv')
-# with open('input/configuration/test.json') as json_file:
+## logging.basicConfig(format='%(asctime)s %(message)s', filename=given_name+'/logging.log', encoding='utf-8', level=logging.DEBUG)
+# data_ = pd.read_csv('input/data/uk_inv_train.csv')
+# with open('input/configuration/uk_inv_cr.json') as json_file:
 #     configuration = json.load(json_file)
-# model = 'ebm'
+# model_name = 'ebm'
 #############################################
 
 # Handle the configuration file
@@ -63,6 +64,9 @@ target_col, feature_cols, model_params, pre_params, post_params = config_handlin
 # pre processing
 # make copy (doesn't change anything but for future use)
 data = data_.copy()
+
+# Log parameters
+logging.info(f'Configuration file content: \n{configuration}')
 
 # set model type based on target value
 if (data[target_col].dtype == 'float') | ((data[target_col].dtype == 'int') & (data[target_col].nunique() > 10)):
@@ -75,14 +79,14 @@ logging.info('This problem will be treated as a {model_type} problem'.format(mod
 
 # pre process data
 datasets = pre_process_kfold(data, target_col, feature_cols
-                                                                                             , model_type=model_type
-                                                                                             , logging=logging
-                                                                                             , pre_params=pre_params
-                                                                                             , random_seed=random_seed)
+                                             , model_name=model_name
+                                             , model_type=model_type
+                                             , logging=logging
+                                             , pre_params=pre_params
+                                             , random_seed=random_seed)
 
 # train decision tree and figures and save them
-clf = globals()[model].make_model(given_name, datasets, model_type=model_type, model_params=model_params, post_params=post_params, logging=logging)
+clf = globals()[model_name].make_model(given_name, datasets, model_type=model_type, model_params=model_params, post_params=post_params, logging=logging)
 
 # Create SQL version of model and save it
-globals()[model + '_as_code'].save_model_and_extras(clf, given_name, post_params['sql_split'], logging)
-
+globals()[model_name + '_as_code'].save_model_and_extras(clf, given_name, post_params['sql_split'], logging)

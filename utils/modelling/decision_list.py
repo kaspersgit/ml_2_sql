@@ -1,26 +1,21 @@
-from sklearn import tree
-import sys
-import pandas as pd
-import numpy as np
-from matplotlib import pyplot as plt
+from interpret.glassbox import DecisionListClassifier
 import pickle
+from sklearn.model_selection import train_test_split
 from utils.checks import *
 from utils.modelling.performance import *
 
-def trainDecisionTree(X_train, y_train, params, model_type, logging):
+def trainDecisionList(X_train, y_train, params, model_type, logging):
     # if 'feature_names' not in params.keys():
     #     params['feature_names'] = X_train.columns
-    if model_type == 'regression':
-        clf = tree.DecisionTreeRegressor(**params)
-    elif model_type == 'classification':
-        clf = tree.DecisionTreeClassifier(**params)
+    if model_type == 'classification':
+        clf = DecisionListClassifier(**params)
     else:
-        print('Only regression or classification available')
-        logging.warning('Only regression or classification available')
+        print('Only classification available')
+        logging.warning('Only classification available')
 
     clf.fit(X_train, y_train)
-    print('Trained decision tree \n')
-    logging.info('Trained decision tree')
+    print('Trained decision list \n')
+    logging.info('Trained decision list')
 
     return clf
 
@@ -39,71 +34,6 @@ def featureImportanceSave(clf, given_name):
     importance_df.to_csv('{given_name}/feature_importance.csv'.format(given_name=given_name), index=False)
 
     print('Feature importance csv saved')
-
-def make_model_old(given_name, X_train, y_train, X_train_ups, y_train_ups, X_test, y_test, model_type = 'classification'):
-    # check if X is a list (CV should be applied in that case)
-    if isinstance(X_train, list):
-        y_train_pred_list = list()
-        y_test_pred_list = list()
-
-        for fold_id in range(len(X_train_ups)):
-            all_classes_represented = False
-            max_leaf_nodes = len(y_train[fold_id].unique())
-            while not all_classes_represented:
-                print('Nr of max leaf nodes: {max_leaf_nodes}'.format(max_leaf_nodes=max_leaf_nodes))
-                clf = trainDecisionTree(X_train_ups[fold_id], y_train_ups[fold_id], max_leaf_nodes=max_leaf_nodes)
-                all_classes_represented = checkAllClassesHaveLeafNode(clf)
-                max_leaf_nodes += 1
-
-            y_train_pred_list.append(clf.predict(X_train[fold_id]))
-            y_test_pred_list.append(clf.predict(X_test[fold_id]))
-
-        # Merge list of lists into one list
-        y_train_pred = [item for sublist in y_train_pred_list for item in sublist]
-        y_test_pred = [item for sublist in y_test_pred_list for item in sublist]
-
-        y_test = [item for sublist in y_test for item in sublist]
-        y_train = [item for sublist in y_train for item in sublist]
-        y_ups = [item for sublist in y_train_ups for item in sublist]
-
-        # Merge list of dataframes into one dataframe
-        X_test = pd.concat(X_test).reset_index(drop=True)
-        X_train = pd.concat(X_train).reset_index(drop=True)
-        X_ups = pd.concat(X_train_ups).reset_index(drop=True)
-
-        # train model one last time on all samples
-        all_classes_represented = False
-        max_leaf_nodes = len(set(y_ups))
-        while not all_classes_represented:
-            print('Nr of max leaf nodes: {max_leaf_nodes}'.format(max_leaf_nodes=max_leaf_nodes))
-            clf = trainDecisionTree(X_ups, y_ups, max_leaf_nodes=max_leaf_nodes)
-            all_classes_represented = checkAllClassesHaveLeafNode(clf)
-            max_leaf_nodes += 1
-
-    # If just regular train/test split has been applied
-    else:
-        all_classes_represented = False
-        max_leaf_nodes = len(y_train.unique())
-        while not all_classes_represented:
-            print('Nr of max leaf nodes: {max_leaf_nodes}'.format(max_leaf_nodes=max_leaf_nodes))
-            clf = trainDecisionTree(X_train_ups, y_train_ups, max_leaf_nodes=max_leaf_nodes)
-            all_classes_represented = checkAllClassesHaveLeafNode(clf)
-            max_leaf_nodes += 1
-
-        y_train_pred = clf.predict(X_train)
-        y_test_pred = clf.predict(X_test)
-
-    if model_type == 'classification':
-        plotConfusionMatrixSave(given_name, y_train, y_train_pred, data_type='train')
-        plotConfusionMatrixSave(given_name, y_test, y_test_pred, data_type='test')
-        classificationReportSave(given_name, y_train, y_train_pred, data_type='train')
-        classificationReportSave(given_name, y_test, y_test_pred, data_type='test')
-
-    # plot the final tree
-    plotTreeStructureSave(clf, given_name)
-    featureImportanceSave(clf, given_name + '/feature_importance')
-
-    return clf
 
 
 def make_model(given_name, datasets, model_type, model_params, post_params, logging):
@@ -132,8 +62,8 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
             else:
                 X_slice_train, y_slice_train = X_train[fold_id], y_train[fold_id]
 
-            clf = trainDecisionTree(X_slice_train, y_slice_train, model_params, model_type, logging)
-            logging.info(f'Model params:\n {clf.get_params}')
+            clf = trainDecisionList(X_slice_train, y_slice_train, model_params, model_type, logging)
+            # logging.info(f'Model params:\n {clf.get_params}')
 
             if post_params['calibration'] != 'false':
                 clf = calibrateModel(clf, X_cal, y_cal, logging, method=post_params['calibration'], final_model=False)
@@ -156,7 +86,7 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
 
     # If just regular train/test split has been applied
     else:
-        clf = trainDecisionTree(X_train, y_train, model_params, model_type, logging)
+        clf = trainDecisionList(X_train, y_train, model_params, model_type, logging)
 
         # discrete prediction
         y_test_pred = clf.predict(X_test)
@@ -173,7 +103,7 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
     if post_params['calibration'] != 'false':
         X_all, X_cal, y_all, y_cal = train_test_split(X_all, y_all, test_size=0.2, random_state=123)
 
-    clf = trainDecisionTree(X_all, y_all, model_params, model_type, logging)
+    clf = trainDecisionList(X_all, y_all, model_params, model_type, logging)
 
     # Save model in pickled format
     filename = given_name + '/model/decision_tree_{model_type}.sav'.format(model_type=model_type)

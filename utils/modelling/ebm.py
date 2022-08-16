@@ -28,18 +28,27 @@ def trainEBM(X_train, y_train, params, model_type, logging):
     return clf
 
 
-def featureExplanationSave(ebm, given_name, logging):
+def featureExplanationSave(ebm, given_name, file_type, logging):
 
     ebm_global = ebm.explain_global()
 
     # Save overall feature importance graph
     plotly_fig = ebm_global.visualize()
-    plotly_fig.write_image('{given_name}/1_overall_feature_importance.png'.format(given_name=given_name))
+
+    if file_type == 'png':
+        plotly_fig.write_image('{given_name}/1_overall_feature_importance.png'.format(given_name=given_name))
+    elif file_type == 'html':
+        plotly_fig.write_html('{given_name}/1_overall_feature_importance.html'.format(given_name=given_name))
 
     # Save feature specific explanation graphs
     for index, value in enumerate(ebm.feature_groups_):
         plotly_fig = ebm_global.visualize(index)
-        plotly_fig.write_image('{given_name}/explain_{feature}.png'.format(given_name=given_name, feature=ebm.feature_names[index]))
+
+        if file_type == 'png':
+            plotly_fig.write_image('{given_name}/explain_{feature}.png'.format(given_name=given_name, feature=ebm.feature_names[index]))
+        elif file_type == 'html':
+            # or as html file
+            plotly_fig.write_html('{given_name}/explain_{feature}.html'.format(given_name=given_name, feature=ebm.feature_names[index]))
 
     print('Explanation plots of {n_features} features saved'.format(n_features=index+1))
     logging.info('Explanation plots of {n_features} features saved'.format(n_features=index+1))
@@ -139,9 +148,9 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
 
     if model_type == 'classification':
         # Threshold dependant
-        plotConfusionMatrixSave(given_name, y_all, y_all_pred, data_type='final train')
+        plotConfusionMatrixSave(given_name, y_all, y_all_pred, data_type='final_train')
         plotConfusionMatrixSave(given_name, y_test, y_test_pred, data_type='test')
-        classificationReportSave(given_name, y_all, y_all_pred, data_type='final train')
+        classificationReportSave(given_name, y_all, y_all_pred, data_type='final_train')
         classificationReportSave(given_name, y_test, y_test_pred, data_type='test')
 
         if len(clf.classes_) == 2:
@@ -167,6 +176,31 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
             plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final_train')
             plotProbabilityDistribution(given_name, y_test, y_test_prob, data_type='test')
 
+        elif len(clf.classes_) > 2:
+            # loop through classes
+            for c in clf.classes_:
+                # creating a list of all the classes except the current class
+                other_class = [x for x in clf.classes_ if x != c]
+
+                # marking the current class as 1 and all other classes as 0
+                y_test_list_ova = [[0 if x in other_class else 1 for x in fold_] for fold_ in y_test_list]
+                y_test_prob_list_ova = [[0 if x in c else 1 for x in fold_] for fold_ in y_test_prob_list]
+
+                # Threshold independant
+                plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='roc', data_type='final_train')
+                plotClassificationCurve(given_name, new_actual_class, new_pred_class, curve_type='roc', data_type=f'test_class_{c}')
+
+                plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='pr', data_type='final_train_class1')
+                plotClassificationCurve(given_name, y_all_neg, y_all_prob_neg, curve_type='pr', data_type=f'test_class_{c}')
+
+                plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='pr', data_type='test_data_class1')
+                plotClassificationCurve(given_name, y_test_list_neg, y_test_prob_list_neg, curve_type='pr', data_type='test_data_class0')
+
+                plotCalibrationCurve(given_name, y_all, y_all_prob, data_type='final_train')
+                plotCalibrationCurve(given_name, y_test_list, y_test_prob_list, data_type='test')
+                plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final_train')
+                plotProbabilityDistribution(given_name, y_test, y_test_prob, data_type='test')
+
 
     elif model_type == 'regression':
         plotYhatVsYSave(given_name, y_test, y_test_pred, data_type='test')
@@ -177,6 +211,6 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
         logging.info('Adjusted R2: {adjustedR2}'.format(adjustedR2=adjustedR2))
 
     # Plot explanation of feature importances
-    featureExplanationSave(clf, given_name + '/feature_importance', logging)
+    featureExplanationSave(clf, given_name + '/feature_importance', post_params['file_type'], logging)
 
     return clf
