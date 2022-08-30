@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import RandomOverSampler, SMOTE, SMOTENC
+from utils.feature_selection.clustermap import plotClustermap
 
 def cleanAndCastColumns(data, feature_cols, target_col, model_name, model_type, logging):
     # make copy of data
@@ -107,7 +108,7 @@ def pre_process_simple(data, target_col, feature_cols, logging, random_seed=42):
 
     return X_train, X_train_ups, X_test, y_train, y_train_ups, y_test
 
-def pre_process_kfold(data, target_col, feature_cols, model_name, model_type, logging, pre_params, random_seed=42):
+def pre_process_kfold(given_name, data, target_col, feature_cols, model_name, model_type, logging, pre_params, post_params, random_seed=42):
 
     # clean and cast
     data_clean = cleanAndCastColumns(data, feature_cols, target_col, model_name, model_type, logging)
@@ -118,6 +119,9 @@ def pre_process_kfold(data, target_col, feature_cols, model_name, model_type, lo
         data_clean = data_clean.sample(n=max_rows).reset_index(drop=True)
         print(f'Limited dataset to {max_rows}')
         logging.info(f'Limited dataset to {max_rows}')
+
+    # Plot clustermap (for manual feature selection)
+    plotClustermap(data_clean, given_name, post_params['file_type'], logging)
 
     # create kfolds in a statified manner
     from sklearn.model_selection import StratifiedKFold, KFold, TimeSeriesSplit
