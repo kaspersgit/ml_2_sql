@@ -51,9 +51,9 @@ model_name = args.model_name
 #############################################
 # for debugging
 # given_name='trained_models/kasper'
-## logging.basicConfig(format='%(asctime)s %(message)s', filename=given_name+'/logging.log', encoding='utf-8', level=logging.DEBUG)
-# data_ = pd.read_csv('input/data/uk_inv_train.csv')
-# with open('input/configuration/uk_inv_cr.json') as json_file:
+# # logging.basicConfig(format='%(asctime)s %(message)s', filename=given_name+'/logging.log', encoding='utf-8', level=logging.DEBUG)
+# data_ = pd.read_csv('input/data/example_titanic.csv')
+# with open('input/configuration/example_titanic.json') as json_file:
 #     configuration = json.load(json_file)
 # model_name = 'ebm'
 #############################################
@@ -78,11 +78,12 @@ print('\nThis problem will be treated as a {model_type} problem'.format(model_ty
 logging.info('This problem will be treated as a {model_type} problem'.format(model_type=model_type))
 
 # pre process data
-datasets = pre_process_kfold(data, target_col, feature_cols
+datasets = pre_process_kfold(given_name, data, target_col, feature_cols
                                              , model_name=model_name
                                              , model_type=model_type
                                              , logging=logging
                                              , pre_params=pre_params
+                                             , post_params=post_params
                                              , random_seed=random_seed)
 
 # train decision tree and figures and save them

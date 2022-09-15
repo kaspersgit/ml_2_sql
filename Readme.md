@@ -81,13 +81,12 @@ Name of target column (required)
 ### TODO list
 - Add calibration (platt scaling/isotonic regression)
 - Implement null handling (there is an implementation mentioned [here](https://github.com/interpretml/interpret/issues/18))
-- Add option to save plots as html file (interactive)
 - Make multi class classification EBM work fully
 - Make regression EBM work fully
+- Removing outliers by using quantiles (e.g. only keeping 1 - 99 % quantiles)
 - Add decision tree
 - Add logistic regression
 - Add Skope rules
-- Add check for variables to just have 1 value
 - Get csv file from s3 link
 - Spatial Cross-validation discovery
 - Extend logging granularity (add model parameters)

@@ -92,6 +92,7 @@ FULL_MODEL_NAME=${CURRENT_DATE}_${MODELNAME}
 # Make directory with current data and model name
 mkdir trained_models/${FULL_MODEL_NAME} || exit
 mkdir -p trained_models/${FULL_MODEL_NAME}/feature_importance
+mkdir -p trained_models/${FULL_MODEL_NAME}/feature_info
 mkdir -p trained_models/${FULL_MODEL_NAME}/performance
 mkdir -p trained_models/${FULL_MODEL_NAME}/model
 

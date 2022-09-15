@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import RandomOverSampler, SMOTE, SMOTENC
+from utils.feature_selection.correlations import *
 
 def cleanAndCastColumns(data, feature_cols, target_col, model_name, model_type, logging):
     # make copy of data
@@ -79,35 +80,7 @@ def imbalanceness(labels):
 
     return (max_class_size - min_class_size)/(total_size - nclasses)
 
-def pre_process_simple(data, target_col, feature_cols, logging, random_seed=42):
-    data = cleanAndCastColumns(data, feature_cols, target_col)
-
-    # Warning is caused when a class has very few records and stratisfy is used
-    X_train, X_test, y_train, y_test = train_test_split(data[feature_cols], data[target_col], test_size=0.25, random_state=random_seed, stratify=data[target_col])
-
-    # pre oversampling
-    print('Counts of train labels before resampling: \n{labels} \n\n'.format(labels = y_train.value_counts()))
-    logging.info('Counts of train labels before resampling: \n{labels} \n\n'.format(labels = y_train.value_counts()))
-
-    # oversample train data
-    try:
-        ros = SMOTE(random_state=random_seed)
-        X_train_ups, y_train_ups = ros.fit_resample(X_train, y_train)
-        print('SMOTE oversampling')
-        logging.info('SMOTE oversampling')
-    except:
-        ros = RandomOverSampler(random_state=random_seed)
-        X_train_ups, y_train_ups = ros.fit_resample(X_train, y_train)
-        print('Random oversampling')
-        logging.info('Random oversampling')
-
-    # post oversampling
-    print('Counts of train labels after resampling: \n{labels} \n\n'.format(labels = y_train_ups.value_counts()))
-    logging.info('Counts of train labels after resampling: \n{labels}'.format(labels = y_train_ups.value_counts()))
-
-    return X_train, X_train_ups, X_test, y_train, y_train_ups, y_test
-
-def pre_process_kfold(data, target_col, feature_cols, model_name, model_type, logging, pre_params, random_seed=42):
+def pre_process_kfold(given_name, data, target_col, feature_cols, model_name, model_type, logging, pre_params, post_params, random_seed=42):
 
     # clean and cast
     data_clean = cleanAndCastColumns(data, feature_cols, target_col, model_name, model_type, logging)
@@ -118,6 +91,10 @@ def pre_process_kfold(data, target_col, feature_cols, model_name, model_type, lo
         data_clean = data_clean.sample(n=max_rows).reset_index(drop=True)
         print(f'Limited dataset to {max_rows}')
         logging.info(f'Limited dataset to {max_rows}')
+
+    # Create correlation plots
+    plotPearsonCorrelation(data_clean[feature_cols], given_name, post_params['file_type'], logging)
+    plotCramervCorrelation(data_clean[feature_cols], given_name, post_params['file_type'], logging)
 
     # create kfolds in a statified manner
     from sklearn.model_selection import StratifiedKFold, KFold, TimeSeriesSplit

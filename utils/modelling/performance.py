@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 from sklearn.calibration import calibration_curve
 from sklearn.metrics import brier_score_loss
 
-def plotConfusionMatrixSave(given_name, y_true, y_pred, data_type):
+def plotConfusionMatrixSave(given_name, y_true, y_pred, data_type, logging):
 
     from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
     fig, ax = plt.subplots(figsize=(10, 8))
@@ -16,8 +16,9 @@ def plotConfusionMatrixSave(given_name, y_true, y_pred, data_type):
     plt.savefig('{given_name}/performance/{data_type}_confusion_matrix.png'.format(given_name=given_name, data_type=data_type), bbox_inches='tight')
 
     print('Confusion matrix saved')
+    logging.info('Confusion matrix saved')
 
-def classificationReportSave(given_name, y_true, y_pred, data_type):
+def classificationReportSave(given_name, y_true, y_pred, data_type, logging):
 
     from sklearn.metrics import classification_report
 
@@ -26,16 +27,18 @@ def classificationReportSave(given_name, y_true, y_pred, data_type):
     report_df.to_csv('{given_name}/performance/{data_type}_classification_report.csv'.format(given_name=given_name, data_type=data_type))
 
     print('Classification report saved')
+    logging.info('Classification report saved')
 
-def plotYhatVsYSave(given_name, y_true, y_pred, data_type):
+def plotYhatVsYSave(given_name, y_true, y_pred, data_type, logging):
 
     plot_df = pd.DataFrame({'y_true':y_true, 'y_pred':y_pred})
     fig = px.scatter(plot_df, 'y_true', 'y_pred')
     fig.write_image('{given_name}/performance/{data_type}_scatter_yhat_vs_y.png'.format(given_name=given_name, data_type=data_type))
 
     print(f'Scatter plot of yhat vs y saved for {data_type}')
+    logging.info(f'Scatter plot of yhat vs y saved for {data_type}')
 
-def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type):
+def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type, logging):
     """
     :param given_name: string path where to save
     :param probs: float models predicted probability
@@ -62,8 +65,15 @@ def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type):
         title = 'Precision-Recall curve - {data_type}'.format(data_type=data_type)
         xlabel = 'True Positive Rate (Recall)'
         ylabel = 'Precision'
-        diagCor1 = [0, 0]
-        diagCor2 = [0, 0]
+
+        # add the random line (= share of positives in sample)
+        if isinstance(y_true, list):
+            pos_share = sum([sum(el) for el in y_true]) / sum([len(el) for el in y_true])
+        else:
+            pos_share = sum(y_true)/len(y_true)
+
+        diagCor1 = [0, 1]
+        diagCor2 = [pos_share, pos_share]
 
         curve_ = 'pr'
 
@@ -120,11 +130,13 @@ def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type):
                        yshift=10)
 
     fig.write_image(f'{given_name}/performance/{data_type}_{curve_type}_plot.png')
+
     print(f'Created and saved {curve_type} plot for {data_type} data')
+    logging.info(f'Created and saved {curve_type} plot for {data_type} data')
 
     return np.mean(auc_list)
 
-def plotCalibrationCurve(given_name, y_true, y_prob, data_type):
+def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
     """
     Plot the calibration curve for a set of true and predicted values
 
@@ -185,7 +197,9 @@ def plotCalibrationCurve(given_name, y_true, y_prob, data_type):
                        yshift=10)
 
     fig.write_image(f'{given_name}/performance/{data_type}_calibration_plot.png')
+
     print(f'Created and saved calibration plot')
+    logging.info(f'Created and saved calibration plot')
 
 # for multiclass classification WIP
 def multiClassPlotCalibrationCurvePlotly(actuals, probs, title, bins=10):
@@ -206,7 +220,7 @@ def multiClassPlotCalibrationCurvePlotly(actuals, probs, title, bins=10):
         y_true = np.where(actuals == cl, 1, 0)
         y_prob = probs[cl]
 
-        # summaries actuals and predicted probs to (bins) number of points
+        # summarise actuals and predicted probs to (bins) number of points
         fraction_of_positives, mean_predicted_value = \
             calibration_curve(y_true, y_prob, n_bins=bins)
 
@@ -236,14 +250,20 @@ def multiClassPlotCalibrationCurvePlotly(actuals, probs, title, bins=10):
 
     fig.show()
 
-def plotProbabilityDistribution(given_name, y_true, y_prob, data_type):
+def plotProbabilityDistribution(given_name, y_true, y_prob, data_type, logging):
     import plotly.figure_factory as ff
     df = pd.DataFrame({'actuals': y_true, 'prob': y_prob})
     do = df[df['actuals']==1]['prob']
     dont = df[df['actuals']==0]['prob']
 
-    # Create distplot with custom bin_size
-    fig = ff.create_distplot([do,dont], ['1','0'], colors=['green','red'], bin_size=.01)
+    # Catching any kind of exception
+    try:
+        # Create distplot with custom bin_size
+        fig = ff.create_distplot([do,dont], ['1','0'], colors=['green','red'], bin_size=.01)
+    except Exception as e:
+        print(f'Could not create distribution plot because of \n{e}')
+        logging.info(f'Could not create distribution plot because of \n{e}')
+        return
 
     # Update size of figure
     fig.update_layout(xaxis_title='Predicted probability', yaxis_title='Frequency',
@@ -254,4 +274,8 @@ def plotProbabilityDistribution(given_name, y_true, y_prob, data_type):
     # fig.show(renderer='browser')
 
     fig.write_image(f'{given_name}/performance/{data_type}_distribution_plot.png')
+
     print(f'Created and saved probability distribution plot')
+    logging.info(f'Created and saved probability distribution plot')
+
+    return

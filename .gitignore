@@ -1,8 +1,10 @@
 # files and data
 input/data/*.csv
+!input/data/example_titanic.csv
 input/configuration/*.json
-!input/configuration/example.json
+!input/configuration/example_titanic.json
 trained_models/*
+!trained_models/example_titanic/
 
 # Editors
 .vscode/

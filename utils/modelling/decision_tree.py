@@ -29,82 +29,28 @@ def plotTreeStructureSave(clf, given_name):
     plt.figure(figsize=(30,30))
 
     tree.plot_tree(clf, fontsize=10, feature_names=clf.feature_names_in_, class_names=clf.classes_)
-    plt.savefig('{given_name}/tree_plot.png'.format(given_name=given_name))
+    plt.savefig(f'{given_name}/tree_plot.png')
 
     print('Tree structure plot saved')
 
 
-def featureImportanceSave(clf, given_name):
-    importance_df = pd.DataFrame({'importance':clf.feature_importances_, 'feature':clf.feature_names_in_}).sort_values('importance', ascending=False).reset_index(drop=True)
-    importance_df.to_csv('{given_name}/feature_importance.csv'.format(given_name=given_name), index=False)
+def featureImportanceSave(clf, given_name, file_type, logging):
+    importance_df = pd.DataFrame({'importance':clf.feature_importances_, 'feature':clf.feature_names_in_}).sort_values('importance', ascending=True).reset_index(drop=True)
+    importance_non_zero = importance_df[importance_df['importance'] > 0]
+    plotly_fig = px.bar(importance_non_zero, x='importance', y='feature')
 
-    print('Feature importance csv saved')
+    # Update size of figure
+    plotly_fig.update_layout(xaxis_title='Importance', yaxis_title='Feature',
+                      title=f'Feature importance',
+                      width=1000,
+                      height=800)
 
-def make_model_old(given_name, X_train, y_train, X_train_ups, y_train_ups, X_test, y_test, model_type = 'classification'):
-    # check if X is a list (CV should be applied in that case)
-    if isinstance(X_train, list):
-        y_train_pred_list = list()
-        y_test_pred_list = list()
+    if file_type == 'png':
+        plotly_fig.write_image('{given_name}/gini_feature_importance.png'.format(given_name=given_name))
+    elif file_type == 'html':
+        plotly_fig.write_html('{given_name}/gini_feature_importance.html'.format(given_name=given_name))
 
-        for fold_id in range(len(X_train_ups)):
-            all_classes_represented = False
-            max_leaf_nodes = len(y_train[fold_id].unique())
-            while not all_classes_represented:
-                print('Nr of max leaf nodes: {max_leaf_nodes}'.format(max_leaf_nodes=max_leaf_nodes))
-                clf = trainDecisionTree(X_train_ups[fold_id], y_train_ups[fold_id], max_leaf_nodes=max_leaf_nodes)
-                all_classes_represented = checkAllClassesHaveLeafNode(clf)
-                max_leaf_nodes += 1
-
-            y_train_pred_list.append(clf.predict(X_train[fold_id]))
-            y_test_pred_list.append(clf.predict(X_test[fold_id]))
-
-        # Merge list of lists into one list
-        y_train_pred = [item for sublist in y_train_pred_list for item in sublist]
-        y_test_pred = [item for sublist in y_test_pred_list for item in sublist]
-
-        y_test = [item for sublist in y_test for item in sublist]
-        y_train = [item for sublist in y_train for item in sublist]
-        y_ups = [item for sublist in y_train_ups for item in sublist]
-
-        # Merge list of dataframes into one dataframe
-        X_test = pd.concat(X_test).reset_index(drop=True)
-        X_train = pd.concat(X_train).reset_index(drop=True)
-        X_ups = pd.concat(X_train_ups).reset_index(drop=True)
-
-        # train model one last time on all samples
-        all_classes_represented = False
-        max_leaf_nodes = len(set(y_ups))
-        while not all_classes_represented:
-            print('Nr of max leaf nodes: {max_leaf_nodes}'.format(max_leaf_nodes=max_leaf_nodes))
-            clf = trainDecisionTree(X_ups, y_ups, max_leaf_nodes=max_leaf_nodes)
-            all_classes_represented = checkAllClassesHaveLeafNode(clf)
-            max_leaf_nodes += 1
-
-    # If just regular train/test split has been applied
-    else:
-        all_classes_represented = False
-        max_leaf_nodes = len(y_train.unique())
-        while not all_classes_represented:
-            print('Nr of max leaf nodes: {max_leaf_nodes}'.format(max_leaf_nodes=max_leaf_nodes))
-            clf = trainDecisionTree(X_train_ups, y_train_ups, max_leaf_nodes=max_leaf_nodes)
-            all_classes_represented = checkAllClassesHaveLeafNode(clf)
-            max_leaf_nodes += 1
-
-        y_train_pred = clf.predict(X_train)
-        y_test_pred = clf.predict(X_test)
-
-    if model_type == 'classification':
-        plotConfusionMatrixSave(given_name, y_train, y_train_pred, data_type='train')
-        plotConfusionMatrixSave(given_name, y_test, y_test_pred, data_type='test')
-        classificationReportSave(given_name, y_train, y_train_pred, data_type='train')
-        classificationReportSave(given_name, y_test, y_test_pred, data_type='test')
-
-    # plot the final tree
-    plotTreeStructureSave(clf, given_name)
-    featureImportanceSave(clf, given_name + '/feature_importance')
-
-    return clf
-
+    print('Gini feature importance plot saved')
 
 def make_model(given_name, datasets, model_type, model_params, post_params, logging):
     # unpack datasets
@@ -201,10 +147,10 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
 
     if model_type == 'classification':
         # Threshold dependant
-        plotConfusionMatrixSave(given_name, y_all, y_all_pred, data_type='final_train')
-        plotConfusionMatrixSave(given_name, y_test, y_test_pred, data_type='test')
-        classificationReportSave(given_name, y_all, y_all_pred, data_type='final_train')
-        classificationReportSave(given_name, y_test, y_test_pred, data_type='test')
+        plotConfusionMatrixSave(given_name, y_all, y_all_pred, data_type='final_train', logging=logging)
+        plotConfusionMatrixSave(given_name, y_test, y_test_pred, data_type='test', logging=logging)
+        classificationReportSave(given_name, y_all, y_all_pred, data_type='final_train', logging=logging)
+        classificationReportSave(given_name, y_test, y_test_pred, data_type='test', logging=logging)
 
         if len(clf.classes_) == 2:
             # Also create pr curve for class 0
@@ -215,19 +161,19 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
             y_test_prob_list_neg = [[1 - j for j in i] for i in y_test_prob_list]
 
             # Threshold independant
-            plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='roc', data_type='final_train')
-            plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='roc', data_type='test')
+            plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='roc', data_type='final_train', logging=logging)
+            plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='roc', data_type='test', logging=logging)
 
-            plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='pr', data_type='final_train_class1')
-            plotClassificationCurve(given_name, y_all_neg, y_all_prob_neg, curve_type='pr', data_type='final_train_class0')
+            plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='pr', data_type='final_train_class1', logging=logging)
+            plotClassificationCurve(given_name, y_all_neg, y_all_prob_neg, curve_type='pr', data_type='final_train_class0', logging=logging)
 
-            plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='pr', data_type='test_data_class1')
-            plotClassificationCurve(given_name, y_test_list_neg, y_test_prob_list_neg, curve_type='pr', data_type='test_data_class0')
+            plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='pr', data_type='test_data_class1', logging=logging)
+            plotClassificationCurve(given_name, y_test_list_neg, y_test_prob_list_neg, curve_type='pr', data_type='test_data_class0', logging=logging)
 
-            plotCalibrationCurve(given_name, y_all, y_all_prob, data_type='final_train')
-            plotCalibrationCurve(given_name, y_test_list, y_test_prob_list, data_type='test')
-            plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final_train')
-            plotProbabilityDistribution(given_name, y_test, y_test_prob, data_type='test')
+            plotCalibrationCurve(given_name, y_all, y_all_prob, data_type='final_train', logging=logging)
+            plotCalibrationCurve(given_name, y_test_list, y_test_prob_list, data_type='test', logging=logging)
+            plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final_train', logging=logging)
+            plotProbabilityDistribution(given_name, y_test, y_test_prob, data_type='test', logging=logging)
 
         elif len(clf.classes_) > 2:
             # loop through classes
@@ -240,19 +186,19 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
                 y_test_prob_list_ova = [[0 if x in c else 1 for x in fold_] for fold_ in y_test_prob_list]
 
                 # Threshold independant
-                plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='roc', data_type='final_train')
-                plotClassificationCurve(given_name, new_actual_class, new_pred_class, curve_type='roc', data_type=f'test_class_{c}')
+                plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='roc', data_type='final_train', logging=logging)
+                plotClassificationCurve(given_name, new_actual_class, new_pred_class, curve_type='roc', data_type=f'test_class_{c}', logging=logging)
 
-                plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='pr', data_type='final_train_class1')
-                plotClassificationCurve(given_name, y_all_neg, y_all_prob_neg, curve_type='pr', data_type=f'test_class_{c}')
+                plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='pr', data_type='final_train_class1', logging=logging)
+                plotClassificationCurve(given_name, y_all_neg, y_all_prob_neg, curve_type='pr', data_type=f'test_class_{c}', logging=logging)
 
-                plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='pr', data_type='test_data_class1')
-                plotClassificationCurve(given_name, y_test_list_neg, y_test_prob_list_neg, curve_type='pr', data_type='test_data_class0')
+                plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='pr', data_type='test_data_class1', logging=logging)
+                plotClassificationCurve(given_name, y_test_list_neg, y_test_prob_list_neg, curve_type='pr', data_type='test_data_class0', logging=logging)
 
-                plotCalibrationCurve(given_name, y_all, y_all_prob, data_type='final_train')
-                plotCalibrationCurve(given_name, y_test_list, y_test_prob_list, data_type='test')
-                plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final_train')
-                plotProbabilityDistribution(given_name, y_test, y_test_prob, data_type='test')
+                plotCalibrationCurve(given_name, y_all, y_all_prob, data_type='final_train', logging=logging)
+                plotCalibrationCurve(given_name, y_test_list, y_test_prob_list, data_type='test', logging=logging)
+                plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final_train', logging=logging)
+                plotProbabilityDistribution(given_name, y_test, y_test_prob, data_type='test', logging=logging)
 
 
     elif model_type == 'regression':
@@ -265,6 +211,6 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
 
     # plot the final tree
     # plotTreeStructureSave(clf, given_name)
-    featureImportanceSave(clf, given_name + '/feature_importance')
+    featureImportanceSave(clf, given_name + '/feature_importance', post_params['file_type'], logging)
 
     return clf
