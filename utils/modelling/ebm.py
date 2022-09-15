@@ -44,11 +44,18 @@ def featureExplanationSave(ebm, given_name, file_type, logging):
     for index, value in enumerate(ebm.feature_groups_):
         plotly_fig = ebm_global.visualize(index)
 
+        # reformatting feature name
+        feature_name = ebm.feature_names[index]
+        chars = "\\`./"
+        for c in chars:
+            if c in feature_name:
+                feature_name = feature_name.replace(c, "_")
+
         if file_type == 'png':
-            plotly_fig.write_image('{given_name}/explain_{feature}.png'.format(given_name=given_name, feature=ebm.feature_names[index]))
+            plotly_fig.write_image('{given_name}/explain_{feature}.png'.format(given_name=given_name, feature=feature_name))
         elif file_type == 'html':
             # or as html file
-            plotly_fig.write_html('{given_name}/explain_{feature}.html'.format(given_name=given_name, feature=ebm.feature_names[index]))
+            plotly_fig.write_html('{given_name}/explain_{feature}.html'.format(given_name=given_name, feature=feature_name))
 
     print('Explanation plots of {n_features} features saved'.format(n_features=index+1))
     logging.info('Explanation plots of {n_features} features saved'.format(n_features=index+1))

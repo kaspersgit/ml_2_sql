@@ -1,7 +1,11 @@
 {
   "features": [
-    "feature_1",
-    "feature_2"
+    "Pclass",
+    "Sex",
+    "Age",
+    "Siblings/Spouses Aboard",
+    "Parents/Children Aboard",
+    "Fare"
   ],
   "model_params": {
     "interactions": 4,
@@ -13,10 +17,10 @@
     "sql_split": "true"
   },
   "pre_params": {
-    "cv_type": "timeseriesplit",
+    "cv_type": "notimeseriesplit",
     "max_rows": 100000,
     "time_sensitive_column": "date_column",
     "upsampling": "false"
   },
-  "target": "target"
+  "target": "Survived"
 }

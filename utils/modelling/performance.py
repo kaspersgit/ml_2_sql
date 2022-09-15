@@ -220,7 +220,7 @@ def multiClassPlotCalibrationCurvePlotly(actuals, probs, title, bins=10):
         y_true = np.where(actuals == cl, 1, 0)
         y_prob = probs[cl]
 
-        # summaries actuals and predicted probs to (bins) number of points
+        # summarise actuals and predicted probs to (bins) number of points
         fraction_of_positives, mean_predicted_value = \
             calibration_curve(y_true, y_prob, n_bins=bins)
 
@@ -256,8 +256,14 @@ def plotProbabilityDistribution(given_name, y_true, y_prob, data_type, logging):
     do = df[df['actuals']==1]['prob']
     dont = df[df['actuals']==0]['prob']
 
-    # Create distplot with custom bin_size
-    fig = ff.create_distplot([do,dont], ['1','0'], colors=['green','red'], bin_size=.01)
+    # Catching any kind of exception
+    try:
+        # Create distplot with custom bin_size
+        fig = ff.create_distplot([do,dont], ['1','0'], colors=['green','red'], bin_size=.01)
+    except Exception as e:
+        print(f'Could not create distribution plot because of \n{e}')
+        logging.info(f'Could not create distribution plot because of \n{e}')
+        return
 
     # Update size of figure
     fig.update_layout(xaxis_title='Predicted probability', yaxis_title='Frequency',
@@ -271,3 +277,5 @@ def plotProbabilityDistribution(given_name, y_true, y_prob, data_type, logging):
 
     print(f'Created and saved probability distribution plot')
     logging.info(f'Created and saved probability distribution plot')
+
+    return

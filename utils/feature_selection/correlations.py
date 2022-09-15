@@ -155,9 +155,9 @@ def plotCramervCorrelation(df, given_name, file_type, logging):
     data_ = df.select_dtypes(include=['category', 'object', 'bool']).copy()
 
     # if above dataframe is empty then skip function
-    if data_.empty:
-        print(f'No categorical variables found')
-        logging.info(f'No categorical variables found')
+    if data_.shape[1] < 2:
+        print(f'Less than 2 categorical variables found')
+        logging.info(f'Less than 2 categorical variables found')
         return
 
     cols = data_.columns
