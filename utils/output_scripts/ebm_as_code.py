@@ -130,7 +130,11 @@ def extractLookupTable(ebm):
     lookup_df['nr_features'] = 1
 
     # being able for score arrays to be grouped
-    lookup_df['score_hash'] = pd.util.hash_pandas_object(lookup_df['score'].astype(str), index=False)
+    # for categorical features do not group by score hence we include value in score_hash
+    lookup_df['pre_hash_column'] = np.where(lookup_df['feat_type'] == 'categorical'
+                                            , lookup_df['score'].astype(str) + lookup_df['feat_bound'].astype(str)
+                                            , lookup_df['score'].astype(str))
+    lookup_df['score_hash'] = pd.util.hash_pandas_object(lookup_df['pre_hash_column'], index=False)
     hash_lookup_df = lookup_df[['score_hash','score']].drop_duplicates('score_hash').reset_index(drop=True).copy()
 
     # to group by score but keep them in order (not grouping similar scores for different feature values)
