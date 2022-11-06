@@ -4,9 +4,7 @@ from sklearn.model_selection import train_test_split
 from utils.checks import *
 from utils.modelling.performance import *
 
-def trainDecisionList(X_train, y_train, params, model_type, logging):
-    # if 'feature_names' not in params.keys():
-    #     params['feature_names'] = X_train.columns
+def trainDecisionRule(X_train, y_train, params, model_type, logging):
     if model_type == 'classification':
         clf = DecisionListClassifier(**params)
     else:
@@ -14,20 +12,10 @@ def trainDecisionList(X_train, y_train, params, model_type, logging):
         logging.warning('Only classification available')
 
     clf.fit(X_train, y_train)
-    print('Trained decision list \n')
-    logging.info('Trained decision list')
+    print('Trained decision rule \n')
+    logging.info('Trained decision rule')
 
     return clf
-
-def plotTreeStructureSave(clf, given_name):
-
-    plt.figure(figsize=(30,30))
-
-    tree.plot_tree(clf, fontsize=10, feature_names=clf.feature_names_in_, class_names=clf.classes_)
-    plt.savefig('{given_name}/tree_plot.png'.format(given_name=given_name))
-
-    print('Tree structure plot saved')
-
 
 def featureImportanceSave(clf, given_name, logging):
 
@@ -39,7 +27,7 @@ def featureImportanceSave(clf, given_name, logging):
     # Save list of all rules
     plotly_fig = clf_global.visualize()
 
-    with open(f"{given_name}/decisions_list.html", "w") as file:
+    with open(f"{given_name}/decisions_rule.html", "w") as file:
         file.write(plotly_fig)
 
     # Save feature specific explanation graphs
@@ -79,7 +67,7 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
             else:
                 X_slice_train, y_slice_train = X_train[fold_id], y_train[fold_id]
 
-            clf = trainDecisionList(X_slice_train, y_slice_train, model_params, model_type, logging)
+            clf = trainDecisionRule(X_slice_train, y_slice_train, model_params, model_type, logging)
             # logging.info(f'Model params:\n {clf.get_params}')
 
             if post_params['calibration'] != 'false':
@@ -103,7 +91,7 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
 
     # If just regular train/test split has been applied
     else:
-        clf = trainDecisionList(X_train, y_train, model_params, model_type, logging)
+        clf = trainDecisionRule(X_train, y_train, model_params, model_type, logging)
 
         # discrete prediction
         y_test_pred = clf.predict(X_test)
@@ -120,7 +108,7 @@ def make_model(given_name, datasets, model_type, model_params, post_params, logg
     if post_params['calibration'] != 'false':
         X_all, X_cal, y_all, y_cal = train_test_split(X_all, y_all, test_size=0.2, random_state=123)
 
-    clf = trainDecisionList(X_all, y_all, model_params, model_type, logging)
+    clf = trainDecisionRule(X_all, y_all, model_params, model_type, logging)
 
     # Save model in pickled format
     filename = given_name + '/model/decision_tree_{model_type}.sav'.format(model_type=model_type)

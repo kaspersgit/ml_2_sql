@@ -6,7 +6,7 @@ import logging
 import random
 from utils.modelling import decision_tree
 from utils.modelling import ebm
-from utils.modelling import decision_list
+from utils.modelling import decision_rule
 from utils.config_handling import *
 from utils.pre_process import *
 from utils.output_scripts import decision_tree_as_code
@@ -45,13 +45,13 @@ data_ = pd.read_csv(args.data_path)
 with open(args.configuration) as json_file:
     configuration = json.load(json_file)
 
-# get model name  (decision tree and ExplainableBoosting(Classifier/Regressor)
+# get model name
 model_name = args.model_name
 
 #############################################
 # for debugging
 # given_name='trained_models/kasper'
-# # logging.basicConfig(format='%(asctime)s %(message)s', filename=given_name+'/logging.log', encoding='utf-8', level=logging.DEBUG)
+# logging.basicConfig(format='%(asctime)s %(message)s', filename=given_name+'/logging.log', encoding='utf-8', level=logging.DEBUG)
 # data_ = pd.read_csv('input/data/example_titanic.csv')
 # with open('input/configuration/example_titanic.json') as json_file:
 #     configuration = json.load(json_file)
@@ -69,10 +69,15 @@ data = data_.copy()
 logging.info(f'Configuration file content: \n{configuration}')
 
 # set model type based on target value
-if (data[target_col].dtype == 'float') | ((data[target_col].dtype == 'int') & (data[target_col].nunique() > 10)):
+if data[target_col].nunique() == 1:
+    raise Exception("Target column needs more than 1 unique value")
+elif (data[target_col].dtype == 'float') | ((data[target_col].dtype == 'int') & (data[target_col].nunique() > 10)):
     model_type = 'regression'
 else:
     model_type = 'classification'
+
+    print(f'\nTarget column has {data[target_col].nunique()} unique values')
+    logging.info(f'\nTarget column has {data[target_col].nunique()} unique values')
 
 print('\nThis problem will be treated as a {model_type} problem'.format(model_type=model_type))
 logging.info('This problem will be treated as a {model_type} problem'.format(model_type=model_type))
