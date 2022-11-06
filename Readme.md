@@ -36,6 +36,8 @@ List with names of the columns which should be used as feature (optional)
 #### model_params
 Dictionary of parameters that can be used with model of choice (optional). Check the model's documentation:
 - EBM ([model documentation](https://interpret.ml/docs/ebm.html))
+- Decision tree ([model documentation](https://interpret.ml/docs/dt.html))
+- Decision rule ([model documentation](https://interpret.ml/docs/dr.html))
 
 #### post_params
 `calibration` options (optional, not fully implemented):
@@ -87,7 +89,9 @@ Name of target column (required)
 - Add decision tree
 - Add logistic regression
 - Add Skope rules
-- Get csv file from s3 link
 - Spatial Cross-validation discovery
 - Extend logging granularity (add model parameters)
 - Use menu function bash for model type choosing
+- Add target single unique value check
+- Replace `classification_report` and `confusion_matrix` due to dependance on threshold
+- Add MCC, cohen kappa and other metrics plotted with threshold
