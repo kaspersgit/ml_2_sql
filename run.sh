@@ -77,7 +77,7 @@ mkdir -p trained_models/${FULL_MODEL_NAME}/model
 printf "Starting script to create model"
 
 # Run python script with given input
-printf "\npython main.py --name trained_models/${FULL_MODEL_NAME} --data_path $CSVPATH --configuration $JSONPATH --output_type $OUTPUT_TYPE --model $MODEL_TYPE"
+printf "\npython main.py --name trained_models/${FULL_MODEL_NAME} --data_path $CSVPATH --configuration $JSONPATH --model $MODEL_TYPE"
 python main.py --name trained_models/${FULL_MODEL_NAME} --data_path $CSVPATH --configuration $JSONPATH --model $MODEL_TYPE
 
 printf "\n\nModel outputs can be found in folder: \n${PWD}/trained_models/${FULL_MODEL_NAME}"

@@ -1,38 +1,18 @@
 # Load packages
-import sys
-import pandas as pd
-import json
 import logging
-import random
-from utils.modelling import decision_tree
-from utils.modelling import ebm
-from utils.modelling import decision_rule
-from utils.config_handling import *
-from utils.pre_process import *
+
+from utils.modelling.main_modeler import *
+
+# The translations to SQL (grey as we refer to them dynamically)
 from utils.output_scripts import decision_tree_as_code
+from utils.output_scripts import decision_rule_as_code
 from utils.output_scripts import ebm_as_code
 
-# parse command line arguments
-import argparse
+from utils.helper_functions.config_handling import *
+from utils.helper_functions.parsing_arguments import *
+from utils.pre_process import *
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--name", type=str, help="Enter project name",
-                        nargs='?', default='no_name', const='no_name')
-    parser.add_argument("--data_path", type=str, help="Enter path to csv file",
-                        nargs='?', default='no_data', const='no_data')
-    parser.add_argument("--configuration", type=str, help="Enter path to json file",
-                        nargs='?')
-    parser.add_argument("--model_name", type=str, help="Enter model type",
-                        nargs='?', default='decision_tree', const='full')
-
-    args = parser.parse_args()
-
-    # settings
-    pd.set_option('display.max_rows', 500)
-    pd.set_option('display.max_columns', 10)
-    random_seed = 42
-
+def main(args):
     # get given name from the first given argument
     given_name = args.name
 
@@ -49,16 +29,6 @@ def main():
 
     # get model name
     model_name = args.model_name
-
-    #############################################
-    # for debugging
-    # given_name='trained_models/kasper'
-    # logging.basicConfig(format='%(asctime)s %(message)s', filename=given_name+'/logging.log', encoding='utf-8', level=logging.DEBUG)
-    # data_ = pd.read_csv('input/data/example_titanic.csv')
-    # with open('input/configuration/example_titanic.json') as json_file:
-    #     configuration = json.load(json_file)
-    # model_name = 'ebm'
-    #############################################
 
     # Handle the configuration file
     target_col, feature_cols, model_params, pre_params, post_params = config_handling(configuration, logging)
@@ -94,11 +64,31 @@ def main():
                                                  , random_seed=random_seed)
 
     # train decision tree and figures and save them
-    clf = globals()[model_name].make_model(given_name, datasets, model_type=model_type, model_params=model_params, post_params=post_params, logging=logging)
+    clf = make_model(given_name, datasets, model_name=model_name, model_type=model_type, model_params=model_params, post_params=post_params, logging=logging)
+    # clf = globals()[model_name].make_model(given_name, datasets, model_type=model_type, model_params=model_params, post_params=post_params, logging=logging)
 
     # Create SQL version of model and save it
     globals()[model_name + '_as_code'].save_model_and_extras(clf, given_name, post_params['sql_split'], logging)
 
 # Run function
 if __name__ == '__main__':
-    main()
+
+    # settings
+    pd.set_option('display.max_rows', 500)
+    pd.set_option('display.max_columns', 10)
+    random_seed = 42
+
+    # Command line arguments used for testing
+    argvals = '--name trained_models/20221210_titaninc_comeon ' \
+              '--data_path input/data/example_titanic.csv ' \
+              '--configuration input/configuration/example_titanic.json ' \
+              '--model ebm'.split() # example of passing test params to parser
+
+    # For production (only comment for testing)
+    argvals = None
+
+    # Get arguments from the CLI
+    args = GetArgs(argvals)
+
+    # Run main with given arguments
+    main(args)

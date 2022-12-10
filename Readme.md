@@ -85,13 +85,13 @@ Name of target column (required)
 - Implement null handling (there is an implementation mentioned [here](https://github.com/interpretml/interpret/issues/18))
 - Make multi class classification EBM work fully
 - Make regression EBM work fully
-- Removing outliers by using quantiles (e.g. only keeping 1 - 99 % quantiles)
-- Add decision tree
+- Removing outliers by using quantiles (e.g. only keeping 1 - 99 % qua
 - Add logistic regression
-- Add Skope rules
 - Spatial Cross-validation discovery
 - Extend logging granularity (add model parameters)
 - Use menu function bash for model type choosing
-- Add target single unique value check
 - Replace `classification_report` and `confusion_matrix` due to dependance on threshold
 - Add MCC, cohen kappa and other metrics plotted with threshold
+- Add SQL translation for decision rule
+- Add random seed to config file
+- Make a proper testing procedure
