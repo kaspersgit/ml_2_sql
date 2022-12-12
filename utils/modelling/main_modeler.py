@@ -44,8 +44,12 @@ def make_model(given_name, datasets, model_name, model_type, model_params, post_
             y_test_pred_list.append(clf.predict(X_test[fold_id]))
 
             if model_type == 'classification':
-                # probability predictions
-                y_test_prob_list.append(clf.predict_proba(X_test[fold_id])[:,1])
+            # probability predictions
+                # Binary classification
+                if len(clf.classes_) == 2:
+                    y_test_prob_list.append(clf.predict_proba(X_test[fold_id])[:,1])
+                elif len(clf.classes_) > 2:
+                    y_test_prob_list.append(clf.predict_proba(X_test[fold_id]))
 
         # Merge list of prediction lists into one list
         y_test_pred = np.concatenate(y_test_pred_list, axis=0)
@@ -83,8 +87,15 @@ def make_model(given_name, datasets, model_name, model_type, model_params, post_
 
     # train set prediction of final model
     y_all_pred = clf.predict(X_all)
+
     if model_type == 'classification':
-        y_all_prob = clf.predict_proba(X_all)[:,1]
+    # probability predictions
+        # Binary classification
+        if len(clf.classes_) == 2:
+            y_all_prob = clf.predict_proba(X_all)[:,1]
+        elif len(clf.classes_) > 2:
+            y_all_prob = clf.predict_proba(X_all)
+
 
     if post_params['calibration'] != 'false':
         cal_clf, cal_reg = calibrateModel(clf, X_cal, y_cal, logging, method=post_params['calibration'], final_model=True)
@@ -97,7 +108,12 @@ def make_model(given_name, datasets, model_name, model_type, model_params, post_
         y_all_pred = cal_clf.predict(X_all)
 
         if model_type == 'classification':
-            y_all_prob = cal_clf.predict_proba(X_all)[:, 1]
+            # probability predictions
+            # Binary classification
+            if len(clf.classes_) == 2:
+                y_all_prob = clf.predict_proba(X_all)[:, 1]
+            elif len(clf.classes_) > 2:
+                y_all_prob = clf.predict_proba(X_all)
 
 
     # Performance and other post modeling plots
@@ -128,35 +144,46 @@ def make_model(given_name, datasets, model_name, model_type, model_params, post_
 
             plotCalibrationCurve(given_name, y_all, y_all_prob, data_type='final_train', logging=logging)
             plotCalibrationCurve(given_name, y_test_list, y_test_prob_list, data_type='test', logging=logging)
+
             plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final_train', logging=logging)
             plotProbabilityDistribution(given_name, y_test, y_test_prob, data_type='test', logging=logging)
 
+        # If multiclass classification
         elif len(clf.classes_) > 2:
             # loop through classes
             for c in clf.classes_:
                 # creating a list of all the classes except the current class
                 other_class = [x for x in clf.classes_ if x != c]
 
+                # Get index of selected class in clf.classes_
+                class_index = list(clf.classes_).index(c)
+
                 # marking the current class as 1 and all other classes as 0
                 y_test_list_ova = [[0 if x in other_class else 1 for x in fold_] for fold_ in y_test_list]
-                y_test_prob_list_ova = [[0 if x in c else 1 for x in fold_] for fold_ in y_test_prob_list]
+                y_test_prob_list_ova = [[x[class_index] for x in fold_] for fold_ in y_test_prob_list]
+
+                # concatonate probs together to one list for distribution plot
+                y_test_ova = np.concatenate(y_test_list_ova, axis=0)
+                y_test_prob_ova = np.concatenate(y_test_prob_list_ova, axis=0)
+
+                y_all_ova = [0 if x in other_class else 1 for x in y_all]
+                y_all_prob_ova = [x[class_index] for x in y_all_prob]
+
 
                 # Threshold independant
-                plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='roc', data_type='final_train', logging=logging)
-                plotClassificationCurve(given_name, new_actual_class, new_pred_class, curve_type='roc', data_type=f'test_class_{c}', logging=logging)
+                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='roc', data_type=f'final_train_class_'{c}, logging=logging)
+                plotClassificationCurve(given_name, y_test_list_ova, y_test_prob_list_ova, curve_type='roc', data_type=f'test_class_{c}', logging=logging)
 
-                plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='pr', data_type='final_train_class1', logging=logging)
-                plotClassificationCurve(given_name, y_all_neg, y_all_prob_neg, curve_type='pr', data_type=f'test_class_{c}', logging=logging)
+                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='pr', data_type='final_train_class1', logging=logging)
+                plotClassificationCurve(given_name, y_test_list_ova, y_test_prob_list_ova, curve_type='pr', data_type=f'test_class_{c}', logging=logging)
 
-                plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='pr', data_type='test_data_class1', logging=logging)
-                plotClassificationCurve(given_name, y_test_list_neg, y_test_prob_list_neg, curve_type='pr', data_type='test_data_class0', logging=logging)
+                # multiClassPlotCalibrationCurvePlotly(given_name, y_all, pd.DataFrame(y_all_prob, columns=clf.classes_), title='fun')
+                plotCalibrationCurve(given_name, y_test_list_ova, y_test_prob_list_ova, data_type=f'test_class_{c}', logging=logging)
 
-                plotCalibrationCurve(given_name, y_all, y_all_prob, data_type='final_train', logging=logging)
-                plotCalibrationCurve(given_name, y_test_list, y_test_prob_list, data_type='test', logging=logging)
-                plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final_train', logging=logging)
-                plotProbabilityDistribution(given_name, y_test, y_test_prob, data_type='test', logging=logging)
+                # plotProbabilityDistribution(given_name, y_all_ova, y_all_prob_ova, data_type='final_train', logging=logging)
+                plotProbabilityDistribution(given_name, y_test_ova, y_test_prob_ova, data_type=f'test_class_{c}', logging=logging)
 
-
+    # if regression
     elif model_type == 'regression':
         plotYhatVsYSave(given_name, y_test, y_test_pred, data_type='test')
         plotYhatVsYSave(given_name, y_all, y_all_pred, data_type='final_train')

@@ -1,5 +1,6 @@
 # Load packages
 import logging
+import sys
 
 from utils.modelling.main_modeler import *
 
@@ -65,7 +66,6 @@ def main(args):
 
     # train decision tree and figures and save them
     clf = make_model(given_name, datasets, model_name=model_name, model_type=model_type, model_params=model_params, post_params=post_params, logging=logging)
-    # clf = globals()[model_name].make_model(given_name, datasets, model_type=model_type, model_params=model_params, post_params=post_params, logging=logging)
 
     # Create SQL version of model and save it
     globals()[model_name + '_as_code'].save_model_and_extras(clf, given_name, post_params['sql_split'], logging)
@@ -73,19 +73,27 @@ def main(args):
 # Run function
 if __name__ == '__main__':
 
-    # settings
-    pd.set_option('display.max_rows', 500)
-    pd.set_option('display.max_columns', 10)
+    set_env = 'prod' # either prod or dev
+
+    # Check if this script is run from terminal
+    if set_env == 'prod':
+        print('from terminal')
+        # (Prod) script is being run through the terminal
+        argvals = None
+    else:
+        # (Dev) script is not being run through the terminal
+        # Command line arguments used for testing
+        argvals = '--name trained_models/test ' \
+                  '--data_path input/data/faults.csv ' \
+                  '--configuration input/configuration/example_multiclass.json ' \
+                  '--model ebm'.split() # example of passing test params to parser
+
+        # settings
+        pd.set_option('display.max_rows', 500)
+        pd.set_option('display.max_columns', 10)
+
+    # Set random seed
     random_seed = 42
-
-    # Command line arguments used for testing
-    argvals = '--name trained_models/20221210_titaninc_comeon ' \
-              '--data_path input/data/example_titanic.csv ' \
-              '--configuration input/configuration/example_titanic.json ' \
-              '--model ebm'.split() # example of passing test params to parser
-
-    # For production (only comment for testing)
-    argvals = None
 
     # Get arguments from the CLI
     args = GetArgs(argvals)
