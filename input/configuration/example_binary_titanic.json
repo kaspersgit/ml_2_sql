@@ -8,9 +8,6 @@
     "Fare"
   ],
   "model_params": {
-    "interactions": 4,
-    "max_bins": 50,
-    "max_interaction_bins": 6
   },
   "post_params": {
     "calibration": "false",
