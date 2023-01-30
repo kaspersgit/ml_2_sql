@@ -134,14 +134,10 @@ Name of target column (required)
 - Replace/improve `classification_report` and `confusion_matrix` due to dependance on threshold
 - Add MCC, cohen kappa and other metrics plotted with threshold
 - Add SQL translation for decision rule
-- Add random seed to config file
+- Add random seed to config 
+  file
 - Make a proper testing procedure
-
-</br>
-
-# Troubleshooting 
-Problems with `interpret` package on a M1 mac run:
-```
-pip uninstall interpret
-ARCHFLAGS="-arch arm64" pip install interpret --compile --no-cache-dir
-```
+- Makefile to setup virt env and install packages (instead of running 3 setup lines)
+- Improve ReadMe
+- Add more example files (binary/regression/multiclass)
+- Add passthrough columns

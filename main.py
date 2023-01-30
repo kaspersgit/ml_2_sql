@@ -84,8 +84,8 @@ if __name__ == '__main__':
         # (Dev) script is not being run through the terminal
         # Command line arguments used for testing
         argvals = '--name trained_models/test ' \
-                  '--data_path input/data/faults.csv ' \
-                  '--configuration input/configuration/example_multiclass.json ' \
+                  '--data_path input/data/example_multiclass_faults.csv ' \
+                  '--configuration input/configuration/example_multiclass_faults.json ' \
                   '--model ebm'.split() # example of passing test params to parser
 
         # settings
