@@ -38,7 +38,7 @@ jupyter-core==4.10.0
 kaleido==0.2.1
 kiwisolver==1.4.2
 lime==0.2.0.1
-llvmlite==0.38.0
+llvmlite
 MarkupSafe==2.1.1
 matplotlib==3.5.1
 matplotlib-inline==0.1.3
