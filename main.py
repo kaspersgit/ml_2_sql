@@ -1,98 +1,102 @@
 # Load packages
-import sys
-import pandas as pd
-import json
 import logging
-import random
-from utils.modelling import decision_tree
-from utils.modelling import ebm
-from utils.modelling import decision_rule
-from utils.config_handling import *
-from utils.pre_process import *
+import sys
+
+from utils.modelling.main_modeler import *
+
+# The translations to SQL (grey as we refer to them dynamically)
 from utils.output_scripts import decision_tree_as_code
+from utils.output_scripts import decision_rule_as_code
 from utils.output_scripts import ebm_as_code
 
-# parse command line arguments
-import argparse
-parser = argparse.ArgumentParser()
-parser.add_argument("--name", type=str, help="Enter project name",
-                    nargs='?', default='no_name', const='no_name')
-parser.add_argument("--data_path", type=str, help="Enter path to csv file",
-                    nargs='?', default='no_data', const='no_data')
-parser.add_argument("--configuration", type=str, help="Enter path to json file",
-                    nargs='?')
-parser.add_argument("--model_name", type=str, help="Enter model type",
-                    nargs='?', default='decision_tree', const='full')
+from utils.helper_functions.config_handling import *
+from utils.helper_functions.parsing_arguments import *
+from utils.pre_process import *
 
-args = parser.parse_args()
+def main(args):
+    # get given name from the first given argument
+    given_name = args.name
 
-# settings
-pd.set_option('display.max_rows', 500)
-pd.set_option('display.max_columns', 10)
-random_seed = 42
+    # set logger
+    logging.basicConfig(format='%(asctime)s %(message)s', filename=given_name+'/logging.log', level=logging.DEBUG)
+    logging.getLogger('matplotlib.font_manager').disabled = True # ignore matplotlibs font warnings
 
-# get given name from the first given argument
-given_name = args.name
+    # path to data
+    data_ = pd.read_csv(args.data_path)
 
-# set logger
-logging.basicConfig(format='%(asctime)s %(message)s', filename=given_name+'/logging.log', level=logging.DEBUG)
-logging.getLogger('matplotlib.font_manager').disabled = True # ignore matplotlibs font warnings
+    # get target and features columns
+    with open(args.configuration) as json_file:
+        configuration = json.load(json_file)
 
-# path to data
-data_ = pd.read_csv(args.data_path)
+    # get model name
+    model_name = args.model_name
 
-# get target and features columns
-with open(args.configuration) as json_file:
-    configuration = json.load(json_file)
+    # Handle the configuration file
+    target_col, feature_cols, model_params, pre_params, post_params = config_handling(configuration, logging)
 
-# get model name
-model_name = args.model_name
+    # pre processing
+    # make copy (doesn't change anything but for future use)
+    data = data_.copy()
 
-#############################################
-# for debugging
-# given_name='trained_models/kasper'
-# logging.basicConfig(format='%(asctime)s %(message)s', filename=given_name+'/logging.log', encoding='utf-8', level=logging.DEBUG)
-# data_ = pd.read_csv('input/data/example_titanic.csv')
-# with open('input/configuration/example_titanic.json') as json_file:
-#     configuration = json.load(json_file)
-# model_name = 'ebm'
-#############################################
+    # Log parameters
+    logging.info(f'Configuration file content: \n{configuration}')
 
-# Handle the configuration file
-target_col, feature_cols, model_params, pre_params, post_params = config_handling(configuration, logging)
+    # set model type based on target value
+    if data[target_col].nunique() == 1:
+        raise Exception("Target column needs more than 1 unique value")
+    elif (data[target_col].dtype == 'float') | ((data[target_col].dtype == 'int') & (data[target_col].nunique() > 10)):
+        model_type = 'regression'
+    else:
+        model_type = 'classification'
 
-# pre processing
-# make copy (doesn't change anything but for future use)
-data = data_.copy()
+        print(f'\nTarget column has {data[target_col].nunique()} unique values')
+        logging.info(f'\nTarget column has {data[target_col].nunique()} unique values')
 
-# Log parameters
-logging.info(f'Configuration file content: \n{configuration}')
+    print('\nThis problem will be treated as a {model_type} problem'.format(model_type=model_type))
+    logging.info('This problem will be treated as a {model_type} problem'.format(model_type=model_type))
 
-# set model type based on target value
-if data[target_col].nunique() == 1:
-    raise Exception("Target column needs more than 1 unique value")
-elif (data[target_col].dtype == 'float') | ((data[target_col].dtype == 'int') & (data[target_col].nunique() > 10)):
-    model_type = 'regression'
-else:
-    model_type = 'classification'
+    # pre process data
+    datasets = pre_process_kfold(given_name, data, target_col, feature_cols
+                                                 , model_name=model_name
+                                                 , model_type=model_type
+                                                 , logging=logging
+                                                 , pre_params=pre_params
+                                                 , post_params=post_params
+                                                 , random_seed=random_seed)
 
-    print(f'\nTarget column has {data[target_col].nunique()} unique values')
-    logging.info(f'\nTarget column has {data[target_col].nunique()} unique values')
+    # train decision tree and figures and save them
+    clf = make_model(given_name, datasets, model_name=model_name, model_type=model_type, model_params=model_params, post_params=post_params, logging=logging)
 
-print('\nThis problem will be treated as a {model_type} problem'.format(model_type=model_type))
-logging.info('This problem will be treated as a {model_type} problem'.format(model_type=model_type))
+    # Create SQL version of model and save it
+    globals()[model_name + '_as_code'].save_model_and_extras(clf, given_name, post_params['sql_split'], logging)
 
-# pre process data
-datasets = pre_process_kfold(given_name, data, target_col, feature_cols
-                                             , model_name=model_name
-                                             , model_type=model_type
-                                             , logging=logging
-                                             , pre_params=pre_params
-                                             , post_params=post_params
-                                             , random_seed=random_seed)
+# Run function
+if __name__ == '__main__':
 
-# train decision tree and figures and save them
-clf = globals()[model_name].make_model(given_name, datasets, model_type=model_type, model_params=model_params, post_params=post_params, logging=logging)
+    set_env = 'prod' # either prod or dev
 
-# Create SQL version of model and save it
-globals()[model_name + '_as_code'].save_model_and_extras(clf, given_name, post_params['sql_split'], logging)
+    # Check if this script is run from terminal
+    if set_env == 'prod':
+        print('from terminal')
+        # (Prod) script is being run through the terminal
+        argvals = None
+    else:
+        # (Dev) script is not being run through the terminal
+        # Command line arguments used for testing
+        argvals = '--name trained_models/test ' \
+                  '--data_path input/data/example_multiclass_faults.csv ' \
+                  '--configuration input/configuration/example_multiclass_faults.json ' \
+                  '--model ebm'.split() # example of passing test params to parser
+
+        # settings
+        pd.set_option('display.max_rows', 500)
+        pd.set_option('display.max_columns', 10)
+
+    # Set random seed
+    random_seed = 42
+
+    # Get arguments from the CLI
+    args = GetArgs(argvals)
+
+    # Run main with given arguments
+    main(args)

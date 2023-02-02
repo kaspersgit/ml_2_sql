@@ -176,7 +176,7 @@ def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
         for fold_id in range(len(y_prob)):
             # summaries actuals and predicted probs to (bins) number of points
             fraction_of_positives, mean_predicted_value = \
-                calibration_curve(y_true[fold_id], y_prob[fold_id], n_bins=10)
+                calibration_curve(y_true[fold_id], y_prob[fold_id], n_bins=10, strategy='quantile')
 
             # Calculate area under curve (AUC)
             bsl_list.append(brier_score_loss(y_true[fold_id], y_prob[fold_id]))
@@ -184,7 +184,7 @@ def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
     else:
         # summaries actuals and predicted probs to (bins) number of points
         fraction_of_positives, mean_predicted_value = \
-            calibration_curve(y_true, y_prob, n_bins=10)
+            calibration_curve(y_true, y_prob, n_bins=10, strategy='quantile')
 
         # Calculate area under curve (AUC)
         bsl_list.append(brier_score_loss(y_true, y_prob))
@@ -202,7 +202,7 @@ def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
     logging.info(f'Created and saved calibration plot')
 
 # for multiclass classification WIP
-def multiClassPlotCalibrationCurvePlotly(actuals, probs, title, bins=10):
+def multiClassPlotCalibrationCurvePlotly(given_name, actuals, probs, title, bins=10):
     """
     Plot the calibration curve for a set of true and predicted values
 
@@ -222,7 +222,7 @@ def multiClassPlotCalibrationCurvePlotly(actuals, probs, title, bins=10):
 
         # summarise actuals and predicted probs to (bins) number of points
         fraction_of_positives, mean_predicted_value = \
-            calibration_curve(y_true, y_prob, n_bins=bins)
+            calibration_curve(y_true, y_prob, n_bins=bins, strategy='quantile')
 
         calibration_df = calibration_df.append(pd.DataFrame({'classification':cl, 'fraction_of_positives':fraction_of_positives, 'mean_predicted_value':mean_predicted_value}), ignore_index=True)
 
@@ -248,7 +248,7 @@ def multiClassPlotCalibrationCurvePlotly(actuals, probs, title, bins=10):
                   )
     )
 
-    fig.show()
+    fig.show(renderer='browser')
 
 def plotProbabilityDistribution(given_name, y_true, y_prob, data_type, logging):
     import plotly.figure_factory as ff

@@ -1,8 +1,12 @@
 # files and data
 input/data/*.csv
-!input/data/example_titanic.csv
+!input/data/example_binary_titanic.csv
+!input/data/example_multiclass_faults.csv
+
 input/configuration/*.json
-!input/configuration/example_titanic.json
+!input/configuration/example_binary_titanic.json
+!input/configuration/example_multiclass_faults.json
+
 trained_models/*
 !trained_models/example_titanic/
 
@@ -14,7 +18,7 @@ trained_models/*
 .vagrant/
 
 # Mac/OSX
-.DS_Store
+*.DS_Store
 
 # Windows
 Thumbs.db
