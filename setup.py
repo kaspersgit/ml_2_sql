@@ -20,7 +20,7 @@ if sys.platform.startswith("win"):
 else:
     activate_script = os.path.join(VENV_NAME, "bin", "activate")
     print(f"Activating virtual environment using '{activate_script}'...")
-    subprocess.run(f"source {activate_script}")
+    subprocess.run(f"source {activate_script}", shell=True)
 
 
 # Install packages in virtual environment
