@@ -11,7 +11,8 @@
   },
   "post_params": {
     "calibration": "false",
-    "sql_split": "true"
+    "sql_split": "true",
+    "file_type": "html"
   },
   "pre_params": {
     "cv_type": "notimeseriesplit",

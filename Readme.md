@@ -33,26 +33,36 @@ This project tries to make the process simple enough for any SQL user to train a
 
 # Getting started
 ## Pre requisites
-1. Create virtual environment and install packages, on mac run:
-   ```
-   python3 -m venv .ml2sql
-   source .ml2sql/bin/activate
-   pip install -r requirements.txt
-   ```
+1. Create virtual environment and install packages, run:
+   
+    Windows:
+   `python3 setup.py`
+   
+    Mac/Linux:` 
+   python setup.py`
 2. Wait until all packages are installed (could take a few minutes)
+3. Activate the created virtual environment by running:
+   
+    Windows:
+   `.ml2sql/Scripts/activate`
+   
+    Mac/Linux:
+   `source .ml2sql/bin/activate`
 
 ## Try it out demo
-1. In the terminal in the root of this folder run: `bash run.sh`
-2. Follow the instructions on screen by selecting the demo data and config file
-3. Check the output in the newly created folder
+1. Make sure virtual environment is active (step 3 of Pre requisites)
+2. In the terminal in the root of this folder run: `bash run.sh`
+3. Follow the instructions on screen by selecting the demo data and config file
+4. Check the output in the newly created folder
 
 ## Try it out using own data
-1. Save csv file containing target and all features in the `input/data/` folder (more on input data at [input data](#data))
-2. Save a settings json file in the `input/configuration/` (explained below at [configuration json](#configuration-json))
-3. In the terminal run: `bash run.sh`
-4. Follow the instruction on screen
-5. The output will be saved in the folder `trained_models/<current_date>_<your_model_name>/`
-6. The `.sql` file will contain a SQL Case When statement imitating the decision tree/EBM  
+1. Make sure virtual environment is active (step 3 of Pre requisites)
+2. Save csv file containing target and all features in the `input/data/` folder (more on input data at [input data](#data))
+3. Save a settings json file in the `input/configuration/` (explained below at [configuration json](#configuration-json))
+4. In the terminal run: `bash run.sh`
+5. Follow the instruction on screen
+6. The output will be saved in the folder `trained_models/<current_date>_<your_model_name>/`
+7. The `.sql` file will contain a SQL Case When statement imitating the decision tree/EBM  
 
 </br>
 
