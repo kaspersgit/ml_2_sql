@@ -17,7 +17,7 @@
 ## Background
 Due to SQL being the main language being used for data manipulation and thus has extensive support in terms of compute and scheduling,
 why not perform inference with a machine learning model written in SQL code? The big limitation here is SQL itself, that's why we attempt to use
-machine learning models which have a simple structure it is writable in SQL. One additional benefit of this is that the model is interpretable,
+machine learning models which have a (relative) simple structure so that it is writable in SQL. One additional benefit of this is that the model is interpretable,
 if you can write down the model in a basic logical language (SQL) you should be able to understand it (with limitation ofcourse).
 
 This project tries to make the process simple enough for any SQL user to train a model, check the performance and deploy that model in SQL.
