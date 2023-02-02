@@ -36,23 +36,31 @@ This project tries to make the process simple enough for any SQL user to train a
 1. Create virtual environment and install packages, run:
    
     Windows:
-   `python3 setup.py`
-   
-    Mac/Linux:` 
-   python setup.py`
-2. Wait until all packages are installed (could take a few minutes)
-3. Activate the created virtual environment by running:
-   
-    Windows:
-   `.ml2sql/Scripts/activate`
+   ```
+   python -m venv .ml2sql
+   .ml2sql/Scripts/activate
+   pip install -r requirements.txt
+   ```
    
     Mac/Linux:
-   `source .ml2sql/bin/activate`
+   ```
+   python3 -m venv .ml2sql
+   source .ml2sql/bin/activate
+   pip install -r requirements.txt
+   ```
+2. Wait until all packages are installed (could take a few minutes)
+3. Activate or deactivate the created virtual environment by running:
+   
+    Windows:
+   `.ml2sql/Scripts/activate` or `deactivate`
+   
+    Mac/Linux:
+   `source .ml2sql/bin/activate` or `deactivate`
 
 ## Try it out demo
 1. Make sure virtual environment is active (step 3 of Pre requisites)
-2. In the terminal in the root of this folder run: `bash run.sh`
-3. Follow the instructions on screen by selecting the demo data and config file
+2. In the terminal in the root of this folder run: `python run.py`
+3. Follow the instructions on screen by selecting the demo data and (similarly named) config file
 4. Check the output in the newly created folder
 
 ## Try it out using own data
