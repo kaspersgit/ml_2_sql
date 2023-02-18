@@ -8,6 +8,7 @@ from utils.modelling.calibration import *
 from utils.modelling.models import ebm
 from utils.modelling.models import decision_rule
 from utils.modelling.models import decision_tree
+from utils.modelling.models import l_regression
 
 def make_model(given_name, datasets, model_name, model_type, model_params, post_params, logging):
     # unpack datasets
@@ -82,7 +83,7 @@ def make_model(given_name, datasets, model_name, model_type, model_params, post_
     clf = globals()[model_name].trainModel(X_all, y_all, model_params, model_type, logging)
 
     # Save model in pickled format
-    filename = given_name + '/model/ebm_{model_type}.sav'.format(model_type=model_type)
+    filename = f'{given_name}/model/{model_name}_{model_type}.sav'
     pickle.dump(clf, open(filename, 'wb'))
 
     # train set prediction of final model

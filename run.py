@@ -60,7 +60,7 @@ while json_path is None:
 print(f"Configuration file {json_path} will be used for modelling")
 
 # Ask for MODEL_TYPE
-model_types = ["Explainable Boosting Machine", "Decision Tree", "Decision Rule"]
+model_types = ["Explainable Boosting Machine", "Decision Tree", "Decision Rule", "Logistic/Linear regression"]
 model_type = None
 while model_type is None:
     print("\nWhat type of model do you want?")
@@ -77,8 +77,8 @@ while model_type is None:
 
 print(f"Algorithm chosen for modelling: {model_type}")
 model_type = 'ebm' if model_type == 'Explainable Boosting Machine' else model_type
+model_type = 'l_regression' if model_type == 'Logistic/Linear regression' else model_type
 model_type = model_type.lower().replace(" ", "_")
-print(model_type)
 
 # Model name
 model_name = input("\nGive it a name: ")
