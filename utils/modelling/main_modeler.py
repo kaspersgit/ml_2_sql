@@ -1,5 +1,7 @@
 import pickle
 import random
+import numpy as np 
+
 from sklearn.model_selection import train_test_split
 from utils.modelling.performance import *
 from utils.modelling.calibration import *

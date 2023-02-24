@@ -1,17 +1,19 @@
 # Load packages
 import logging
-import sys
+import pandas as pd
+import json
 
-from utils.modelling.main_modeler import *
+# Main modelling function
+from utils.modelling.main_modeler import make_model
 
 # The translations to SQL (grey as we refer to them dynamically)
 from utils.output_scripts import decision_tree_as_code
 from utils.output_scripts import decision_rule_as_code
 from utils.output_scripts import ebm_as_code
 
-from utils.helper_functions.config_handling import *
-from utils.helper_functions.parsing_arguments import *
-from utils.pre_process import *
+from utils.helper_functions.config_handling import config_handling
+from utils.helper_functions.parsing_arguments import GetArgs
+from utils.pre_process import pre_process_kfold
 
 def main(args):
     # get given name from the first given argument

@@ -14,6 +14,9 @@ trained_models/*
 .vscode/
 .idea/
 
+# Ruff
+.ruff*
+
 # Vagrant
 .vagrant/
 

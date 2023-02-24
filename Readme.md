@@ -14,13 +14,24 @@
 
 
 # What is it?
-## Background
-Due to SQL being the main language being used for data manipulation and thus has extensive support in terms of compute and scheduling,
-why not perform inference with a machine learning model written in SQL code? The big limitation here is SQL itself, that's why we attempt to use
-machine learning models which have a (relative) simple structure so that it is writable in SQL. One additional benefit of this is that the model is interpretable,
-if you can write down the model in a basic logical language (SQL) you should be able to understand it (with limitation ofcourse).
-
 This project tries to make the process simple enough for any SQL user to train a model, check the performance and deploy that model in SQL.
+
+## Background
+An automated machine learning tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from interpretML) to train models which are explainable and transparent in how they come to their prediction. SQL infrastructure is the only requirement to put a model into production.
+This tool can be used by anybody, but is aimed for people who want to easily train a model and want to use it in their (company) SQL system. 
+
+Advantages:
+- Automated model training
+- Easy usage
+- Collection of model performance metrics generated
+- Model saved in SQL file
+- Avoid Python production models 
+- Explainable Boosting Machine on par with other boosted methods
+
+Disadvantages:
+- No neural networks and other complex models
+- Tool runs locally
+- Some values are hardcoded (e.g. kfold: k = 5)
 
 ## Current state
 - Only EBM is implemented (decision tree, logistic regression and rule set not yet)
@@ -147,14 +158,13 @@ Name of target column (required)
 - Removing outliers by using quantiles (e.g. only keeping 1 - 99 % quantiles)
 - Spatial Cross-validation discovery
 - Extend logging granularity (add model parameters)
-- Use menu function bash for model type choosing
 - Add target single unique value check
 - Replace/improve `classification_report` and `confusion_matrix` due to dependance on threshold
 - Add MCC, cohen kappa and other metrics plotted with threshold
 - Add SQL translation for decision rule
 - Add random seed to config file
 - Make a proper testing procedure
+- Improve ReadMe
 - Add more example files (binary/regression/multiclass)
 - Add tool to make configuration json
-- Add type annotations
-- Add docstrings
+- Make distribution plot grouped instead of overlaid or stacked (maybe switch to plotly histogram)

@@ -1,8 +1,42 @@
 import csv
 import json
+import os
+
+def get_input(options, message):
+    print(f"\n{message}")
+    choice = None
+    while choice is None:
+        for i, option in enumerate(options):
+            print(f"{i + 1}. {option}")
+        response = input("Enter the number of your choice: ")
+        try:
+            choice = options[int(response) - 1]
+        except (ValueError, IndexError):
+            print("Invalid option, try again.")
+    return choice
+
+# List files in input/data/ directory
+data_dir = "input/data/"
+files = os.listdir(data_dir)
+
+print("Files in input/data/:")
+for i, file in enumerate(files, 1):
+    print(f"{i}. {file}")
+
+# Ask for CSVPATH
+csv_path = None
+while csv_path is None:
+    csv_file_index = input("\nSelect path to csv file to create config for: ")
+    try:
+        csv_file_index = int(csv_file_index) - 1
+        csv_path = os.path.join(data_dir, files[csv_file_index])
+    except (ValueError, IndexError):
+        print("Invalid option, try again.")
+
+print(f"CSV file {csv_path} will be used to create a config file for")
 
 # Load the example CSV file
-with open("input/data/example_binary_titanic.csv") as f:
+with open(csv_path) as f:
     reader = csv.reader(f)
     headers = next(reader)
 
@@ -60,6 +94,9 @@ while True:
 # Create the features list from the selected features indices
 features = [features_dict[i] for i in selected_features]
 
+# Non used columns
+[features_dict.pop(i) for i in selected_features]
+
 # Fill in the JSON template with the selected features
 input_params = {
   "features": features,
@@ -99,14 +136,45 @@ for key in input_params:
     else:
         if len(input_params[key]) > 1:
             for key2 in input_params[key]:
-                input_value = input(f"Enter the value for {key2}: ")
+                if key2 == 'calibration':
+                    # input_value = get_input(["true","false"], "Calibration (true/false): ")
+                    input_value = "false"
+                elif key2 == 'sql_split':
+                    input_value = get_input(["true","false"], "SQL split (true/false): ")
+                elif key2 == 'file_type':
+                    input_value = get_input(["html","png"], "File type (html/png): ")
+                elif key2 == 'cv_type':
+                    input_value = get_input(["timeseriessplit","kfold"], "CV type (timeseriessplit/kfold): ")
+                elif key2 == 'max_rows':
+                    input_value = int(input("\nMax rows (number): "))
+                elif key2 == 'time_sensitive_column':
+                    if input_params['pre_params']['cv_type'] == 'timeseriessplit':
+                        if len(features_dict) == 0:
+                            print('No columns to select as time sensitive, switching to kfold')
+                            input_params['pre_params']['cv_type'] = 'kfold'
+                        print("\nWhich column would you like to use as the time sensitive column?")
+                        for i, header in features_dict.items():
+                            print(f"{i}. {header}")
+                        date_col_index = int(input("Enter the index of the time sensitive column: "))
+                        input_value = features_dict[date_col_index]
+                    else:
+                        input_value = '_'
+                elif key2 == 'upsampling':
+                    # input_value = get_input(["true","false"], "Upsampling (true/false): ")
+                    input_value = "false"
+                
+                # Fill in value in dict
                 input_params[key][key2] = input_value
 
 # convert the dictionary to a JSON string
 json_string = json.dumps(input_params, indent=4)
 
+# name config file
+config_name = input("\nName config file:")
+config_name = config_name.split(".")[0]
+
 # write the JSON string to a file
-with open("input_params.json", "w") as file:
+with open(f"input/configuration/{config_name}.json", "w") as file:
     file.write(json_string)
 
 # Print the resulting JSON

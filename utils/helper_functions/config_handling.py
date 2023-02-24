@@ -1,5 +1,4 @@
 # Handle the configuration file
-import json
 
 def config_handling(configuration, logging):
     # target column

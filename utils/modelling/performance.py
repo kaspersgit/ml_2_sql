@@ -145,7 +145,7 @@ def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
     :param bins: how many bins to divide data in for plotting
     :param savefig: boolean if plot should be saved
     :param saveFileName: str path to which to save the plot
-    :return: calibration plot
+    :return: 
     """
 
     # Create plot
@@ -200,6 +200,8 @@ def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
 
     print(f'Created and saved calibration plot')
     logging.info(f'Created and saved calibration plot')
+
+    return
 
 # for multiclass classification WIP
 def multiClassPlotCalibrationCurvePlotly(given_name, actuals, probs, title, bins=10):
@@ -277,5 +279,92 @@ def plotProbabilityDistribution(given_name, y_true, y_prob, data_type, logging):
 
     print(f'Created and saved probability distribution plot')
     logging.info(f'Created and saved probability distribution plot')
+
+    return
+
+def plotDistribution(given_name, groups, values, data_type, logging):
+    df = pd.DataFrame({'groups': groups, 'values': values})
+    
+    min_value = min(values)
+    max_value = max(values)
+    bin_size = (max_value - min_value) / 50
+    
+    colors = ['red','green','blue','purple','orange']
+
+    # Catching any kind of exception
+    try:
+        # Create distplot 
+        fig = go.Figure()
+        for g in range(len(set(groups))):
+            X = df[df['groups']==g]['values']
+            fig.add_trace(go.Histogram(
+                x=X,
+                histnorm='probability density',
+                name=str(g), # name used in legend and hover labels
+                xbins=dict( # bins used for histogram
+                    start=min_value,
+                    end=max_value,
+                    size=bin_size
+                ),
+                marker_color=colors[g],
+                opacity=0.75
+            ))
+    except Exception as e:
+        print(f'Could not create distribution plot because of \n{e}')
+        logging.info(f'Could not create distribution plot because of \n{e}')
+        return
+
+    fig.update_layout(
+        xaxis_title='Predicted probability',
+        yaxis_title='Probability density',
+        title=f'Distribution plot - {data_type} data',
+        width=1000,
+        height=800,
+        bargap=0.2, # gap between bars of adjacent location coordinates
+        bargroupgap=0.1 # gap between bars of the same location coordinates
+    )
+
+    fig.write_image(f'{given_name}/performance/{data_type}_distribution_plot.png')
+
+    print(f'Created and saved probability distribution plot')
+    logging.info(f'Created and saved probability distribution plot')
+
+    return
+
+# To be used for feature exploration (TODO add more colors)
+def plotDistributionViolin(given_name, groups, values, data_type, logging):
+    df = pd.DataFrame({'groups': groups, 'values': values})
+    
+    colors = ['red','green','blue','purple','orange']
+
+    # Catching any kind of exception
+    try:
+        # Create Violin plot 
+        fig = go.Figure()
+        for g in range(len(set(groups))):
+            X = df[df['groups']==g]['values']
+            fig.add_trace(go.Violin(
+                x=X,
+                name=str(g), # name used in legend and hover labels
+                marker_color=colors[g],
+                opacity=0.75
+            ))
+    except Exception as e:
+        print(f'Could not create distribution plot because of \n{e}')
+        logging.info(f'Could not create distribution plot because of \n{e}')
+        return
+
+    fig.update_layout(
+        xaxis_title='Value',
+        yaxis_title='Group',
+        title=f'Distribution plot - {data_type} data',
+        width=1000,
+        height=800
+    )
+
+    fig.write_image(f'{given_name}/feature_info/{feature_name}_class_distributions.png')
+
+    print(f'Created and saved feature distribution plot')
+    logging.info(f'Created and saved feature distribution plot')
 
     return
