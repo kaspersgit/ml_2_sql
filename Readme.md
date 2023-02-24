@@ -154,7 +154,7 @@ Name of target column (required)
 - Add SQL translation for decision rule
 - Add random seed to config file
 - Make a proper testing procedure
-- Makefile (or bash script) to setup virt env and install packages (instead of running 3 setup lines)
-- Improve ReadMe
 - Add more example files (binary/regression/multiclass)
 - Add tool to make configuration json
+- Add type annotations
+- Add docstrings
