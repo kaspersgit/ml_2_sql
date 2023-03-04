@@ -1,6 +1,33 @@
 # Handle the configuration file
 
 def config_handling(configuration, logging):
+    """
+    Handles the configuration file and extracts necessary information.
+
+    Parameters:
+    -----------
+    configuration : dict
+        A dictionary containing configuration information such as target column, features columns, 
+        model related parameters, pre processing related parameters, and post modeling related parameters.
+
+    logging : logger object
+        A logger object to log the progress and debugging information.
+
+    Returns:
+    --------
+    tuple
+        A tuple containing the following:
+        - target_col : str
+            The name of the target column.
+        - feature_cols : list
+            A list containing the names of the feature columns.
+        - model_params : dict
+            A dictionary containing model related parameters.
+        - pre_params : dict
+            A dictionary containing pre processing related parameters.
+        - post_params : dict
+            A dictionary containing post modeling related parameters.
+    """
     # target column
     target_col = configuration['target']
 

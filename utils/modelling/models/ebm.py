@@ -6,6 +6,46 @@ from utils.modelling.performance import *
 from utils.modelling.calibration import *
 
 def trainModel(X_train, y_train, params, model_type, logging):
+    """
+    Trains an Explainable Boosting Machine (EBM) model on the given training data.
+
+    Parameters
+    ----------
+    X_train : pandas.DataFrame
+        Training data features.
+    y_train : pandas.Series
+        Training data target.
+    params : dict
+        Parameters for the EBM model.
+    model_type : str
+        Type of model to train, either 'regression' or 'classification'.
+    logging : logging.Logger
+        Logger instance for logging information.
+
+    Returns
+    -------
+    clf : EBM model
+        Trained EBM model.
+
+    Raises
+    ------
+    None
+
+    Notes
+    -----
+    This function trains an Explainable Boosting Machine (EBM) model on the given training data
+    using the provided parameters and model type. The trained model is returned and can be used
+    for prediction and feature importance analysis.
+
+    If 'feature_names' is not included in the provided params dictionary, the function will use
+    the column names of the X_train DataFrame as feature names.
+
+    If the model_type parameter is not 'regression' or 'classification', an error message is printed
+    and a warning is logged.
+
+    The function logs the model parameters and a message indicating that the EBM model has been
+    trained successfully.
+    """
     if 'feature_names' not in params.keys():
         params['feature_names'] = X_train.columns
     if model_type == 'regression':
@@ -26,7 +66,42 @@ def trainModel(X_train, y_train, params, model_type, logging):
 
 
 def featureExplanationSave(clf, given_name, file_type, logging):
+    """
+    Saves feature-specific and overall feature importance graphs for a given Explainable Boosting Machine (EBM) model.
 
+    Parameters
+    ----------
+    clf : EBM model
+        Trained EBM model for which to generate feature importance graphs.
+    given_name : str
+        Name for the output files.
+    file_type : str
+        Type of file to save the output graphs, either 'png' or 'html'.
+    logging : logging.Logger
+        Logger instance for logging information.
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    None
+
+    Notes
+    -----
+    This function generates and saves feature-specific and overall feature importance graphs for a given
+    Explainable Boosting Machine (EBM) model. The overall feature importance graph is saved as a png or
+    html file, depending on the file_type parameter. The file is saved in a directory with the given_name
+    parameter as its name.
+
+    The function also generates and saves feature-specific explanation graphs for each feature group in the
+    EBM model. The file is saved in a directory with the given_name parameter as its name. Feature names
+    are reformatted by replacing certain characters with underscores.
+
+    The function logs a message indicating how many features have been saved.
+    """
+    
     clf_global = clf.explain_global()
 
     # Save overall feature importance graph

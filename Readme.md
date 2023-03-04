@@ -29,7 +29,7 @@ Advantages:
 - Explainable Boosting Machine on par with other boosted methods
 
 Disadvantages:
-- No neural networks and other complex models
+- No neural networks and other complex models (boosted trees)
 - Tool runs locally
 - Some values are hardcoded (e.g. kfold: k = 5)
 

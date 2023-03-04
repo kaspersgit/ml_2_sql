@@ -154,54 +154,80 @@ def extractLookupTable(ebm):
 
     return {'intercept': ebm.intercept_, 'feature_single': lookup_df_grouped, 'feature_double': df_of_lists_double}
 
-def lookup_df_to_sql(df_dict, split=True):
+def lookup_df_to_sql(model_name, df_dict, split=True):
     # Create list for all feature score names
     feature_list = []
 
-    # start with intercept term
+    # Start with intercept term
+    intercept = df_dict['intercept'][0]
     if not split:
-        print('{intercept} -- intercept'.format(intercept=df_dict['intercept'][0]))
+        print(f'"{model_name}" AS model_name \n, ')
+        print(f'{intercept} AS intercept')
     elif split:
-        print('{intercept} AS intercept'.format(intercept=df_dict['intercept'][0]))
+        # Creating CTE to create table aliases
+        print('WITH feature_scores AS (\nSELECT')
+        print(f'"{model_name}" AS model_name \n, ')
+        print(f'{intercept} AS intercept')
 
     feature_list.append('intercept')
 
     # for single feature
-    single_features = single_features_2_sql(df_dict['feature_single'], split)
+    single_features = single_features_2_sql(df_dict['feature_single'])
     feature_list = feature_list + single_features
 
     if len(df_dict['feature_double']) > 0:
-        double_features = double_features_2_sql(df_dict['feature_double'], split)
+        double_features = double_features_2_sql(df_dict['feature_double'])
         feature_list = feature_list + double_features
 
     if not split:
-        print('AS score')
-    elif split:
-        # sum up all separate scores
+        # Sum up all separate scores
         print(', ', end='')
         print(*feature_list, sep=' + ')
         print(' AS score')
+        
+        # Applying softmax
+        print(', EXP(score)/(EXP(score) + 1) AS probability')
 
-    # Applying softmax
-    print(', EXP(score)/(EXP(score) + 1) AS probability')
+    elif split:
+        # Add placeholder for source table
+        print('FROM <source_table> -- TODO replace with correct table')
 
-def single_features_2_sql(df, split=True):
+        # Close CTE and create next SELECT statement
+        print('), add_sum_scores AS (')
+        print('SELECT *')
+
+        # Sum up all separate scores
+        print(', ', end='')
+        print(*feature_list, sep=' + ')
+        print(' AS score')
+        print('FROM feature_scores')
+
+        # Close CTE and make final Select statement
+        print(')')
+        print('SELECT *')
+        # Applying softmax
+        print(', EXP(score)/(EXP(score) + 1) AS probability')
+        print('FROM add_sum_scores')
+
+
+
+    
+
+def single_features_2_sql(df):
     feature_nr = 0
     feature_list = []
     for f in df['feature'].unique():
         feature_df = df[df['feature'] == f].reset_index(drop=True)
 
-        if not split:
-            print('+\nCASE')
-        elif split:
-            print(',\nCASE')
+        # Each feature score as seperate column
+        print(',\nCASE')
 
         single_feature_2_sql(feature_df, f)
         feature_nr += 1
         feature_list.append(f'{f}_score')
 
-        if split:
-            print(f'AS {f}_score')
+        # feature score alias
+        print(f'AS {f}_score')
 
     return feature_list
 
@@ -249,24 +275,23 @@ def single_feature_2_sql(df, feature):
 
     print('END')
 
-def double_features_2_sql(df, split=True):
+def double_features_2_sql(df):
 
     feature_list = []
 
     for df_index, df_row in df.iterrows():
 
         feature_name = '_x_'.join(df_row['feature'])
-        if not split:
-            print('+\nCASE')
-        elif split:
-            print(',\nCASE')
+        
+        # Each feature score in seperate column
+        print(',\nCASE')
 
         double_feature_2_sql(df_index, df_row)
 
         feature_list.append(f'{feature_name}_score')
 
-        if split:
-            print(f'AS {feature_name}_score')
+        # Feature score as alias
+        print(f'AS {feature_name}_score')
 
     return feature_list
 
@@ -360,75 +385,9 @@ def double_feature_2_sql(df_index, df_row):
     print('END')
 
 
-def lookup_df_to_sql_multiclass(df, classes):
-    class_nr = 0
-    for c in classes:
-        feature_nr = 0
-        for f in df['feature'].unique():
-            feature_df = df[df['feature'] == f].reset_index(drop=True)
-
-            if (feature_nr == 0) & (class_nr == 0):
-                print('CASE')
-            elif (feature_nr == 0) & (class_nr > 0):
-                print(', CASE')
-            else:
-                print('+\nCASE')
-
-            for index, row in feature_df.iterrows():
-                # check for last numeric bound
-                if row['feat_bound'] == np.PINF:
-                    print(' WHEN {feature} >= {lb} THEN {score}'.format(feature=f,
-                                                                            lb=feature_df.iloc[index - 1, :]['feat_bound'],
-                                                                            score=row['score'][class_nr]))
-                # check if string/category
-                elif isinstance(row['feat_bound'], str):
-                    print(" WHEN {feature} = '{lb}' THEN {score}".format(feature=f, lb=row['feat_bound'],
-                                                                             score=row['score'][class_nr]))
-                # check if boolean casted to int
-                elif row['feat_bound'] == int(row['feat_bound']):
-                    print(' WHEN {feature}::INT = {lb} THEN {score}'.format(feature=f, lb=row['feat_bound'],
-                                                                                score=row['score'][class_nr]))
-                # otherwise it should be a float
-                elif isinstance(row['feat_bound'], float):
-                    if index == 0:
-                        # still use either first or second bound (based on if they are for made for null handling or not
-                        if row['feat_bound'] > 0:
-                            print(' WHEN {feature} <= {ub} THEN {score}'.format(feature=f,
-                                                                                         ub=row['feat_bound'],
-                                                                                         score=row['score'][class_nr]))
-                    else:
-                        # still use either first or second bound (based on if they are for made for null handling or not
-                        if (index == 1) & (row['feat_bound'] > 0) & (feature_df.iloc[index-1, :]['feat_bound'] < 0):
-                            print(' WHEN {feature} <= {ub} THEN {score}'.format(feature=f,
-                                                                                         ub=row['feat_bound'],
-                                                                                         score=row['score'][class_nr]))
-
-                        print(' WHEN {feature} > {lb} AND {feature} <= {ub} THEN {score}'.format(feature=f,
-                                                                                                     lb=feature_df.iloc[index-1, :]['feat_bound'],
-                                                                                                     ub=row['feat_bound'],
-                                                                                                     score=row['score'][class_nr]))
-                else:
-                    raise "not sure what to do"
-
-            print('END')
-
-            feature_nr += 1
-
-        print('AS score_{classification}'.format(classification=c))
-
-        class_nr += 1
-
-    for c in classes:
-        if c == classes[0]:
-            print(', EXP(score_{classification})'.format(classification=c), end='')
-        else:
-            print(' + EXP(score_{classification})'.format(classification=c), end='')
-    print(' AS total_score')
-
-    for c in classes:
-        print(', EXP(score_{classification}) / (total_score) AS probability_{classification}'.format(classification=c), end='\n')
-
-def lookup_df_to_sql_multiclass_new(df, classes, split=True):
+def lookup_df_to_sql_multiclass(model_name, df, classes, split=True):
+    
+    print(f'"{model_name}" AS model_name \n, ')
     class_nr = 0
     for c in classes:
         feature_nr = 0
@@ -440,38 +399,73 @@ def lookup_df_to_sql_multiclass_new(df, classes, split=True):
                 print('CASE')
             elif (feature_nr == 0) & (class_nr > 0):
                 print(', CASE')
-            elif not split:
-                print('+\nCASE')
-            elif split:
+            else:
                 print(',\nCASE')
 
             single_feature_2_sql_multiclass(feature_df, f, class_nr)
 
-            if split:
-                print(f'AS {f}_score_{c}')
-                feature_list.append(f'{f}_score_{c}')
+            # Feature score as alias
+            print(f'AS {f}_score_{c}')
+            feature_list.append(f'{f}_score_{c}')
 
             feature_nr += 1
 
         if not split:
-            print(f'AS score_{c}')
-        elif split:
-            # sum up all separate scores
+            # Sum up all separate scores
             print(', ', end='')
             print(*feature_list, sep=' + ')
             print(f' AS score_{c}')
 
+        elif split:
+            # Add placeholder for source table
+            print('FROM <source_table> -- TODO replace with correct table')
+
+            # Close CTE and create next SELECT statement
+            print('), add_sum_scores AS (')
+            print('SELECT *')
+
+            # Sum up all separate scores
+            print(', ', end='')
+            print(*feature_list, sep=' + ')
+            print(f' AS score_{c}')
+            print('FROM feature_scores')
+
         class_nr += 1
 
-    for c in classes:
-        if c == classes[0]:
-            print(f', EXP(score_{c})', end='')
-        else:
-            print(f' + EXP(score_{c})', end='')
-    print(' AS total_score')
+        # Summing feature scores to total score per class
+        if not split:
+            for c in classes:
+                if c == classes[0]:
+                    print(f', EXP(score_{c})', end='')
+                else:
+                    print(f' + EXP(score_{c})', end='')
+            print(' AS total_score')
 
-    for c in classes:
-        print(f', EXP(score_{c}) / (total_score) AS probability_{c}', end='\n')
+        elif split:
+            # Close CTE and make final Select statement
+            print(')')
+            print('SELECT *')
+
+            for c in classes:
+                if c == classes[0]:
+                    print(f', EXP(score_{c})', end='')
+                else:
+                    print(f' + EXP(score_{c})', end='')
+            
+            # Close CTE and create next SELECT statement
+            print('FROM add_sum_scores')
+            print('), add_sum_all_scores AS (')
+            print('SELECT *')
+
+        
+        # Applying softmax
+        if not split:
+            for c in classes:
+                print(f', EXP(score_{c}) / (total_score) AS probability_{c}', end='\n')
+        elif split: 
+            for c in classes:
+                print(f', EXP(score_{c}) / (total_score) AS probability_{c}', end='\n')
+                print('FROM add_sum_all_scores')
 
 def single_feature_2_sql_multiclass(df, feature, class_nr):
     for index, row in df.iterrows():
@@ -517,11 +511,11 @@ def single_feature_2_sql_multiclass(df, feature, class_nr):
 
     print('END')
 
-def ebm_to_sql(df, classes, split=True):
+def ebm_to_sql(model_name, df, classes, split=True):
     if len(classes) > 2:
-        lookup_df_to_sql_multiclass_new(df['feature_single'], classes, split=True)
+        lookup_df_to_sql_multiclass(model_name, df['feature_single'], classes, split=True)
     else:
-        lookup_df_to_sql(df, split)
+        lookup_df_to_sql(model_name, df, split)
 
 
 def save_model_and_extras(ebm, model_name, split, logging):
@@ -536,7 +530,32 @@ def save_model_and_extras(ebm, model_name, split, logging):
     # Write printed output to file
     with open('{model_name}/model/ebm_in_sql.sql'.format(model_name=model_name), 'w') as f:
         with redirect_stdout(f):
-            print(f"'{model_name.split('/')[1]}' AS model_name \n, ", end='')
-            ebm_to_sql(lookup_df, ebm.classes_, split)
+            model_name = model_name.split('/')[1]
+            ebm_to_sql(model_name, lookup_df, ebm.classes_, split)
     print('SQL version of EBM saved')
     logging.info('SQL version of EBM saved')
+
+if __name__ == '__main__':
+    # Used for testing faster
+    import pickle 
+
+    # Variables
+    split = False 
+    model_name = 'easy_there'
+    
+    # Load model in pickled format
+    filename = f'trained_models/20230304_bq_test_v3/model/ebm_classification.sav'
+
+    ebm = pickle.load(open(filename, 'rb'))
+
+    # extract lookup table from EBM
+    lookup_df = extractLookupTable(ebm)
+
+    # In case of regression
+    if not hasattr(ebm, 'classes_'):
+        ebm.classes_ = [0]
+        lookup_df['intercept'] = [lookup_df['intercept']]
+
+    # Print output
+    ebm_to_sql(model_name, lookup_df, ebm.classes_, split=split)
+    

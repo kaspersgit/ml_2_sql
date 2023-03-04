@@ -7,6 +7,31 @@ from sklearn.calibration import calibration_curve
 from sklearn.metrics import brier_score_loss
 
 def plotConfusionMatrixSave(given_name, y_true, y_pred, data_type, logging):
+    """
+    Plot and save a confusion matrix for given predictions.
+
+    Parameters
+    ----------
+    given_name : str
+        The name of the experiment or model.
+    y_true : array-like of shape (n_samples,)
+        True labels of the samples.
+    y_pred : array-like of shape (n_samples,)
+        Predicted labels of the samples.
+    data_type : str
+        The type of the data (train, val, test, etc.)
+    logging : logging object
+        The object to log the status and messages.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    Saves the confusion matrix in {given_name}/performance/{data_type}_confusion_matrix.png
+
+    """
 
     from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
     fig, ax = plt.subplots(figsize=(10, 8))
@@ -19,6 +44,28 @@ def plotConfusionMatrixSave(given_name, y_true, y_pred, data_type, logging):
     logging.info('Confusion matrix saved')
 
 def classificationReportSave(given_name, y_true, y_pred, data_type, logging):
+    """
+    Save the classification report as a CSV file.
+
+    Parameters
+    ----------
+    given_name : str
+        The name of the project or experiment.
+    y_true : array-like of shape (n_samples,)
+        Ground truth (correct) target values.
+    y_pred : array-like of shape (n_samples,)
+        Estimated targets as returned by a classifier.
+    data_type : str
+        The type of data being evaluated (e.g. 'train', 'test').
+    logging : logging.Logger
+        An instance of the logging.Logger class to record the event.
+
+    Returns
+    -------
+    None
+        This function does not return any value but saves the classification report as a CSV file.
+
+    """
 
     from sklearn.metrics import classification_report
 
@@ -30,6 +77,27 @@ def classificationReportSave(given_name, y_true, y_pred, data_type, logging):
     logging.info('Classification report saved')
 
 def plotYhatVsYSave(given_name, y_true, y_pred, data_type, logging):
+    """
+    Plots a scatter plot of predicted values (y_pred) against true values (y_true)
+    and saves the plot in a specified directory.
+
+    Parameters:
+    -----------
+    given_name : str
+        Name of the directory where the plot will be saved.
+    y_true : array-like of shape (n_samples,)
+        Ground truth (correct) target values.
+    y_pred : array-like of shape (n_samples,)
+        Estimated targets as returned by a classifier.
+    data_type : str
+        Type of data, e.g. train, validation, or test.
+    logging : logging.Logger
+        Logging instance to log information about the execution.
+
+    Returns:
+    --------
+    None
+    """
 
     plot_df = pd.DataFrame({'y_true':y_true, 'y_pred':y_pred})
     fig = px.scatter(plot_df, 'y_true', 'y_pred')
@@ -40,14 +108,27 @@ def plotYhatVsYSave(given_name, y_true, y_pred, data_type, logging):
 
 def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type, logging):
     """
-    :param given_name: string path where to save
-    :param probs: float models predicted probability
-    :param y_true: int 1 or 0 for the y_true outcome
-    :param title: str title of the plot
-    :param curve_type: str either ROC or PR
-    :param savefig: boolean if plot should be saved
-    :param saveFileName: str where to save the plot to
-    :return:
+    Plots the ROC or Precision-Recall curve for a binary classification model, and saves the plot image.
+
+    Parameters:
+    -----------
+    given_name : str
+        Path where the plot image should be saved.
+    y_true : array-like of shape (n_samples,)
+        True binary labels for the samples.
+    y_prob : array-like of shape (n_samples,)
+        Estimated probabilities of the positive class for the samples.
+    curve_type : str
+        Type of curve to plot. Either 'ROC' for Receiver Operating Characteristic curve, or 'PR' for Precision-Recall curve.
+    data_type : str
+        Type of data being plotted. This string is included in the plot title.
+    logging : logging object
+        Logging object for recording progress and error messages.
+
+    Returns:
+    --------
+    mean_auc : float
+        Mean area under the curve (AUC) value for all folds or for the fitted model.
     """
     from sklearn.metrics import roc_curve, precision_recall_curve, auc
     curve_type = curve_type.lower()
@@ -138,14 +219,45 @@ def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type, l
 
 def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
     """
-    Plot the calibration curve for a set of true and predicted values
+    Plot the calibration curve for a set of true and predicted values.
 
-    :param actuals: true target value
-    :param probs: predicted probability of target
-    :param bins: how many bins to divide data in for plotting
-    :param savefig: boolean if plot should be saved
-    :param saveFileName: str path to which to save the plot
-    :return: 
+    Parameters
+    ----------
+    given_name : str
+        The name of the given data.
+    y_true : array-like of shape (n_samples,)
+        The true target values.
+    y_prob : array-like of shape (n_samples,)
+        The predicted probabilities of target.
+    data_type : str
+        The type of the given data (train or test).
+    logging : logging.Logger
+        An instance of the `logging.Logger` class.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    This function creates and saves a calibration plot that shows the relationship
+    between the true target values and the predicted probabilities of target. The plot
+    is saved in a subdirectory named `performance` inside the directory specified by
+    `given_name`.
+
+    The function uses the `calibration_curve` function from scikit-learn to calculate
+    the fraction of positives and the mean predicted value for a range of predicted
+    probabilities. The number of points in the plot is determined by the `n_bins`
+    parameter of `calibration_curve`.
+
+    The function also calculates the Brier score loss for each fold of cross-validation
+    and adds the mean Brier score loss to the plot.
+
+    Examples
+    --------
+    >>> y_true = [0, 1, 1, 0, 1, 0]
+    >>> y_prob = [0.2, 0.6, 0.7, 0.4, 0.8, 0.1]
+    >>> plotCalibrationCurve("data", y_true, y_prob, "test", logging.getLogger())
     """
 
     # Create plot
@@ -253,6 +365,26 @@ def multiClassPlotCalibrationCurvePlotly(given_name, actuals, probs, title, bins
     fig.show(renderer='browser')
 
 def plotProbabilityDistribution(given_name, y_true, y_prob, data_type, logging):
+    """
+    Plot the probability distribution of true and predicted values.
+
+    Parameters
+    ----------
+    given_name : str
+        Given name to create and save plot.
+    y_true : array-like of shape (n_samples,)
+        True target value.
+    y_prob : array-like of shape (n_samples,)
+        Predicted probabilities.
+    data_type : str
+        Type of data, such as "train", "test", or "validation".
+    logging : logger object
+        Logging object for printing errors and warnings.
+
+    Returns
+    -------
+    None
+    """
     import plotly.figure_factory as ff
     df = pd.DataFrame({'actuals': y_true, 'prob': y_prob})
     do = df[df['actuals']==1]['prob']
@@ -283,6 +415,36 @@ def plotProbabilityDistribution(given_name, y_true, y_prob, data_type, logging):
     return
 
 def plotDistribution(given_name, groups, values, data_type, logging):
+    """
+    Create a plotly histogram figure displaying the distribution of values for each group.
+
+    Parameters
+    ----------
+    given_name: str
+    A string representing the name of the plot to be created.
+    groups: array-like of shape (n_samples,)
+    An array-like object containing the group assignments of each sample.
+    values: array-like of shape (n_samples,)
+    An array-like object containing the values to be plotted.
+    data_type: str
+    A string representing the type of data being plotted (e.g., training, validation, test).
+    logging: logger object
+    A logger object that can be used to record messages.
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    Exception: If the histogram cannot be created.
+
+    Example
+    -------
+    >>> groups = [0, 0, 1, 1, 2, 2]
+    >>> values = [1, 2, 2, 3, 3, 3]
+    >>> plotDistribution("myplot", groups, values, "training", logging.getLogger())
+    """
     df = pd.DataFrame({'groups': groups, 'values': values})
     
     min_value = min(values)
@@ -333,6 +495,39 @@ def plotDistribution(given_name, groups, values, data_type, logging):
 
 # To be used for feature exploration (TODO add more colors)
 def plotDistributionViolin(given_name, groups, values, data_type, logging):
+    """
+    Plot violin plot of distribution of values across different groups.
+
+    Parameters
+    ----------
+    given_name : str
+    Name of the figure to be saved.
+
+    groups : array_like
+    Group labels of the data.
+
+    values : array_like
+    Values of the data.
+
+    data_type : str
+    Type of the data.
+
+    logging : logging.Logger
+    Logger object for logging messages.
+
+    Returns
+    -------
+    None
+    Returns nothing, but saves the violin plot figure as a png file.
+
+    Notes
+    -----
+    This function uses the Plotly library to create the violin plot. It first creates a pandas DataFrame from the input data, and then uses a for loop to create a violin plot for each group. The resulting figure is saved as a png file in the directory specified by given_name.
+
+    Examples
+    --------
+    >>> plotDistributionViolin('my_figure', [0, 1, 0, 1], [2.5, 3.7, 4.2, 5.3], 'continuous', logging)
+    """
     df = pd.DataFrame({'groups': groups, 'values': values})
     
     colors = ['red','green','blue','purple','orange']

@@ -2,6 +2,19 @@ import pandas as pd
 import numpy as np
 
 def checkAllClassesHaveLeafNode(clf):
+    """
+    Check if all classes are represented by a leaf node in a given decision tree classifier.
+
+    Parameters:
+    -----------
+    clf : sklearn.tree.DecisionTreeClassifier object
+        The decision tree classifier to be checked.
+
+    Returns:
+    --------
+    bool
+        True if all classes are represented by a leaf node, False otherwise.
+    """
     n_nodes = clf.tree_.node_count
     children_left = clf.tree_.children_left
     children_right = clf.tree_.children_right

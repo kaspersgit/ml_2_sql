@@ -4,6 +4,33 @@ from sklearn.model_selection import train_test_split
 from utils.modelling.performance import *
 
 def trainModel(X_train, y_train, params, model_type, logging):
+    """
+    Train a decision list classifier on the given training data.
+
+    Parameters
+    ----------
+    X_train : pandas.DataFrame
+        The input features for training the model.
+    y_train : pandas.Series
+        The target variable for training the model.
+    params : dict
+        A dictionary containing the parameters for the decision list classifier.
+    model_type : str
+        The type of model to train. Only 'classification' is currently supported.
+    logging : logging.Logger
+        A logger object to record messages during the training process.
+
+    Returns
+    -------
+    clf : DecisionListClassifier
+        The trained decision list classifier.
+
+    Raises
+    ------
+    ValueError
+        If an unsupported model type is provided.
+
+    """
     if 'feature_names' not in params.keys():
         params['feature_names'] = X_train.columns
     if model_type == 'classification':
@@ -19,6 +46,33 @@ def trainModel(X_train, y_train, params, model_type, logging):
     return clf
 
 def featureImportanceSave(clf, given_name, logging):
+    """
+    Save the feature importance graphs for the trained model.
+
+    Parameters
+    ----------
+    clf : object
+        The trained decision list classifier object.
+
+    given_name : str
+        The name of the file to which the feature importance graphs will be saved.
+
+    logging : logging.Logger
+        The logging object.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    The feature importance graphs include the overall feature importance graph and the feature specific explanation graphs.
+
+    The feature importance graphs are saved in the following files:
+        - overall feature importance graph - {given_name}/decisions_rule.html
+        - feature specific explanation graphs - {given_name}/explain_{feature_name}.html
+
+    """
 
     clf_global = clf.explain_global()
 

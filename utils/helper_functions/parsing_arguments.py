@@ -1,6 +1,16 @@
 import argparse
 
 def SetArgParser():
+    """
+    Create and configure an argument parser for command-line interface.
+
+    Returns:
+    parser: An argparse.ArgumentParser object.
+
+    Usage example:
+    parser = SetArgParser()
+    args = parser.parse_args()
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", type=str, help="Enter project name",
                         nargs='?', default='no_name', const='no_name')
@@ -14,6 +24,20 @@ def SetArgParser():
     return parser
 
 def GetArgs(argv):
+    """
+    Parse command-line arguments using argparse and return the parsed arguments.
+
+    Args:
+    - argv (list of str): List of command-line arguments to parse.
+
+    Returns:
+    - args (argparse.Namespace): An object containing the parsed arguments.
+      The object has the following attributes:
+      - name (str): The name of the project. Default: 'no_name'.
+      - data_path (str): The path to the CSV file containing the data. Default: 'no_data'.
+      - configuration (str): The path to the JSON file containing the model configuration.
+      - model_name (str): The name of the model to use. Default: 'decision_tree'.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", type=str, help="Enter project name",
                         nargs='?', default='no_name', const='no_name')

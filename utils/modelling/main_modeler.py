@@ -13,6 +13,31 @@ from utils.modelling.models import decision_tree
 from utils.modelling.models import l_regression
 
 def make_model(given_name, datasets, model_name, model_type, model_params, post_params, logging):
+    """
+    Train and save a model, and generate performance plots.
+
+    Parameters
+    ----------
+    given_name : str
+        The name of the model.
+    datasets : dict
+        A dictionary containing the training and test datasets.
+    model_name : str
+        The name of the model to be used.
+    model_type : str
+        The type of the model (classification or regression).
+    model_params : dict
+        A dictionary containing the hyperparameters of the model.
+    post_params : dict
+        A dictionary containing the postprocessing parameters.
+    logging : logger
+        A logger object used for logging.
+
+    Returns
+    -------
+    A trained machine learning model that can be used to make predictions on new data.
+
+    """
     # unpack datasets
     X_train = datasets['cv_train']['X']
     y_train = datasets['cv_train']['y']

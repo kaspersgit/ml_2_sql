@@ -13,7 +13,7 @@ from utils.output_scripts import ebm_as_code
 
 from utils.helper_functions.config_handling import config_handling
 from utils.helper_functions.parsing_arguments import GetArgs
-from utils.pre_process import pre_process_kfold
+from utils.pre_processing.pre_process import pre_process_kfold
 
 def main(args):
     # get given name from the first given argument
