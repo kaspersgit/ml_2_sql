@@ -109,8 +109,8 @@ Dictionary of parameters that can be used with model of choice (optional). Check
 - any other value, no calibration applied
 
 `sql_split` options:
-- `false`, outputs the SQL model as one column by adding all separate scores up directly
-- `true`, outputs the SQL model as one column for each feature and a total score columns afterwards. This might be needed to avoid some memory related (stackoverflow) error.
+- `false`, outputs the SQL model as one SELECT statement, using column aliases within the same select statement
+- `true`, outputs the SQL model as several CTEs, this can be used if column aliases can't be referenced within the same SELECT statement
 
 `file_type` options (optional):
 - `png`, output of features importance graphs will be static .png (smaller file).

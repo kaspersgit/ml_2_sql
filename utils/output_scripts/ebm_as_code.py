@@ -209,10 +209,6 @@ def lookup_df_to_sql(model_name, df_dict, split=True):
         print(', EXP(score)/(EXP(score) + 1) AS probability')
         print('FROM add_sum_scores')
 
-
-
-    
-
 def single_features_2_sql(df):
     feature_nr = 0
     feature_list = []
@@ -388,10 +384,12 @@ def double_feature_2_sql(df_index, df_row):
 def lookup_df_to_sql_multiclass(model_name, df, classes, split=True):
     
     print(f'"{model_name}" AS model_name \n, ')
+    
     class_nr = 0
+    feature_list = {}
     for c in classes:
         feature_nr = 0
-        feature_list = []
+        feature_list[c] = []
         for f in df['feature'].unique():
             feature_df = df[df['feature'] == f].reset_index(drop=True)
 
@@ -406,66 +404,70 @@ def lookup_df_to_sql_multiclass(model_name, df, classes, split=True):
 
             # Feature score as alias
             print(f'AS {f}_score_{c}')
-            feature_list.append(f'{f}_score_{c}')
+            feature_list[c].append(f'{f}_score_{c}')
 
             feature_nr += 1
-
-        if not split:
-            # Sum up all separate scores
-            print(', ', end='')
-            print(*feature_list, sep=' + ')
-            print(f' AS score_{c}')
-
-        elif split:
-            # Add placeholder for source table
-            print('FROM <source_table> -- TODO replace with correct table')
-
-            # Close CTE and create next SELECT statement
-            print('), add_sum_scores AS (')
-            print('SELECT *')
-
-            # Sum up all separate scores
-            print(', ', end='')
-            print(*feature_list, sep=' + ')
-            print(f' AS score_{c}')
-            print('FROM feature_scores')
-
         class_nr += 1
 
-        # Summing feature scores to total score per class
-        if not split:
-            for c in classes:
-                if c == classes[0]:
-                    print(f', EXP(score_{c})', end='')
-                else:
-                    print(f' + EXP(score_{c})', end='')
-            print(' AS total_score')
+    if split:
+        # Add placeholder for source table
+        print('FROM <source_table> -- TODO replace with correct table')
+        # Close CTE and create next SELECT statement
+        print('), add_sum_scores AS (')
+        print('SELECT *')
 
-        elif split:
-            # Close CTE and make final Select statement
-            print(')')
-            print('SELECT *')
+    
+    if not split:
+        for c in classes:
+            # Sum up all separate scores
+            print(', ', end='')
+            print(*feature_list[c], sep=' + ')
+            print(f' AS score_{c}')
 
-            for c in classes:
-                if c == classes[0]:
-                    print(f', EXP(score_{c})', end='')
-                else:
-                    print(f' + EXP(score_{c})', end='')
-            
-            # Close CTE and create next SELECT statement
-            print('FROM add_sum_scores')
-            print('), add_sum_all_scores AS (')
-            print('SELECT *')
+    elif split:
+        for c in classes:
+            # Create CTE with sums of all features scores per class
+            print(', ', end='')
+            print(*feature_list[c], sep=' + ')
+            print(f' AS score_{c}')
+        # From CTE
+        print('FROM feature_scores')
+
+    # Summing feature scores to total score per class
+    if not split:
+        for c in classes:
+            if c == classes[0]:
+                print(f', EXP(score_{c})', end='')
+            else:
+                print(f' + EXP(score_{c})', end='')
+        print(' AS total_score')
+
+    elif split:
+        # Close CTE and create next SELECT statement
+        print('), add_sum_all_scores AS (')
+        print('SELECT *')
+
+        for c in classes:
+            if c == classes[0]:
+                print(f', EXP(score_{c})', end='')
+            else:
+                print(f' + EXP(score_{c})', end='')
+        print(' AS total_score')
+        
+        # Close CTE and create final SELECT statement
+        print('FROM add_sum_scores')
+        print(')')
+        print('SELECT *')
 
         
-        # Applying softmax
-        if not split:
-            for c in classes:
-                print(f', EXP(score_{c}) / (total_score) AS probability_{c}', end='\n')
-        elif split: 
-            for c in classes:
-                print(f', EXP(score_{c}) / (total_score) AS probability_{c}', end='\n')
-                print('FROM add_sum_all_scores')
+    # Applying softmax
+    if not split:
+        for c in classes:
+            print(f', EXP(score_{c}) / (total_score) AS probability_{c}', end='\n')
+    elif split: 
+        for c in classes:
+            print(f', EXP(score_{c}) / (total_score) AS probability_{c}', end='\n')
+        print('FROM add_sum_all_scores')
 
 def single_feature_2_sql_multiclass(df, feature, class_nr):
     for index, row in df.iterrows():
