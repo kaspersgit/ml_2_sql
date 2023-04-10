@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 from sklearn.calibration import calibration_curve
 from sklearn.metrics import brier_score_loss
 
-def plotConfusionMatrixSave(given_name, y_true, y_pred, data_type, logging):
+def plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging):
     """
     Plot and save a confusion matrix for given predictions.
 
@@ -42,6 +42,96 @@ def plotConfusionMatrixSave(given_name, y_true, y_pred, data_type, logging):
 
     print('Confusion matrix saved')
     logging.info('Confusion matrix saved')
+
+# Mainly meant for binary classification
+def plotConfusionMatrixSlider(given_name, y_true, y_prob, data_type, logging):
+    import xarray as xr
+
+    cms = []
+
+    threshold_list = np.arange(0.0, 1.05, 0.05)
+
+    for threshold in threshold_list:
+        y_pred = [1 if x > threshold else 0 for x in y_prob]
+
+        df = pd.DataFrame({'y_true': y_true, 'y_pred': y_pred})
+
+        # predicted / actual 
+        trfa = len(df[(df['y_pred'] == 1) & (df['y_true'] == 0)])
+        trtr = len(df[(df['y_pred'] == 1) & (df['y_true'] == 1)])
+        fafa = len(df[(df['y_pred'] == 0) & (df['y_true'] == 0)])
+        fatr = len(df[(df['y_pred'] == 0) & (df['y_true'] == 1)])
+
+        z = [[trtr, trfa],
+                [fatr, fafa]]  
+
+        cms.append(z)
+
+    # Round to 2 decimals 
+    threshold_list = [round(i,2) for i in threshold_list]
+
+    # convert to xarray
+    da = xr.DataArray(cms, coords=[threshold_list, ['1', '0'], ['1', '0']], dims=['Threshold', 'Predicted', 'Actual'])
+
+    # Create figure
+    fig = px.imshow(da, 
+                    title='Confusion Matrix',
+                    animation_frame='Threshold',
+                    text_auto=True,
+                    width=750, height=750, 
+                    labels=dict(animation_frame="Threshold"))
+
+    # Add metrics per frame
+    for frame in fig.frames:
+        
+        # Get confusion matrix values of frame
+        trtr = frame.data[0].z[0,0]
+        trfa = frame.data[0].z[0,1]
+        fatr = frame.data[0].z[1,0]
+        fafa = frame.data[0].z[1,1]
+
+        # Calculate metrics
+        # ignore div by 0 or 0/0 warning and just state nan
+        with np.errstate(divide='ignore', invalid='ignore'):
+            precision = np.float64(trtr) / (trtr + trfa)
+            recall = np.float64(trtr) / (trtr + fatr)
+            f1 = np.float64(2 * precision * recall) / (precision + recall)
+            accuracy = np.float64(trtr + fafa) / (trtr + trfa + fatr + fafa)
+
+        frame.layout['title'] = f'Confusion Matrix<br><sup>Precision: {precision:.2f}\tRecall: {recall:.2f}\tF1-Score: {f1:.2f}\tAccuracy: {accuracy:.2f}</sup>'
+
+    # set default slider value to 0.5 and update layout and trace accordingly
+    fig.layout.sliders[0]['active'] = 10  
+    fig.update_layout(fig.frames[10].layout)
+    fig.update_traces(z=fig.frames[10].data[0].z)
+
+    fig.update_layout(
+        xaxis = dict(
+            title='Actual',
+            dtick=1,
+        ),
+        yaxis = dict(
+            title='Predicted',
+            dtick=1,
+        )
+    )
+
+    fig["layout"].pop("updatemenus")
+
+    fig.write_html(f'{given_name}/performance/{data_type}_confusion_matrix.html', auto_play=False)
+
+    print(f'Created and saved confusion matrix for {data_type} data')
+    logging.info(f'Created and saved confusion matrix for {data_type} data')
+
+def plotConfusionMatrix(given_name, y_true, y_prob, y_pred, file_type, data_type, logging):
+    # If html is wanted and binary classification
+    # Make confusion matrix plot with slider
+    if (file_type=='html') & (len(set(y_true))==2):
+        plotConfusionMatrixSlider(given_name, y_true, y_prob, data_type, logging)
+    
+    # Otherwise make 'simple' static confusion matrix plot
+    else:
+        plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging)
 
 def classificationReportSave(given_name, y_true, y_pred, data_type, logging):
     """

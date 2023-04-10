@@ -11,6 +11,8 @@ from utils.output_scripts import decision_tree_as_code
 from utils.output_scripts import decision_rule_as_code
 from utils.output_scripts import ebm_as_code
 
+from utils.helper_functions.checks import checkInputDataHard
+
 from utils.helper_functions.config_handling import config_handling
 from utils.helper_functions.parsing_arguments import GetArgs
 from utils.pre_processing.pre_process import pre_process_kfold
@@ -22,11 +24,12 @@ def main(args):
     # set logger
     logging.basicConfig(format='%(asctime)s %(message)s', filename=given_name+'/logging.log', level=logging.DEBUG)
     logging.getLogger('matplotlib.font_manager').disabled = True # ignore matplotlibs font warnings
+    logging.info(f'Script input arguments: \n{args}')
 
-    # path to data
-    data_ = pd.read_csv(args.data_path)
+    # Load in data
+    data = pd.read_csv(args.data_path)
 
-    # get target and features columns
+    # Get configuration file
     with open(args.configuration) as json_file:
         configuration = json.load(json_file)
 
@@ -36,17 +39,14 @@ def main(args):
     # Handle the configuration file
     target_col, feature_cols, model_params, pre_params, post_params = config_handling(configuration, logging)
 
-    # pre processing
-    # make copy (doesn't change anything but for future use)
-    data = data_.copy()
-
     # Log parameters
     logging.info(f'Configuration file content: \n{configuration}')
 
+    # Perform some basic checks
+    checkInputDataHard(data, configuration)
+
     # set model type based on target value
-    if data[target_col].nunique() == 1:
-        raise Exception("Target column needs more than 1 unique value")
-    elif (data[target_col].dtype == 'float') | ((data[target_col].dtype == 'int') & (data[target_col].nunique() > 10)):
+    if (data[target_col].dtype == 'float') | ((data[target_col].dtype == 'int') & (data[target_col].nunique() > 10)):
         model_type = 'regression'
     else:
         model_type = 'classification'
@@ -86,8 +86,8 @@ if __name__ == '__main__':
         # (Dev) script is not being run through the terminal
         # Command line arguments used for testing
         argvals = '--name trained_models/test ' \
-                  '--data_path input/data/example_multiclass_faults.csv ' \
-                  '--configuration input/configuration/example_multiclass_faults.json ' \
+                  '--data_path input/data/example_binary_titanic.csv ' \
+                  '--configuration input/configuration/example_binary_titanic.json ' \
                   '--model ebm'.split() # example of passing test params to parser
 
         # settings

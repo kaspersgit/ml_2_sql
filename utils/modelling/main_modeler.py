@@ -147,10 +147,8 @@ def make_model(given_name, datasets, model_name, model_type, model_params, post_
     # Performance and other post modeling plots
     if model_type == 'classification':
         # Threshold dependant
-        plotConfusionMatrixSave(given_name, y_all, y_all_pred, data_type='final_train', logging=logging)
-        plotConfusionMatrixSave(given_name, y_test, y_test_pred, data_type='test', logging=logging)
-        classificationReportSave(given_name, y_all, y_all_pred, data_type='final_train', logging=logging)
-        classificationReportSave(given_name, y_test, y_test_pred, data_type='test', logging=logging)
+        plotConfusionMatrix(given_name, y_all, y_all_prob, y_all_pred, post_params['file_type'], data_type='final_train', logging=logging)
+        plotConfusionMatrix(given_name, y_test, y_test_prob, y_test_pred, post_params['file_type'], data_type='test', logging=logging)
 
         if len(clf.classes_) == 2:
             # Also create pr curve for class 0

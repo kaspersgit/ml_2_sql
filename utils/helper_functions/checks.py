@@ -1,6 +1,14 @@
 import pandas as pd
 import numpy as np
 
+    
+def checkTargetHard(target):
+    if target.nunique() == 1:
+        raise Exception("Target column needs more than 1 unique value")
+
+def checkInputDataHard(data, config):
+    checkTargetHard(data[config['target']])
+
 def checkAllClassesHaveLeafNode(clf):
     """
     Check if all classes are represented by a leaf node in a given decision tree classifier.

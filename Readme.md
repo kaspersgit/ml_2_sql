@@ -168,3 +168,5 @@ Name of target column (required)
 - Add more example files (binary/regression/multiclass)
 - Add tool to make configuration json
 - Make distribution plot grouped instead of overlaid or stacked (maybe switch to plotly histogram)
+- Add check if variables and target are finite 
+- Add performance summary for easy and quick comparison (including auc pr & roc, best f1-score, etc)
