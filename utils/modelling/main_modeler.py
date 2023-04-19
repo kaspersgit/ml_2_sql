@@ -143,82 +143,27 @@ def make_model(given_name, datasets, model_name, model_type, model_params, post_
             elif len(clf.classes_) > 2:
                 y_all_prob = clf.predict_proba(X_all)
 
+    # concat y train, X test and X train to single lists
+    y_train = np.concatenate(y_train, axis=0)
+    X_test = np.concatenate(X_test, axis=0)
+    X_train = np.concatenate(X_train, axis=0)
+
+    post_datasets = {
+        'X_test': X_test,
+        'X_train': X_train,
+        'X_all': X_all,
+        'y_train': y_train,
+        'y_all': y_all,
+        'y_all_prob': y_all_prob,
+        'y_all_pred': y_all_pred,
+        'y_test': y_test,
+        'y_test_prob': y_test_prob,
+        'y_test_pred': y_test_pred,
+        'y_test_list': y_test_list,
+        'y_test_prob_list': y_test_prob_list
+    }
 
     # Performance and other post modeling plots
-    if model_type == 'classification':
-        # Threshold dependant
-        plotConfusionMatrix(given_name, y_all, y_all_prob, y_all_pred, post_params['file_type'], data_type='final_train', logging=logging)
-        plotConfusionMatrix(given_name, y_test, y_test_prob, y_test_pred, post_params['file_type'], data_type='test', logging=logging)
-
-        if len(clf.classes_) == 2:
-            # Also create pr curve for class 0
-            y_all_neg = np.array([1 - j for j in list(y_all)])
-            y_all_prob_neg = np.array([1 - j for j in list(y_all_prob)])
-
-            y_test_list_neg = [[1 - j for j in i] for i in y_test_list]
-            y_test_prob_list_neg = [[1 - j for j in i] for i in y_test_prob_list]
-
-            # Threshold independant
-            plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='roc', data_type='final_train', logging=logging)
-            plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='roc', data_type='test', logging=logging)
-
-            plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='pr', data_type='final_train_class1', logging=logging)
-            plotClassificationCurve(given_name, y_all_neg, y_all_prob_neg, curve_type='pr', data_type='final_train_class0', logging=logging)
-
-            plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='pr', data_type='test_data_class1', logging=logging)
-            plotClassificationCurve(given_name, y_test_list_neg, y_test_prob_list_neg, curve_type='pr', data_type='test_data_class0', logging=logging)
-
-            plotCalibrationCurve(given_name, y_all, y_all_prob, data_type='final_train', logging=logging)
-            plotCalibrationCurve(given_name, y_test_list, y_test_prob_list, data_type='test', logging=logging)
-
-            plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final_train', logging=logging)
-            plotProbabilityDistribution(given_name, y_test, y_test_prob, data_type='test', logging=logging)
-
-        # If multiclass classification
-        elif len(clf.classes_) > 2:
-            # loop through classes
-            for c in clf.classes_:
-                # creating a list of all the classes except the current class
-                other_class = [x for x in clf.classes_ if x != c]
-
-                # Get index of selected class in clf.classes_
-                class_index = list(clf.classes_).index(c)
-
-                # marking the current class as 1 and all other classes as 0
-                y_test_list_ova = [[0 if x in other_class else 1 for x in fold_] for fold_ in y_test_list]
-                y_test_prob_list_ova = [[x[class_index] for x in fold_] for fold_ in y_test_prob_list]
-
-                # concatonate probs together to one list for distribution plot
-                y_test_ova = np.concatenate(y_test_list_ova, axis=0)
-                y_test_prob_ova = np.concatenate(y_test_prob_list_ova, axis=0)
-
-                y_all_ova = [0 if x in other_class else 1 for x in y_all]
-                y_all_prob_ova = [x[class_index] for x in y_all_prob]
-
-
-                # Threshold independant
-                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='roc', data_type=f'final_train_class_'{c}, logging=logging)
-                plotClassificationCurve(given_name, y_test_list_ova, y_test_prob_list_ova, curve_type='roc', data_type=f'test_class_{c}', logging=logging)
-
-                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='pr', data_type='final_train_class1', logging=logging)
-                plotClassificationCurve(given_name, y_test_list_ova, y_test_prob_list_ova, curve_type='pr', data_type=f'test_class_{c}', logging=logging)
-
-                # multiClassPlotCalibrationCurvePlotly(given_name, y_all, pd.DataFrame(y_all_prob, columns=clf.classes_), title='fun')
-                plotCalibrationCurve(given_name, y_test_list_ova, y_test_prob_list_ova, data_type=f'test_class_{c}', logging=logging)
-
-                # plotProbabilityDistribution(given_name, y_all_ova, y_all_prob_ova, data_type='final_train', logging=logging)
-                plotProbabilityDistribution(given_name, y_test_ova, y_test_prob_ova, data_type=f'test_class_{c}', logging=logging)
-
-    # if regression
-    elif model_type == 'regression':
-        plotYhatVsYSave(given_name, y_test, y_test_pred, data_type='test')
-        plotYhatVsYSave(given_name, y_all, y_all_pred, data_type='final_train')
-
-        adjustedR2 = 1 - (1 - clf.score(X_all, y_all)) * (len(y_all) - 1) / (len(y_all) - X_all.shape[1] - 1)
-        print('Adjusted R2: {adjustedR2}'.format(adjustedR2=adjustedR2))
-        logging.info('Adjusted R2: {adjustedR2}'.format(adjustedR2=adjustedR2))
-
-    # Post modeling plots, specific per model but includes feature importance among others
-    globals()[model_name].postModelPlots(clf, given_name + '/feature_importance', post_params['file_type'], logging)
+    postModellingPlots(clf, model_name, model_type, given_name, post_datasets, post_params, logging)
 
     return clf

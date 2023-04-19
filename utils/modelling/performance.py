@@ -3,8 +3,15 @@ import numpy as np
 from matplotlib import pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
+import pingouin
 from sklearn.calibration import calibration_curve
 from sklearn.metrics import brier_score_loss
+
+# The actual algorithms (grey as we refer to them dynamically)
+from utils.modelling.models import ebm
+from utils.modelling.models import decision_rule
+from utils.modelling.models import decision_tree
+from utils.modelling.models import l_regression
 
 def plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging):
     """
@@ -653,3 +660,136 @@ def plotDistributionViolin(given_name, groups, values, data_type, logging):
     logging.info(f'Created and saved feature distribution plot')
 
     return
+
+def scorePartialCorrelation(clf, post_datasets):
+    sl_test = clf.predict_and_contrib(post_datasets['X_test'], output='labels')
+    X_test_scores = pd.DataFrame(sl_test[1], columns=clf.feature_names)
+    y_test_label = pd.Series(post_datasets['y_test'], name='target')
+
+
+    sl_train = clf.predict_and_contrib(post_datasets['X_train'], output='labels')
+    X_train_scores = pd.DataFrame(sl_train[1], columns=clf.feature_names)
+    y_train_label = pd.Series(post_datasets['y_train'], name='target')
+
+    # Define function for partial correlation
+    def partial_correlation(X, y):
+        out = pd.Series(index=X.columns, dtype=float)
+        for feature_name in X.columns:
+            out[feature_name] = pingouin.partial_corr(
+                data=pd.concat([X, y], axis=1).astype(float),
+                x=feature_name,
+                y=y.name,
+                x_covar=[f for f in X.columns if f != feature_name]
+            ).loc['pearson', 'r']
+        return out
+
+    parscore_test = partial_correlation(X_test_scores, y_test_label)
+    parscore_train = partial_correlation(X_train_scores, y_train_label)
+    parscore_diff = pd.Series(parscore_test - parscore_train, name = 'parscore_diff')
+
+    # Plot parshap
+    plotmin, plotmax = min(parscore_train.min(), parscore_test.min()), max(parscore_train.max(), parscore_test.max())
+    plotbuffer = .05 * (plotmax - plotmin)
+    fig, ax = plt.subplots()
+    if plotmin < 0:
+        ax.vlines(0, plotmin - plotbuffer, plotmax + plotbuffer, color='darkgrey', zorder=0)
+        ax.hlines(0, plotmin - plotbuffer, plotmax + plotbuffer, color='darkgrey', zorder=0)
+    ax.plot(
+        [plotmin - plotbuffer, plotmax + plotbuffer], [plotmin - plotbuffer, plotmax + plotbuffer],
+        color='darkgrey', zorder=0
+    )
+    sc = ax.scatter(
+        parscore_train, parscore_test,
+        edgecolor='grey', c=[5]*16, s=50, cmap=plt.cm.get_cmap('Reds'))
+    ax.set(title='Partial correlation bw SHAP and target...', xlabel='... on Train data', ylabel='... on Test data')
+    cbar = fig.colorbar(sc)
+    cbar.set_ticks([])
+    for txt in parscore_train.index:
+        ax.annotate(txt, (parscore_train[txt], parscore_test[txt] + plotbuffer / 2), ha='center', va='bottom')
+    # fig.savefig('parshap.png', dpi=300, bbox_inches="tight")
+    fig.show()
+
+
+def postModellingPlots(clf, model_name, model_type, given_name, post_datasets, post_params, logging):
+    # Performance and other post modeling plots
+    # unpack dict
+    X_all = post_datasets['X_all']
+    y_all, y_all_prob, y_all_pred = post_datasets['y_all'], post_datasets['y_all_prob'], post_datasets['y_all_pred']
+    y_test, y_test_prob, y_test_pred = post_datasets['y_test'], post_datasets['y_test_prob'], post_datasets['y_test_pred']
+    y_test_list, y_test_prob_list = post_datasets['y_test_list'], post_datasets['y_test_prob_list']
+
+    if model_type == 'classification':
+        # Threshold dependant
+        plotConfusionMatrix(given_name, y_all, y_all_prob, y_all_pred, post_params['file_type'], data_type='final_train', logging=logging)
+        plotConfusionMatrix(given_name, y_test, y_test_prob, y_test_pred, post_params['file_type'], data_type='test', logging=logging)
+
+        if len(clf.classes_) == 2:
+            # Also create pr curve for class 0
+            y_all_neg = np.array([1 - j for j in list(y_all)])
+            y_all_prob_neg = np.array([1 - j for j in list(y_all_prob)])
+
+            y_test_list_neg = [[1 - j for j in i] for i in y_test_list]
+            y_test_prob_list_neg = [[1 - j for j in i] for i in y_test_prob_list]
+
+            # Threshold independant
+            plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='roc', data_type='final_train', logging=logging)
+            plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='roc', data_type='test', logging=logging)
+
+            plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='pr', data_type='final_train_class1', logging=logging)
+            plotClassificationCurve(given_name, y_all_neg, y_all_prob_neg, curve_type='pr', data_type='final_train_class0', logging=logging)
+
+            plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='pr', data_type='test_data_class1', logging=logging)
+            plotClassificationCurve(given_name, y_test_list_neg, y_test_prob_list_neg, curve_type='pr', data_type='test_data_class0', logging=logging)
+
+            plotCalibrationCurve(given_name, y_all, y_all_prob, data_type='final_train', logging=logging)
+            plotCalibrationCurve(given_name, y_test_list, y_test_prob_list, data_type='test', logging=logging)
+
+            plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final_train', logging=logging)
+            plotProbabilityDistribution(given_name, y_test, y_test_prob, data_type='test', logging=logging)
+
+        # If multiclass classification
+        elif len(clf.classes_) > 2:
+            # loop through classes
+            for c in clf.classes_:
+                # creating a list of all the classes except the current class
+                other_class = [x for x in clf.classes_ if x != c]
+
+                # Get index of selected class in clf.classes_
+                class_index = list(clf.classes_).index(c)
+
+                # marking the current class as 1 and all other classes as 0
+                y_test_list_ova = [[0 if x in other_class else 1 for x in fold_] for fold_ in y_test_list]
+                y_test_prob_list_ova = [[x[class_index] for x in fold_] for fold_ in y_test_prob_list]
+
+                # concatonate probs together to one list for distribution plot
+                y_test_ova = np.concatenate(y_test_list_ova, axis=0)
+                y_test_prob_ova = np.concatenate(y_test_prob_list_ova, axis=0)
+
+                y_all_ova = [0 if x in other_class else 1 for x in y_all]
+                y_all_prob_ova = [x[class_index] for x in y_all_prob]
+
+
+                # Threshold independant
+                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='roc', data_type=f'final_train_class_'{c}, logging=logging)
+                plotClassificationCurve(given_name, y_test_list_ova, y_test_prob_list_ova, curve_type='roc', data_type=f'test_class_{c}', logging=logging)
+
+                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='pr', data_type='final_train_class1', logging=logging)
+                plotClassificationCurve(given_name, y_test_list_ova, y_test_prob_list_ova, curve_type='pr', data_type=f'test_class_{c}', logging=logging)
+
+                # multiClassPlotCalibrationCurvePlotly(given_name, y_all, pd.DataFrame(y_all_prob, columns=clf.classes_), title='fun')
+                plotCalibrationCurve(given_name, y_test_list_ova, y_test_prob_list_ova, data_type=f'test_class_{c}', logging=logging)
+
+                # plotProbabilityDistribution(given_name, y_all_ova, y_all_prob_ova, data_type='final_train', logging=logging)
+                plotProbabilityDistribution(given_name, y_test_ova, y_test_prob_ova, data_type=f'test_class_{c}', logging=logging)
+
+    # if regression
+    elif model_type == 'regression':
+        plotYhatVsYSave(given_name, y_test, y_test_pred, data_type='test')
+        plotYhatVsYSave(given_name, y_all, y_all_pred, data_type='final_train')
+
+        adjustedR2 = 1 - (1 - clf.score(X_all, y_all)) * (len(y_all) - 1) / (len(y_all) - X_all.shape[1] - 1)
+        print('Adjusted R2: {adjustedR2}'.format(adjustedR2=adjustedR2))
+        logging.info('Adjusted R2: {adjustedR2}'.format(adjustedR2=adjustedR2))
+
+    # Post modeling plots, specific per model but includes feature importance among others
+    globals()[model_name].postModelPlots(clf, given_name + '/feature_importance', post_params['file_type'], logging)
