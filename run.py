@@ -30,7 +30,7 @@ for i, file in enumerate(files, 1):
 # Ask for CSVPATH
 csv_path = None
 while csv_path is None:
-    csv_file_index = input("\nSelect path to csv file for training the model: ")
+    csv_file_index = input("\nSelect CSV file for training the model: ")
     try:
         csv_file_index = int(csv_file_index) - 1
         csv_path = os.path.join(data_dir, files[csv_file_index])
@@ -52,7 +52,7 @@ for i, file in enumerate(files, 1):
 # Ask for JSONPATH
 json_path = None
 while json_path is None:
-    json_file_index = input("\nSelect path to json file for model configuration: ")
+    json_file_index = input("\nSelect JSON file for training configuration: ")
     try:
         json_file_index = int(json_file_index) - 1
         json_path = os.path.join(configuration_dir, files[json_file_index])
@@ -78,6 +78,8 @@ while model_type is None:
         print("Invalid option")
 
 print(f"Algorithm chosen for modelling: {model_type}")
+
+# Rename model choice for easier reference in code later on
 model_type = 'ebm' if model_type == 'Explainable Boosting Machine' else model_type
 model_type = 'l_regression' if model_type == 'Logistic/Linear regression' else model_type
 model_type = model_type.lower().replace(" ", "_")

@@ -37,7 +37,7 @@ Disadvantages:
 - Only EBM is implemented (decision tree, logistic regression and rule set not yet)
 - Automated model training is working for binary classification and regression
 - SQL creation of model is working fully for binary clasification
-- SQL for regression and the whole process for multiclass classification is wip
+- SQL for regression and the whole process for multiclass classification is work in progress
 - Up/down sampling not fully implemented yet 
 
 </br>
@@ -69,19 +69,19 @@ Disadvantages:
    `source .ml2sql/bin/activate` or `deactivate`
 
 ## Try it out demo
-1. Make sure virtual environment is active (step 3 of Pre requisites)
-2. In the terminal in the root of this folder run: `python run.py`
-3. Follow the instructions on screen by selecting the demo data and (similarly named) config file
-4. Check the output in the newly created folder
+1. In the terminal in the root of this folder run: 
+  - `python3 run.py` (Mac/Linux)
+  - `python run.py` (Windows)
+2. Follow the instructions on screen by selecting the demo data and (similarly named) config file
+3. Check the output in the newly created folder
 
 ## Try it out using own data
-1. Make sure virtual environment is active (step 3 of Pre requisites)
-2. Save csv file containing target and all features in the `input/data/` folder (more on input data at [input data](#data))
-3. Save a settings json file in the `input/configuration/` (explained below at [configuration json](#configuration-json))
-4. In the terminal run: `bash run.sh`
-5. Follow the instruction on screen
-6. The output will be saved in the folder `trained_models/<current_date>_<your_model_name>/`
-7. The `.sql` file will contain a SQL Case When statement imitating the decision tree/EBM  
+1. Save csv file containing target and all features in the `input/data/` folder (more on input data at [input data](#data))
+2. Save a settings json file in the `input/configuration/` (explained below at [configuration json](#configuration-json))
+3. In the terminal run: `bash run.sh`
+4. Follow the instruction on screen
+5. The output will be saved in the folder `trained_models/<current_date>_<your_model_name>/`
+6. The `.sql` file in the `model` folder will contain a SQL written model  
 
 </br>
 
@@ -143,7 +143,6 @@ Name of target column (required)
 ## Notes
 - Any NULL values should be imputed before using this script
 - Data imbalance treatments (e.g. oversampling + model calibration) not fully implemented
-- Resampling (almost) always makes the trained model ill calibrated
 - Multiclass and regression are experimental
 
 ## TODO list
@@ -168,3 +167,6 @@ Name of target column (required)
 - Add check if variables and target are finite 
 - Add performance summary for easy and quick comparison (including label count, auc pr & roc, best f1-score, etc)
 - Add feature over/under fitting plot (https://towardsdatascience.com/which-of-your-features-are-overfitting-c46d0762e769)
+- Add variables being NULL checks
+
+# Troubleshooting
