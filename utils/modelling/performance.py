@@ -61,13 +61,15 @@ def plotConfusionMatrixSlider(given_name, y_true, y_prob, data_type, logging):
     for threshold in threshold_list:
         y_pred = [1 if x > threshold else 0 for x in y_prob]
 
+        nr_cases = len(y_pred)
+
         df = pd.DataFrame({'y_true': y_true, 'y_pred': y_pred})
 
         # predicted / actual 
-        trfa = len(df[(df['y_pred'] == 1) & (df['y_true'] == 0)])
-        trtr = len(df[(df['y_pred'] == 1) & (df['y_true'] == 1)])
-        fafa = len(df[(df['y_pred'] == 0) & (df['y_true'] == 0)])
-        fatr = len(df[(df['y_pred'] == 0) & (df['y_true'] == 1)])
+        trfa = len(df[(df['y_pred'] == 1) & (df['y_true'] == 0)])/nr_cases
+        trtr = len(df[(df['y_pred'] == 1) & (df['y_true'] == 1)])/nr_cases
+        fafa = len(df[(df['y_pred'] == 0) & (df['y_true'] == 0)])/nr_cases
+        fatr = len(df[(df['y_pred'] == 0) & (df['y_true'] == 1)])/nr_cases
 
         z = [[trtr, trfa],
                 [fatr, fafa]]  

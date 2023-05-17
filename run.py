@@ -21,6 +21,7 @@ print("\n\n")
 # List files in input/data/ directory
 data_dir = "input/data/"
 files = os.listdir(data_dir)
+files.sort()
 
 print("Files in input/data/:")
 for i, file in enumerate(files, 1):
@@ -42,6 +43,7 @@ print(f"CSV file {csv_path} will be used for modelling")
 # List files in input/configuration/ directory
 configuration_dir = "input/configuration/"
 files = os.listdir(configuration_dir)
+files.sort()
 
 print(f"\n\nFiles in {configuration_dir}:")
 for i, file in enumerate(files, 1):
@@ -100,9 +102,13 @@ except FileExistsError:
 
 print("Starting script to create model")
 
-# Run python script with given input
+# Run script with given input using python in the venv (so venv does not need to be activated beforehand)
 print("\nRunning command:")
-command = f"python main.py --name trained_models/{full_model_name} --data_path {csv_path} --configuration {json_path} --model {model_type}"
+if sys.platform == 'win32':
+    command = f".ml2sql/Scripts/python main.py --name trained_models/{full_model_name} --data_path {csv_path} --configuration {json_path} --model {model_type}"
+else:
+    command = f".ml2sql/bin/python main.py --name trained_models/{full_model_name} --data_path {csv_path} --configuration {json_path} --model {model_type}"
+
 print(command)
 
 os.system(command)

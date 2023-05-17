@@ -158,15 +158,13 @@ Name of target column (required)
 - Removing outliers by using quantiles (e.g. only keeping 1 - 99 % quantiles)
 - Spatial Cross-validation discovery
 - Extend logging granularity (add model parameters)
-- Add target single unique value check
-- Replace/improve `classification_report` and `confusion_matrix` due to dependance on threshold
 - Add MCC, cohen kappa and other metrics plotted with threshold
 - Add SQL translation for decision rule
 - Add random seed to config file
 - Make a proper testing procedure
 - Improve ReadMe
 - Add more example files (binary/regression/multiclass)
-- Add tool to make configuration json
 - Make distribution plot grouped instead of overlaid or stacked (maybe switch to plotly histogram)
 - Add check if variables and target are finite 
-- Add performance summary for easy and quick comparison (including auc pr & roc, best f1-score, etc)
+- Add performance summary for easy and quick comparison (including label count, auc pr & roc, best f1-score, etc)
+- Add feature over/under fitting plot (https://towardsdatascience.com/which-of-your-features-are-overfitting-c46d0762e769)
