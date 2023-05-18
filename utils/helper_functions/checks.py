@@ -1,13 +1,23 @@
 import pandas as pd
 import numpy as np
 
-    
+
 def checkTargetHard(target):
     if target.nunique() == 1:
         raise Exception("Target column needs more than 1 unique value")
 
+def checkFeaturesHard(features):
+    featNullCount = features.isnull().sum()
+    nullf = featNullCount[featNullCount > 0]
+    if len(nullf) > 0:
+        raise Exception(f"NULL values not allowed, found the following: \n{nullf}")
+
 def checkInputDataHard(data, config):
+    """
+    Checks at start ensuring target and feature columns are good to go
+    """
     checkTargetHard(data[config['target']])
+    checkFeaturesHard(data[config['features']])
 
 def checkAllClassesHaveLeafNode(clf):
     """
