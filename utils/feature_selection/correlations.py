@@ -141,9 +141,6 @@ def plotPearsonCorrelation(df, given_name, file_type, logging):
     """
     # Numerical values
     # Creating pearson correlation matrix
-    print(f'Creating Pearson correlation matrix')
-    logging.info(f'Creating Pearson correlation matrix')
-
     data_ = df.select_dtypes(exclude=['object', 'category', 'bool']).copy()
 
     # if above dataframe is empty then skip function
@@ -160,6 +157,10 @@ def plotPearsonCorrelation(df, given_name, file_type, logging):
 
     # Plot matrix
     plotClustermap(data_corr, matrix_type, given_name, file_type, logging)
+
+    # success message
+    print(f'Created Pearson correlation matrix (for numerical features)')
+    logging.info(f'Created Pearson correlation matrix (for numerical features)')
 
 
 def cramers_corrected_stat(confusion_matrix):
@@ -227,15 +228,12 @@ def plotCramervCorrelation(df, given_name, file_type, logging):
     """
     # Nominal Categorical values
     # Creating CramerV correlation matrix
-    print(f'Creating CramerV correlation matrix')
-    logging.info(f'Creating CramerV correlation matrix')
-
     data_ = df.select_dtypes(include=['category', 'object', 'bool']).copy()
 
     # if above dataframe is empty then skip function
     if data_.shape[1] < 2:
-        print(f'Less than 2 categorical variables found')
-        logging.info(f'Less than 2 categorical variables found')
+        print(f'Skip CramerV correlation matrix due to fewer than 2 categorical variables found')
+        logging.info(f'Skip CramerV correlation matrix due to fewer than 2 categorical variables found')
         return
 
     cols = data_.columns
@@ -260,3 +258,6 @@ def plotCramervCorrelation(df, given_name, file_type, logging):
     # Plot matrix
     plotClustermap(df_cramerv, matrix_type, given_name, file_type, logging)
 
+    # Success message
+    print(f'Created CramerV correlation matrix (for categorical values)')
+    logging.info(f'Created CramerV correlation matrix (for categorical values)')

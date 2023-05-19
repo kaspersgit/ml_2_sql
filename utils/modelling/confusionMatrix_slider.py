@@ -7,7 +7,7 @@ y_true = np.random.choice([0,1], size=nsize)
 
 
 import plotly.graph_objects as go
-from plotly.tools import make_subplots
+from plotly.subplots import make_subplots
 import numpy as np
 import pandas as pd 
 
@@ -21,7 +21,13 @@ for threshold in threshold_list:
 
     df = pd.DataFrame({'y_true': y_true, 'y_pred': y_pred})
 
-    # predicted / actual 
+    # confusion matrix
+    cm = []
+    for p in {0,1}:
+        cm.append([])
+        for a in {0,1}:
+            cm[p].append(len(df[(df['y_pred'] == p) & (df['y_true'] == a)])/len(y_pred))
+
     trfa = len(df[(df['y_pred'] == 1) & (df['y_true'] == 0)])/len(y_pred)
     trtr = len(df[(df['y_pred'] == 1) & (df['y_true'] == 1)])/len(y_pred)
     fafa = len(df[(df['y_pred'] == 0) & (df['y_true'] == 0)])/len(y_pred)
@@ -29,32 +35,33 @@ for threshold in threshold_list:
 
     # Calculate metrics
     # ignore div by 0 or 0/0 warning and just state nan
+    cm_metrics = {"0":{}, "1": {}}
     with np.errstate(divide='ignore', invalid='ignore'):
+        cm_metrics["0"]["precision"] = np.float64(cm[1][1]) / (cm[1][0] + cm[1][1]))
+        cm_metrics["0"]["recall"] = np.float64(cm[1][1]) / (cm[1][1] + cm[0][1]))
+        cm_metrics["0"]["f1"] = np.float64(2 * cm_metrics["0"]["precision"] * cm_metrics["0"]["recall"]) / (cm_metrics["0"]["precision"] + cm_metrics["0"]["recall"])
+        cm_metrics["0"]["accuracy"] = np.float64(cm[1][1] + cm[0][0]) / sum(cm[0] + cm[1]))
+
         precision = np.float64(trtr) / (trtr + trfa)
         recall = np.float64(trtr) / (trtr + fatr)
         f1 = np.float64(2 * precision * recall) / (precision + recall)
         accuracy = np.float64(trtr + fafa) / (trtr + trfa + fatr + fafa)
 
+    # force 3 decimal places
     metrics = [['F1-score','Accuracy','Recall','Precision'],
-                [round(f1,3), round(accuracy,3), round(recall,3), round(precision,3)]]
+                [f1, accuracy, recall, precision]]
 
-    z = [[trtr, trfa],
-            [fatr, fafa]]  
-    
-    # round to 3 decimals
-    z = np.round(z,3)
-
-    conf_matrices.append(z)
+    conf_matrices.append(cm)
 
     steps.append(dict(method = "restyle",
-                args = [{'z': [ z ], #in the initial fig update z and text
-                    'text': [z],
+                args = [{'z': [ cm ], #in the initial fig update z and text
+                    'text': [cm],
                     'cells.values':[metrics]}],
                     label=round(threshold,2),
                     ))
     
     if threshold == 0.5:
-        conf_matrix = z
+        conf_matrix = cm
         table_metrics = metrics
 
 
@@ -63,15 +70,15 @@ labels_r = labels.copy()
 labels_r.reverse()
 
 # Make subplots top table bottom heatmap
-fig = make_subplots(rows=2, cols=1,
-                    specs=[[{'type': 'table'}],
-                           [{'type': 'heatmap'}]])
+fig = make_subplots(rows=1, cols=2,
+                    specs=[[{'type': 'table'},
+                           {'type': 'heatmap'}]])
 
 # Create heatmap 
 heatmap = go.Heatmap(x=labels, y=labels_r,
                     z=conf_matrix,
                     text=conf_matrix,
-                    texttemplate="%{text}",
+                    texttemplate="%{text:.3f}",
                     hovertemplate="<br>".join([
                         "Predicted: %{x}",
                         "Actual: %{y}",
@@ -81,17 +88,18 @@ heatmap = go.Heatmap(x=labels, y=labels_r,
 )
 
 
-# Create heatmap 
+# Create table
 metrics_table = go.Table(header=dict(values=['Metric', 'Value']),
-                 cells=dict(values=table_metrics))
+                 cells=dict(values=table_metrics, format=["", ".3f"])
+                         )
 
 # Add table and heatmap to figure 
 fig.add_trace(metrics_table, row=1, col=1)
-fig.add_trace(heatmap, row=2, col=1)
+fig.add_trace(heatmap, row=1, col=2)
 
 
 
-fig.update_layout(width=600, height=800,
+fig.update_layout(width=1000, height=600,
                   xaxis_title="Actual",
                   yaxis_title="Predicted",
                   xaxis_type="category", 
@@ -109,7 +117,7 @@ sliders = [dict(
 )]
 
 fig.update_layout(sliders=sliders)
-fig.show()
+fig.show(renderer='browser')
 
 
 
@@ -194,3 +202,18 @@ fig.show()
 
     print(f'Created and saved confusion matrix for {data_type} data')
     logging.info(f'Created and saved confusion matrix for {data_type} data')
+#####################3
+
+import plotly.graph_objs as go
+from plotly.subplots import make_subplots
+
+fig = make_subplots(rows=2, cols=2,
+                    specs=[[{'rowspan': 2}, {}], [None, {}]],
+                    subplot_titles=('First Subplot', 'Second Subplot', 'Third Subplot'))
+
+fig.add_trace(go.Scatter(x=[1, 2], y=[1, 2]), row=1, col=1)
+fig.add_trace(go.Scatter(x=[1, 2], y=[1, 2]), row=1, col=2)
+fig.add_trace(go.Scatter(x=[1, 2], y=[1, 2]), row=2, col=2)
+
+fig.update_layout(title='Unequal Subplots')
+fig.show(renderer='browser')
