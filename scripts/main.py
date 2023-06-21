@@ -84,10 +84,12 @@ if __name__ == '__main__':
         argvals = None
     else:
         # (Dev) script is not being run through the terminal
+        # make sure pwd is the root folder (not in scripts)
+
         # Command line arguments used for testing
-        argvals = '--name trained_models/test ' \
-                  '--data_path input/data/example_binary_titanic.csv ' \
-                  '--configuration input/configuration/example_binary_titanic.json ' \
+        argvals = '--name ../trained_models/test ' \
+                  '--data_path ../input/data/example_binary_titanic.csv ' \
+                  '--configuration ../input/configuration/example_binary_titanic.json ' \
                   '--model ebm'.split() # example of passing test params to parser
 
         # settings
@@ -98,7 +100,7 @@ if __name__ == '__main__':
     random_seed = 42
 
     # Get arguments from the CLI
-    args = GetArgs(argvals)
+    args = GetArgs('main', argvals)
 
     # Run main with given arguments
     main(args)

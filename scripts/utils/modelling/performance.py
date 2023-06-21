@@ -3,9 +3,13 @@ import numpy as np
 from matplotlib import pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import pingouin
 from sklearn.calibration import calibration_curve
 from sklearn.metrics import brier_score_loss
+from sklearn.metrics import classification_report
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, mean_absolute_percentage_error, explained_variance_score, max_error, median_absolute_error, mean_squared_log_error, mean_poisson_deviance, mean_gamma_deviance
+
 
 # The actual algorithms (grey as we refer to them dynamically)
 from utils.modelling.models import ebm
@@ -52,85 +56,132 @@ def plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging):
 
 # Mainly meant for binary classification
 def plotConfusionMatrixSlider(given_name, y_true, y_prob, data_type, logging):
-    import xarray as xr
-
-    cms = []
+    conf_matrices = []
+    steps=[]
 
     threshold_list = np.arange(0.0, 1.05, 0.05)
 
     for threshold in threshold_list:
         y_pred = [1 if x > threshold else 0 for x in y_prob]
-
-        nr_cases = len(y_pred)
-
+        
         df = pd.DataFrame({'y_true': y_true, 'y_pred': y_pred})
 
-        # predicted / actual 
-        trfa = len(df[(df['y_pred'] == 1) & (df['y_true'] == 0)])/nr_cases
-        trtr = len(df[(df['y_pred'] == 1) & (df['y_true'] == 1)])/nr_cases
-        fafa = len(df[(df['y_pred'] == 0) & (df['y_true'] == 0)])/nr_cases
-        fatr = len(df[(df['y_pred'] == 0) & (df['y_true'] == 1)])/nr_cases
+        # confusion matrix
+        cm = []
+        for p in [0,1]:
+            new_row = []
+            for a in [1,0]:
+                new_row.append(len(df[(df['y_pred'] == p) & (df['y_true'] == a)])/len(y_pred))
+            cm.append(new_row)
 
-        z = [[trtr, trfa],
-                [fatr, fafa]]  
+        # Add to list of matrices
+        conf_matrices.append(cm)
 
-        cms.append(z)
+        # Create sklearn summary report 
+        report = classification_report(y_true, y_pred, output_dict=True, zero_division=0)
 
-    # Round to 2 decimals 
-    threshold_list = [round(i,2) for i in threshold_list]
+        # Create a list of lists for the matrix
+        metrics_matrix = []
 
-    # convert to xarray
-    da = xr.DataArray(cms, coords=[threshold_list, ['1', '0'], ['1', '0']], dims=['Threshold', 'Predicted', 'Actual'])
+        # Iterate over the keys and values in the summary report dictionary
+        for key, value in report.items():
+            if key == 'accuracy':
+                metrics_matrix.append(['', '', '', '', ''])
+                metrics_matrix.append(['Accuracy', '', '', value, ''])
+            elif key.startswith(('macro', 'weighted')):
+                metrics_matrix.append([key.capitalize(), value['precision'], value['recall'], value['f1-score'], value['support']])
+            else:
+                row = [key, value['precision'], value['recall'], value['f1-score'], value['support']]
+                metrics_matrix.append(row)
 
-    # Create figure
-    fig = px.imshow(da, 
-                    title='Confusion Matrix',
-                    animation_frame='Threshold',
-                    text_auto=True,
-                    width=750, height=750, 
-                    labels=dict(animation_frame="Threshold"))
+        # Formatting options
+        precision_format = '{:.3f}'
+        integer_format = '{:d}'
+        empty_string_format = ''
 
-    # Add metrics per frame
-    for frame in fig.frames:
+        # Format the matrix elements
+        formatted_matrix = []
+        for row in metrics_matrix:
+            formatted_row = [precision_format.format(cell) if isinstance(cell, float)
+                            else integer_format.format(cell) if isinstance(cell, int)
+                            else empty_string_format if cell == ''
+                            else cell
+                            for cell in row]
+            formatted_matrix.append(formatted_row)
+
+        # transpose matrix
+        metrics = list(zip(*formatted_matrix))
+
+        # Add values to the different steps
+        steps.append(dict(method = "restyle",
+                    args = [{'z': [ cm ], #in the initial fig update z and text
+                        'text': [cm],
+                        'cells.values':[metrics]}],
+                        label=round(threshold,2),
+                        ))
         
-        # Get confusion matrix values of frame
-        trtr = frame.data[0].z[0,0]
-        trfa = frame.data[0].z[0,1]
-        fatr = frame.data[0].z[1,0]
-        fafa = frame.data[0].z[1,1]
+        if threshold == 0.5:
+            conf_matrix = cm
+            table_metrics = metrics
 
-        # Calculate metrics
-        # ignore div by 0 or 0/0 warning and just state nan
-        with np.errstate(divide='ignore', invalid='ignore'):
-            precision = np.float64(trtr) / (trtr + trfa)
-            recall = np.float64(trtr) / (trtr + fatr)
-            f1 = np.float64(2 * precision * recall) / (precision + recall)
-            accuracy = np.float64(trtr + fafa) / (trtr + trfa + fatr + fafa)
+    # Manually add labels
+    labels = ["1", "0"]
+    labels_r = labels.copy()
+    labels_r.reverse()
 
-        frame.layout['title'] = f'Confusion Matrix<br><sup>Precision: {precision:.2f}\tRecall: {recall:.2f}\tF1-Score: {f1:.2f}\tAccuracy: {accuracy:.2f}</sup>'
+    # Make subplots top table bottom heatmap
+    fig = make_subplots(rows=1, cols=2,
+                        specs=[[{'type': 'table'},
+                            {'type': 'heatmap'}]])
 
-    # set default slider value to 0.5 and update layout and trace accordingly
-    fig.layout.sliders[0]['active'] = 10  
-    fig.update_layout(fig.frames[10].layout)
-    fig.update_traces(z=fig.frames[10].data[0].z)
-
-    fig.update_layout(
-        xaxis = dict(
-            title='Actual',
-            dtick=1,
-        ),
-        yaxis = dict(
-            title='Predicted',
-            dtick=1,
-        )
+    # Create heatmap 
+    heatmap = go.Heatmap(x=labels, y=labels_r,
+                        z=conf_matrix,
+                        text=conf_matrix,
+                        texttemplate="%{text:.3f}",
+                        hovertemplate="<br>".join([
+                            "Predicted: %{y}",
+                            "Actual: %{x}",
+                            "Share of total cases: %{z}",
+                            "<extra></extra>"
+                        ])
     )
 
-    fig["layout"].pop("updatemenus")
+    # Create table
+    metrics_table = go.Table(header=dict(values=['          ', 'Precision', 'Recall', 'F1-Score', 'Support']),
+                    cells=dict(values=table_metrics) 
+                    )
+
+    # Add table and heatmap to figure 
+    fig.add_trace(metrics_table, row=1, col=1)
+    fig.add_trace(heatmap, row=1, col=2)
+
+
+
+    fig.update_layout(width=1000, height=600,
+                    xaxis_title="Actual",
+                    yaxis_title="Predicted",
+                    xaxis_type="category", 
+                    yaxis_type="category", 
+                    xaxis_side="top",
+                    title_text= "Normalized confusion matrix", 
+                    title_x=0.5,
+                    )
+
+    sliders = [dict(
+        active=10,
+        currentvalue={"prefix": "Threshold: "},
+        pad={"t": 50}, #sort it out later
+        steps=steps
+    )]
+
+    fig.update_layout(sliders=sliders)
 
     fig.write_html(f'{given_name}/performance/{data_type}_confusion_matrix.html', auto_play=False)
 
     print(f'Created and saved confusion matrix for {data_type} data')
     logging.info(f'Created and saved confusion matrix for {data_type} data')
+
 
 def plotConfusionMatrix(given_name, y_true, y_prob, y_pred, file_type, data_type, logging):
     # If html is wanted and binary classification
@@ -592,6 +643,84 @@ def plotDistribution(given_name, groups, values, data_type, logging):
 
     return
 
+def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type, logging):
+    y_true_pos = np.clip(y_true, 0, None)
+    y_pred_pos = np.clip(y_pred, 0, None)
+
+    # Calculate metrics
+    mae = mean_absolute_error(y_true, y_pred)
+    mse = mean_squared_error(y_true, y_pred)
+    rmse = mse ** 0.5
+    r2 = r2_score(y_true, y_pred)
+    adj_r2 = 1 - (1 - r2) * (len(y_true) - 1) / (len(y_true) - X_all.shape[1] - 1)
+    mape = mean_absolute_percentage_error(y_true, y_pred)
+    evs = explained_variance_score(y_true, y_pred)
+    me = max_error(y_true, y_pred)
+    medae = median_absolute_error(y_true, y_pred)
+    msle = mean_squared_log_error(y_true_pos, y_pred_pos)
+    rmsle_value = msle ** 0.5
+
+    header = ["Metric"]
+
+    # Define the rows of the table
+    rows = [
+        ["Mean Absolute Error (MAE)"],
+        ["Mean Squared Error (MSE)"],
+        ["Root Mean Squared Error (RMSE)"],
+        ["R-squared (R2)"],
+        ["Adjusted R-squared (Adj R2)"],
+        ["Mean Absolute Percentage Error (MAPE)"],
+        ["Explained Variance Score (EVS)"],
+        ["Max Error"],
+        ["Median Absolute Error (MedAE)"],
+        ["Mean Squared Log Error (MSLE)"],
+        ["Root Mean Squared Log Error (RMSLE)"]
+    ]
+
+    # Create the table
+    fig = go.Figure(data=[go.Table(header=dict(values=header), cells=dict(values=rows))])
+
+    # Add metrics data
+    metric_values = [
+        [mae],
+        [mse],
+        [rmse],
+        [r2],
+        [adj_r2],
+        [mape],
+        [evs],
+        [me],
+        [medae],
+        [msle],
+        [rmsle_value]
+    ]
+
+    metric_names = [row for row in rows]
+
+    # Add metrics data as a new column
+    cells_values = [metric_names, metric_values]
+    column_names = ["Metric", "Value"]
+
+    fig.add_trace(go.Table(
+        header=dict(values=column_names),
+        cells=dict(values=cells_values, format=["",".3"])
+    ))
+
+    # Update table layout
+    fig.update_layout(
+        title="Regression Performance Metrics",
+        margin=dict(l=10, r=10, t=50, b=10),
+    )
+
+    # Save table
+    fig.write_image(f'{given_name}/performance/{data_type}_regression_metrics.png')
+
+    print(f'Created and saved regression metrics table')
+    logging.info(f'Created and saved regression metrics table')
+
+    return
+    
+
 # To be used for feature exploration (TODO add more colors)
 def plotDistributionViolin(given_name, groups, values, data_type, logging):
     """
@@ -663,15 +792,25 @@ def plotDistributionViolin(given_name, groups, values, data_type, logging):
 
     return
 
-def scorePartialCorrelation(clf, post_datasets):
-    sl_test = clf.predict_and_contrib(post_datasets['X_test'], output='labels')
-    X_test_scores = pd.DataFrame(sl_test[1], columns=clf.feature_names)
-    y_test_label = pd.Series(post_datasets['y_test'], name='target')
+# TODO below function would need to have the test models available and make the calucations using those
+# So that the X_test is actually not seen yet by the model 
+# Currently the clf['final'] is the model trained over all data
+def scorePartialCorrelation(given_name, clf, post_datasets):
+    for fold_id in range(len(post_datasets['X_test_list'])):
+        clf_fold = clf['test'][fold_id]
 
+        X_test = post_datasets['X_test_list'][fold_id]
+        X_train = post_datasets['X_train_list'][fold_id]
+        y_test = post_datasets['y_test_list'][fold_id]
+        y_train = post_datasets['y_train_list'][fold_id]
 
-    sl_train = clf.predict_and_contrib(post_datasets['X_train'], output='labels')
-    X_train_scores = pd.DataFrame(sl_train[1], columns=clf.feature_names)
-    y_train_label = pd.Series(post_datasets['y_train'], name='target')
+        sl_test = clf_fold.predict_and_contrib(X_test, output='labels')
+        X_test_scores = pd.DataFrame(sl_test[1], columns=clf_fold.feature_names)
+        y_test_label = pd.Series(y_test, name='target')
+
+        sl_train = clf_fold.predict_and_contrib(X_train, output='labels')
+        X_train_scores = pd.DataFrame(sl_train[1], columns=clf_fold.feature_names)
+        y_train_label = pd.Series(y_train, name='target')
 
     # Define function for partial correlation
     def partial_correlation(X, y):
@@ -702,30 +841,35 @@ def scorePartialCorrelation(clf, post_datasets):
     )
     sc = ax.scatter(
         parscore_train, parscore_test,
-        edgecolor='grey', c=[5]*16, s=50, cmap=plt.cm.get_cmap('Reds'))
-    ax.set(title='Partial correlation bw SHAP and target...', xlabel='... on Train data', ylabel='... on Test data')
+        edgecolor='grey',
+        #   c=[5]*16, 
+          s=50, 
+          cmap=plt.cm.get_cmap('Reds'))
+    ax.set(title='Partial correlation bw Score and target...', xlabel='... on Train data', ylabel='... on Test data')
     cbar = fig.colorbar(sc)
     cbar.set_ticks([])
     for txt in parscore_train.index:
         ax.annotate(txt, (parscore_train[txt], parscore_test[txt] + plotbuffer / 2), ha='center', va='bottom')
-    # fig.savefig('parshap.png', dpi=300, bbox_inches="tight")
-    fig.show()
+    fig.savefig(f'{given_name}/performance/PartialCorrelation.png', dpi=300, bbox_inches="tight")
 
 
 def postModellingPlots(clf, model_name, model_type, given_name, post_datasets, post_params, logging):
     # Performance and other post modeling plots
     # unpack dict
     X_all = post_datasets['X_all']
-    y_all, y_all_prob, y_all_pred = post_datasets['y_all'], post_datasets['y_all_prob'], post_datasets['y_all_pred']
-    y_test, y_test_prob, y_test_pred = post_datasets['y_test'], post_datasets['y_test_prob'], post_datasets['y_test_pred']
-    y_test_list, y_test_prob_list = post_datasets['y_test_list'], post_datasets['y_test_prob_list']
+    y_all, y_all_pred = post_datasets['y_all'], post_datasets['y_all_pred']
+    y_test_concat, y_test_pred = post_datasets['y_test_concat'], post_datasets['y_test_pred']
+    y_test_list = post_datasets['y_test_list']
 
     if model_type == 'classification':
+        # probabilities only for classifications
+        y_test_prob, y_all_prob, y_test_prob_list = post_datasets['y_test_prob'], post_datasets['y_all_prob'], post_datasets['y_test_prob_list']
+
         # Threshold dependant
         plotConfusionMatrix(given_name, y_all, y_all_prob, y_all_pred, post_params['file_type'], data_type='final_train', logging=logging)
-        plotConfusionMatrix(given_name, y_test, y_test_prob, y_test_pred, post_params['file_type'], data_type='test', logging=logging)
+        plotConfusionMatrix(given_name, y_test_concat, y_test_prob, y_test_pred, post_params['file_type'], data_type='test', logging=logging)
 
-        if len(clf.classes_) == 2:
+        if len(clf['final'].classes_) == 2:
             # Also create pr curve for class 0
             y_all_neg = np.array([1 - j for j in list(y_all)])
             y_all_prob_neg = np.array([1 - j for j in list(y_all_prob)])
@@ -747,17 +891,19 @@ def postModellingPlots(clf, model_name, model_type, given_name, post_datasets, p
             plotCalibrationCurve(given_name, y_test_list, y_test_prob_list, data_type='test', logging=logging)
 
             plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final_train', logging=logging)
-            plotProbabilityDistribution(given_name, y_test, y_test_prob, data_type='test', logging=logging)
+            plotProbabilityDistribution(given_name, y_test_concat, y_test_prob, data_type='test', logging=logging)
+
+            scorePartialCorrelation(given_name, clf, post_datasets)
 
         # If multiclass classification
-        elif len(clf.classes_) > 2:
+        elif len(clf['final'].classes_) > 2:
             # loop through classes
-            for c in clf.classes_:
+            for c in clf['final'].classes_:
                 # creating a list of all the classes except the current class
-                other_class = [x for x in clf.classes_ if x != c]
+                other_class = [x for x in clf['final'].classes_ if x != c]
 
-                # Get index of selected class in clf.classes_
-                class_index = list(clf.classes_).index(c)
+                # Get index of selected class in clf['final'].classes_
+                class_index = list(clf['final'].classes_).index(c)
 
                 # marking the current class as 1 and all other classes as 0
                 y_test_list_ova = [[0 if x in other_class else 1 for x in fold_] for fold_ in y_test_list]
@@ -778,7 +924,7 @@ def postModellingPlots(clf, model_name, model_type, given_name, post_datasets, p
                 # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='pr', data_type='final_train_class1', logging=logging)
                 plotClassificationCurve(given_name, y_test_list_ova, y_test_prob_list_ova, curve_type='pr', data_type=f'test_class_{c}', logging=logging)
 
-                # multiClassPlotCalibrationCurvePlotly(given_name, y_all, pd.DataFrame(y_all_prob, columns=clf.classes_), title='fun')
+                # multiClassPlotCalibrationCurvePlotly(given_name, y_all, pd.DataFrame(y_all_prob, columns=clf['final'].classes_), title='fun')
                 plotCalibrationCurve(given_name, y_test_list_ova, y_test_prob_list_ova, data_type=f'test_class_{c}', logging=logging)
 
                 # plotProbabilityDistribution(given_name, y_all_ova, y_all_prob_ova, data_type='final_train', logging=logging)
@@ -786,12 +932,11 @@ def postModellingPlots(clf, model_name, model_type, given_name, post_datasets, p
 
     # if regression
     elif model_type == 'regression':
-        plotYhatVsYSave(given_name, y_test, y_test_pred, data_type='test')
-        plotYhatVsYSave(given_name, y_all, y_all_pred, data_type='final_train')
+        plotYhatVsYSave(given_name, y_test_concat, y_test_pred, data_type='test', logging=logging)
+        plotYhatVsYSave(given_name, y_all, y_all_pred, data_type='final_train', logging=logging)
 
-        adjustedR2 = 1 - (1 - clf.score(X_all, y_all)) * (len(y_all) - 1) / (len(y_all) - X_all.shape[1] - 1)
-        print('Adjusted R2: {adjustedR2}'.format(adjustedR2=adjustedR2))
-        logging.info('Adjusted R2: {adjustedR2}'.format(adjustedR2=adjustedR2))
+        regressionMetricsTable(given_name, y_test_concat, y_test_pred, X_all, data_type='test', logging=logging)
+        regressionMetricsTable(given_name, y_all, y_all_pred, X_all, data_type='final_train', logging=logging)
 
     # Post modeling plots, specific per model but includes feature importance among others
-    globals()[model_name].postModelPlots(clf, given_name + '/feature_importance', post_params['file_type'], logging)
+    globals()[model_name].postModelPlots(clf['final'], given_name + '/feature_importance', post_params['file_type'], logging)

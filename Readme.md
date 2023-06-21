@@ -127,7 +127,6 @@ Dictionary of parameters that can be used with model of choice (optional). Check
 `time_sensitive_column` options (optional):
 - Name of date column
   - used when `cv_type = timeseriesplit`  
-  - used when out-of-time dataset is created (not implemented yet)
 
 `upsampling` options (optional, should not be used without calibration):
 - `true`, applying the SMOTE(NC) algorithm on the minority class to balance the data

@@ -118,9 +118,6 @@ def plotClustermap(dfc, matrix_type, given_name, file_type, logging):
         # or as html file
         fig.write_html(f'{given_name}/feature_info/{matrix_type}_clustermap.html')
 
-    print(f'Created and saved {matrix_type} clustermap')
-    logging.info(f'Created and saved {matrix_type} clustermap')
-
 def plotPearsonCorrelation(df, given_name, file_type, logging):
     """
     Creates a Pearson correlation matrix using numerical columns of a Pandas DataFrame,

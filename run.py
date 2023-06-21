@@ -107,9 +107,9 @@ print("Starting script to create model")
 # Run script with given input using python in the venv (so venv does not need to be activated beforehand)
 print("\nRunning command:")
 if sys.platform == 'win32':
-    command = f".ml2sql\Scripts\python.exe main.py --name trained_models/{full_model_name} --data_path {csv_path} --configuration {json_path} --model {model_type}"
+    command = f".ml2sql\Scripts\python.exe scripts/main.py --name trained_models/{full_model_name} --data_path {csv_path} --configuration {json_path} --model {model_type}"
 else:
-    command = f".ml2sql/bin/python main.py --name trained_models/{full_model_name} --data_path {csv_path} --configuration {json_path} --model {model_type}"
+    command = f".ml2sql/bin/python scripts/main.py --name trained_models/{full_model_name} --data_path {csv_path} --configuration {json_path} --model {model_type}"
 
 print(command)
 
