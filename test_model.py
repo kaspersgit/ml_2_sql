@@ -15,7 +15,7 @@ for i, file in enumerate(files, 1):
 # Ask for CSVPATH
 csv_path = None
 while csv_path is None:
-    csv_file_index = input("\nSelect CSV file for training the model: ")
+    csv_file_index = input("\nSelect CSV file for testing the model: ")
     try:
         csv_file_index = int(csv_file_index) - 1
         csv_path = os.path.join(data_dir, files[csv_file_index])
@@ -62,7 +62,9 @@ try:
     csv_name = csv_path.split('/')[-1]
     destination_path = f"trained_models/{model_folder}/tested_datasets/{csv_name}"
 
-    os.makedirs(destination_path.split(csv_name)[0])
+    if not os.path.exists(destination_path.split(csv_name)[0]):
+        os.makedirs(destination_path.split(csv_name)[0])
+        
     os.makedirs(destination_path)
     os.makedirs(f"{destination_path}/performance")
 

@@ -226,36 +226,6 @@ def classificationReportSave(given_name, y_true, y_pred, data_type, logging):
     print('Classification report saved')
     logging.info('Classification report saved')
 
-def plotYhatVsYSave(given_name, y_true, y_pred, data_type, logging):
-    """
-    Plots a scatter plot of predicted values (y_pred) against true values (y_true)
-    and saves the plot in a specified directory.
-
-    Parameters:
-    -----------
-    given_name : str
-        Name of the directory where the plot will be saved.
-    y_true : array-like of shape (n_samples,)
-        Ground truth (correct) target values.
-    y_pred : array-like of shape (n_samples,)
-        Estimated targets as returned by a classifier.
-    data_type : str
-        Type of data, e.g. train, validation, or test.
-    logging : logging.Logger
-        Logging instance to log information about the execution.
-
-    Returns:
-    --------
-    None
-    """
-
-    plot_df = pd.DataFrame({'y_true':y_true, 'y_pred':y_pred})
-    fig = px.scatter(plot_df, 'y_true', 'y_pred')
-    fig.write_image('{given_name}/performance/{data_type}_scatter_yhat_vs_y.png'.format(given_name=given_name, data_type=data_type))
-
-    print(f'Scatter plot of yhat vs y saved for {data_type}')
-    logging.info(f'Scatter plot of yhat vs y saved for {data_type}')
-
 def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type, logging):
     """
     Plots the ROC or Precision-Recall curve for a binary classification model, and saves the plot image.
@@ -643,6 +613,66 @@ def plotDistribution(given_name, groups, values, data_type, logging):
 
     return
 
+"""
+Metrics and plot which are related to regression
+"""
+
+def plotYhatVsYSave(given_name, y_true, y_pred, data_type, logging):
+    """
+    Plots a scatter plot of predicted values (y_pred) against true values (y_true)
+    and saves the plot in a specified directory.
+
+    Parameters:
+    -----------
+    given_name : str
+        Name of the directory where the plot will be saved.
+    y_true : array-like of shape (n_samples,)
+        Ground truth (correct) target values.
+    y_pred : array-like of shape (n_samples,)
+        Estimated targets as returned by a classifier.
+    data_type : str
+        Type of data, e.g. train, validation, or test.
+    logging : logging.Logger
+        Logging instance to log information about the execution.
+
+    Returns:
+    --------
+    None
+    """
+
+    plot_df = pd.DataFrame({'y_true':y_true, 'y_pred':y_pred})
+    fig = px.scatter(plot_df, 'y_true', 'y_pred')
+    fig.write_image('{given_name}/performance/{data_type}_scatter_yhat_vs_y.png'.format(given_name=given_name, data_type=data_type))
+
+    print(f'Scatter plot of yhat vs y saved for {data_type}')
+    logging.info(f'Scatter plot of yhat vs y saved for {data_type}')
+
+def plotQuantileError(given_name, y_true, y_pred, data_type, logging):
+
+    # Add prediction error
+    plot_df = pd.DataFrame({'y_true':y_true, 'y_pred':y_pred, 'y_diff':y_pred - y_true})
+
+    # Make 20 quantiles
+    plot_df['quantile'] = pd.qcut(plot_df['y_true'], 20, duplicates='drop')
+
+    # Sort by quantile and make quantile colunn a string for plotting
+    plot_df = plot_df.iloc[plot_df['quantile'].cat.codes.argsort()]
+    plot_df['quantile'] = plot_df['quantile'].astype(str)
+
+    fig = px.box(plot_df, 'quantile', 'y_diff')
+    fig.update_layout(
+        xaxis_title='Actual',
+        yaxis_title='Prediction - actual',
+        title=f'Quantile error plot - {data_type} data',
+        width=1000,
+        height=800
+    )
+
+    fig.write_image('{given_name}/performance/{data_type}_quantile_error_plot.png'.format(given_name=given_name, data_type=data_type))
+
+    print(f'Quantile error plot saved for {data_type}')
+    logging.info(f'Quantile error plot saved for {data_type}')
+
 def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type, logging):
     y_true_pos = np.clip(y_true, 0, None)
     y_pred_pos = np.clip(y_pred, 0, None)
@@ -934,6 +964,9 @@ def postModellingPlots(clf, model_name, model_type, given_name, post_datasets, p
     elif model_type == 'regression':
         plotYhatVsYSave(given_name, y_test_concat, y_test_pred, data_type='test', logging=logging)
         plotYhatVsYSave(given_name, y_all, y_all_pred, data_type='final_train', logging=logging)
+
+        plotQuantileError(given_name, y_test_concat, y_test_pred, data_type='test', logging=logging)
+        plotQuantileError(given_name, y_all, y_all_pred, data_type='final_train', logging=logging)
 
         regressionMetricsTable(given_name, y_test_concat, y_test_pred, X_all, data_type='test', logging=logging)
         regressionMetricsTable(given_name, y_all, y_all_pred, X_all, data_type='final_train', logging=logging)

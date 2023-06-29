@@ -25,10 +25,13 @@ def apply_model(args):
 
     # Load in data
     df = pd.read_csv(args.data_path)
+    
+    target_col = model.target
+    feature_cols = [ x for x in model.feature_names if " x " not in x ]
 
     # Perform inference
-    y_true = df[model.target]
-    X = df[model.feature_names]
+    y_true = df[target_col]
+    X = df[feature_cols]
 
     y_pred = model.predict(X)
 
@@ -92,6 +95,8 @@ def apply_model(args):
     else:
         plotYhatVsYSave(destination, y_true, y_pred, data_type='test', logging=logging)
 
+        plotQuantileError(destination, y_true, y_pred, data_type='test', logging=logging)
+
         regressionMetricsTable(destination, y_true, y_pred, X, data_type='test', logging=logging)
 
 
@@ -107,9 +112,9 @@ if __name__ == '__main__':
         # (Dev) script is not being run through the terminal
 
         # Command line arguments used for testing
-        argvals = '--model_path ../trained_models/20230621_test_target_name/model/ebm_classification.sav ' \
-                  '--data_path ../input/data/example_binary_titanic.csv ' \
-                  '--destination_path ../trained_models/20230621_test_target_name/tested_datasets/example_binary_titanic.csv'.split() # example of passing test params to parser
+        argvals = '--model_path ../trained_models/20230622_datathon_ebm/model/ebm_regression.sav ' \
+                  '--data_path ../input/data/20230525_cq_datathon.csv ' \
+                  '--destination_path ../trained_models/20230622_datathon_ebm/tested_datasets/20230525_cq_datathon.csv'.split() # example of passing test params to parser
 
         # settings
         pd.set_option('display.max_rows', 500)
