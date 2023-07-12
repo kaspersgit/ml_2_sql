@@ -13,25 +13,17 @@
 5. [Troubleshooting](#troubleshooting)
 
 
-# What is it?
+# In short
 This project tries to make the process simple enough for any SQL user to train a model, check the performance and deploy that model in SQL.
+
+## Phylosophy:
+- Automated and easy to use 
+- Model in SQL (avoid Data Science debt for a complex pipeline)
+- Explainable Boosting Machine on par with other boosted methods
 
 ## Background
 An automated machine learning tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from interpretML) to train models which are explainable and transparent in how they come to their prediction. SQL infrastructure is the only requirement to put a model into production.
 This tool can be used by anybody, but is aimed for people who want to easily train a model and want to use it in their (company) SQL system. 
-
-Advantages:
-- Automated model training
-- Easy usage
-- Collection of model performance metrics generated
-- Model saved in SQL file
-- Avoid Python production models 
-- Explainable Boosting Machine on par with other boosted methods
-
-Disadvantages:
-- No neural networks and other complex models (boosted trees)
-- Tool runs locally
-- Some values are hardcoded (e.g. kfold: k = 5)
 
 ## Current state
 - Only EBM is implemented (decision tree, logistic regression and rule set not yet)
@@ -145,27 +137,29 @@ Name of target column (required)
 - Multiclass and regression are experimental
 
 ## TODO list
-- Add decision tree
-- Add logistic regression
-- Add Skope rules
-- Add calibration (platt scaling/isotonic regression)
-- Add changelog and versioning
-- Implement null handling (there is an implementation mentioned [here](https://github.com/interpretml/interpret/issues/18))
-- Make multi class classification EBM work fully
-- Make regression EBM work fully
-- Removing outliers by using quantiles (e.g. only keeping 1 - 99 % quantiles)
-- Spatial Cross-validation discovery
-- Extend logging granularity (add model parameters)
-- Add MCC, cohen kappa and other metrics plotted with threshold
-- Add SQL translation for decision rule
-- Add random seed to config file
-- Make a proper testing procedure
-- Improve ReadMe
-- Add more example files (binary/regression/multiclass)
-- Make distribution plot grouped instead of overlaid or stacked (maybe switch to plotly histogram)
-- Add check if variables and target are finite 
-- Add performance summary for easy and quick comparison (including label count, auc pr & roc, best f1-score, etc)
-- Add feature over/under fitting plot (https://towardsdatascience.com/which-of-your-features-are-overfitting-c46d0762e769)
-- Add variables being NULL checks
+- EBM
+  - SQL interaction terms first term with least values
+  - SQL interaction terms group by to merge similar score bounds
+  - Make multi class classification EBM work fully
+  - Make regression EBM work fully
+
+- Checks and config
+  - Add check if variables and target are finite 
+  - Add variables being NULL checked
+  - Add random seed to config file
+  - Implement null handling (there is an implementation mentioned [here](https://github.com/interpretml/interpret/issues/18))
+
+- Performance monitoring
+  - Add performance summary for easy and quick comparison (including label count, auc pr & roc, best f1-score, etc)
+  - Add feature over/under fitting plot (https://towardsdatascience.com/which-of-your-features-are-overfitting-c46d0762e769)
+  - Make distribution plot grouped instead of overlaid or stacked (maybe switch to plotly histogram)
+
+- Other 
+  - Add calibration (platt scaling/isotonic regression)
+  - Add changelog and versioning
+  - Extend logging granularity 
+  - Add SQL translation for decision rule
+  - Make a proper testing procedure
+  - Add more example files (binary/regression/multiclass)
 
 # Troubleshooting
