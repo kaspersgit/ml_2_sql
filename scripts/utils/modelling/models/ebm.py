@@ -113,11 +113,16 @@ def featureExplanationSave(clf, given_name, file_type, logging):
         plotly_fig.write_html('{given_name}/1_overall_feature_importance.html'.format(given_name=given_name))
 
     # Save feature specific explanation graphs
-    for index, value in enumerate(clf.feature_groups_):
+    for index, value in enumerate(clf.term_features_):
         plotly_fig = clf_global.visualize(index)
 
-        # reformatting feature name
-        feature_name = clf.feature_names[index]
+        # Formatting feature name
+        # if combined feature create combined feature name
+        if len(value) == 2:
+            feature_name = f'{clf.feature_names[value[0]]}_x_{clf.feature_names[value[1]]}'
+        else:
+            feature_name = clf.feature_names[index]
+
         chars = "\\`./ "
         for c in chars:
             if c in feature_name:

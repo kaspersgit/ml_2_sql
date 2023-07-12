@@ -923,7 +923,8 @@ def postModellingPlots(clf, model_name, model_type, given_name, post_datasets, p
             plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final_train', logging=logging)
             plotProbabilityDistribution(given_name, y_test_concat, y_test_prob, data_type='test', logging=logging)
 
-            scorePartialCorrelation(given_name, clf, post_datasets)
+            # TODO fix this
+            # scorePartialCorrelation(given_name, clf, post_datasets)
 
         # If multiclass classification
         elif len(clf['final'].classes_) > 2:
