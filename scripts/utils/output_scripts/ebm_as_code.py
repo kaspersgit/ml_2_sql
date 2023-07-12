@@ -235,7 +235,7 @@ def extractLookupTable(ebm):
     df_of_lists_single = df_of_lists[df_of_lists['nr_features']==1].reset_index(drop=True)
     df_of_lists_double = df_of_lists[df_of_lists['nr_features']==2].reset_index(drop=True)
 
-    # Reduce Single featuers lookup df
+    # Reduce Single featuers lookup
     lookup_df_single = ReduceSingleFeature(df_of_lists_single)
 
     # Restructure and reduce double feature df 
