@@ -29,6 +29,7 @@
     "SigmoidOfAreas"
   ],
   "model_params": {
+	"max_bins": 5
   },
   "post_params": {
     "calibration": "false",

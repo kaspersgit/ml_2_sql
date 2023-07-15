@@ -10,9 +10,14 @@ input/configuration/*.json
 trained_models/*
 !trained_models/example_titanic/
 
+manual_testing.py
+
 # Editors
 .vscode/
 .idea/
+
+# Ruff
+.ruff*
 
 # Vagrant
 .vagrant/

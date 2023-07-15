@@ -8,6 +8,7 @@
     "Fare"
   ],
   "model_params": {
+      "interactions": 5
   },
   "post_params": {
     "calibration": "false",

@@ -13,20 +13,23 @@
 5. [Troubleshooting](#troubleshooting)
 
 
-# What is it?
-## Background
-Due to SQL being the main language being used for data manipulation and thus has extensive support in terms of compute and scheduling,
-why not perform inference with a machine learning model written in SQL code? The big limitation here is SQL itself, that's why we attempt to use
-machine learning models which have a simple structure it is writable in SQL. One additional benefit of this is that the model is interpretable,
-if you can write down the model in a basic logical language (SQL) you should be able to understand it (with limitation ofcourse).
-
+# In short
 This project tries to make the process simple enough for any SQL user to train a model, check the performance and deploy that model in SQL.
+
+## Philosophy:
+- Automated and easy to use 
+- Model in SQL (avoid Data Science debt for a complex pipeline)
+- Explainable Boosting Machine on par with other boosted methods
+
+## Background
+An automated machine learning tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from interpretML) to train models which are explainable and transparent in how they come to their prediction. SQL infrastructure is the only requirement to put a model into production.
+This tool can be used by anybody, but is aimed for people who want to easily train a model and want to use it in their (company) SQL system. 
 
 ## Current state
 - Only EBM is implemented (decision tree, logistic regression and rule set not yet)
 - Automated model training is working for binary classification and regression
 - SQL creation of model is working fully for binary clasification
-- SQL for regression and the whole process for multiclass classification is wip
+- SQL for regression and the whole process for multiclass classification is work in progress
 - Up/down sampling not fully implemented yet 
 
 </br>
@@ -56,21 +59,33 @@ This project tries to make the process simple enough for any SQL user to train a
    
     Mac/Linux:
    `source .ml2sql/bin/activate` or `deactivate`
+4. For usage of this tool the virtual environment can be deactivated.
 
 ## Try it out demo
-1. Make sure virtual environment is active (step 3 of Pre requisites)
-2. In the terminal in the root of this folder run: `python run.py`
-3. Follow the instructions on screen by selecting the demo data and (similarly named) config file
-4. Check the output in the newly created folder
+1. In the terminal in the root of this folder run: 
+  - `python3 run.py` (Mac/Linux)
+  - `python run.py` (Windows)
+2. Follow the instructions on screen by selecting the demo data and (similarly named) config file
+3. Check the output in the newly created folder
 
 ## Try it out using own data
-1. Make sure virtual environment is active (step 3 of Pre requisites)
-2. Save csv file containing target and all features in the `input/data/` folder (more on input data at [input data](#data))
-3. Save a settings json file in the `input/configuration/` (explained below at [configuration json](#configuration-json))
-4. In the terminal run: `bash run.sh`
-5. Follow the instruction on screen
-6. The output will be saved in the folder `trained_models/<current_date>_<your_model_name>/`
-7. The `.sql` file will contain a SQL Case When statement imitating the decision tree/EBM  
+1. Save csv file containing target and all features in the `input/data/` folder (more on input data at [input data](#data))
+2. Save a settings json file in the `input/configuration/` (explained below at [configuration json](#configuration-json))
+3. In the terminal in the root of this folder run: 
+  - `python3 run.py` (Mac/Linux)
+  - `python run.py` (Windows)
+4. Follow the instruction on screen
+5. The output will be saved in the folder `trained_models/<current_date>_<your_model_name>/`
+6. The `.sql` file in the `model` folder will contain a SQL written model  
+
+## Testing already trained model on a new dataset
+1. Make sure new dataset is exactly the same format as the dataset the model was trained on
+2. Save dataset in the `input/data/` folder (more on input data at [input data](#data))
+3. In the terminal in the root of this folder run: 
+  - `python3 test_model.py` (Mac/Linux)
+  - `python test_model.py` (Windows)
+4. Follow the instructions on screen
+5. The output will be saved in the folder `trained_models/<selected_model>/tested_datasets/<selected_dataset>/`
 
 </br>
 
@@ -98,8 +113,8 @@ Dictionary of parameters that can be used with model of choice (optional). Check
 - any other value, no calibration applied
 
 `sql_split` options:
-- `false`, outputs the SQL model as one column by adding all separate scores up directly
-- `true`, outputs the SQL model as one column for each feature and a total score columns afterwards. This might be needed to avoid some memory related (stackoverflow) error.
+- `false`, outputs the SQL model as one SELECT statement, using column aliases within the same select statement
+- `true`, outputs the SQL model as several CTEs, this can be used if column aliases can't be referenced within the same SELECT statement
 
 `file_type` options (optional):
 - `png`, output of features importance graphs will be static .png (smaller file).
@@ -116,7 +131,6 @@ Dictionary of parameters that can be used with model of choice (optional). Check
 `time_sensitive_column` options (optional):
 - Name of date column
   - used when `cv_type = timeseriesplit`  
-  - used when out-of-time dataset is created (not implemented yet)
 
 `upsampling` options (optional, should not be used without calibration):
 - `true`, applying the SMOTE(NC) algorithm on the minority class to balance the data
@@ -132,29 +146,32 @@ Name of target column (required)
 ## Notes
 - Any NULL values should be imputed before using this script
 - Data imbalance treatments (e.g. oversampling + model calibration) not fully implemented
-- Resampling (almost) always makes the trained model ill calibrated
 - Multiclass and regression are experimental
 
 ## TODO list
-- Add decision tree
-- Add logistic regression
-- Add Skope rules
-- Add calibration (platt scaling/isotonic regression)
-- Add changelog and versioning
-- Implement null handling (there is an implementation mentioned [here](https://github.com/interpretml/interpret/issues/18))
-- Make multi class classification EBM work fully
-- Make regression EBM work fully
-- Removing outliers by using quantiles (e.g. only keeping 1 - 99 % quantiles)
-- Spatial Cross-validation discovery
-- Extend logging granularity (add model parameters)
-- Use menu function bash for model type choosing
-- Add target single unique value check
-- Replace/improve `classification_report` and `confusion_matrix` due to dependance on threshold
-- Add MCC, cohen kappa and other metrics plotted with threshold
-- Add SQL translation for decision rule
-- Add random seed to config file
-- Make a proper testing procedure
-- Makefile (or bash script) to setup virt env and install packages (instead of running 3 setup lines)
-- Improve ReadMe
-- Add more example files (binary/regression/multiclass)
-- Add tool to make configuration json
+- EBM
+  - SQL interaction terms first term with least values
+  - SQL interaction terms group by to merge similar score bounds
+  - Make multi class classification EBM work fully
+  - Make regression EBM work fully
+
+- Checks and config
+  - Add check if variables and target are finite 
+  - Add variables being NULL checked
+  - Add random seed to config file
+  - Implement null handling (there is an implementation mentioned [here](https://github.com/interpretml/interpret/issues/18))
+
+- Performance monitoring
+  - Add performance summary for easy and quick comparison (including label count, auc pr & roc, best f1-score, etc)
+  - Add feature over/under fitting plot (https://towardsdatascience.com/which-of-your-features-are-overfitting-c46d0762e769)
+  - Make distribution plot grouped instead of overlaid or stacked (maybe switch to plotly histogram)
+
+- Other 
+  - Add calibration (platt scaling/isotonic regression)
+  - Add changelog and versioning
+  - Extend logging granularity 
+  - Add SQL translation for decision rule
+  - Make a proper testing procedure
+  - Add more example files (binary/regression/multiclass)
+
+# Troubleshooting

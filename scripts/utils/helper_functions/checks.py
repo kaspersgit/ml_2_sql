@@ -1,8 +1,38 @@
-from sklearn.tree import _tree
 import pandas as pd
 import numpy as np
 
+
+def checkTargetHard(target):
+    if target.nunique() == 1:
+        raise Exception("Target column needs more than 1 unique value")
+
+def checkFeaturesHard(features):
+    featNullCount = features.isnull().sum()
+    nullf = featNullCount[featNullCount > 0]
+    if len(nullf) > 0:
+        raise Exception(f"NULL values not allowed, found the following: \n{nullf}")
+
+def checkInputDataHard(data, config):
+    """
+    Checks at start ensuring target and feature columns are good to go
+    """
+    checkTargetHard(data[config['target']])
+    checkFeaturesHard(data[config['features']])
+
 def checkAllClassesHaveLeafNode(clf):
+    """
+    Check if all classes are represented by a leaf node in a given decision tree classifier.
+
+    Parameters:
+    -----------
+    clf : sklearn.tree.DecisionTreeClassifier object
+        The decision tree classifier to be checked.
+
+    Returns:
+    --------
+    bool
+        True if all classes are represented by a leaf node, False otherwise.
+    """
     n_nodes = clf.tree_.node_count
     children_left = clf.tree_.children_left
     children_right = clf.tree_.children_right

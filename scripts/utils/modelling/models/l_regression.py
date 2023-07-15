@@ -1,29 +1,29 @@
-from interpret.glassbox import ExplainableBoostingClassifier, ExplainableBoostingRegressor
 import pickle
-import random
-from sklearn.model_selection import train_test_split
+from interpret.glassbox import LinearRegression, LogisticRegression
 from utils.modelling.performance import *
-from utils.modelling.calibration import *
 
 def trainModel(X_train, y_train, params, model_type, logging):
-    if 'feature_names' not in params.keys():
-        params['feature_names'] = X_train.columns
+    # if 'feature_names' not in params.keys():
+    #     params['feature_names'] = X_train.columns
     if model_type == 'regression':
-        clf = ExplainableBoostingRegressor(**params)
+        clf = LinearRegression(**params)
+        clf_name = 'Linear regression'
     elif model_type == 'classification':
-        clf = ExplainableBoostingClassifier(**params)
+        clf = LogisticRegression(**params)
+        # Hard code classes_
+        clf.classes_ = list(set(y_train))
+        clf_name = 'Logistic regression'
     else:
         print('Only regression or classification available')
         logging.warning('Only regression or classification available')
 
     clf.fit(X_train, y_train)
-    logging.info(f'Model params:\n {clf.get_params}')
+    logging.info(f'Model non default params:\n {clf.kwargs}')
 
-    print('Trained explainable boosting machine \n')
-    logging.info('Trained explainable boosting machine')
+    print(f'Trained {clf_name.lower()} \n')
+    logging.info(f'Trained {clf_name.lower()}')
 
     return clf
-
 
 def featureExplanationSave(clf, given_name, file_type, logging):
 

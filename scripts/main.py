@@ -1,17 +1,21 @@
 # Load packages
 import logging
-import sys
+import pandas as pd
+import json
 
-from utils.modelling.main_modeler import *
+# Main modelling function
+from utils.modelling.main_modeler import make_model
 
 # The translations to SQL (grey as we refer to them dynamically)
 from utils.output_scripts import decision_tree_as_code
 from utils.output_scripts import decision_rule_as_code
 from utils.output_scripts import ebm_as_code
 
-from utils.helper_functions.config_handling import *
-from utils.helper_functions.parsing_arguments import *
-from utils.pre_process import *
+from utils.helper_functions.checks import checkInputDataHard
+
+from utils.helper_functions.config_handling import config_handling
+from utils.helper_functions.parsing_arguments import GetArgs
+from utils.pre_processing.pre_process import pre_process_kfold
 
 def main(args):
     # get given name from the first given argument
@@ -20,11 +24,12 @@ def main(args):
     # set logger
     logging.basicConfig(format='%(asctime)s %(message)s', filename=given_name+'/logging.log', level=logging.DEBUG)
     logging.getLogger('matplotlib.font_manager').disabled = True # ignore matplotlibs font warnings
+    logging.info(f'Script input arguments: \n{args}')
 
-    # path to data
-    data_ = pd.read_csv(args.data_path)
+    # Load in data
+    data = pd.read_csv(args.data_path)
 
-    # get target and features columns
+    # Get configuration file
     with open(args.configuration) as json_file:
         configuration = json.load(json_file)
 
@@ -34,17 +39,14 @@ def main(args):
     # Handle the configuration file
     target_col, feature_cols, model_params, pre_params, post_params = config_handling(configuration, logging)
 
-    # pre processing
-    # make copy (doesn't change anything but for future use)
-    data = data_.copy()
-
     # Log parameters
     logging.info(f'Configuration file content: \n{configuration}')
 
+    # Perform some basic checks
+    checkInputDataHard(data, configuration)
+
     # set model type based on target value
-    if data[target_col].nunique() == 1:
-        raise Exception("Target column needs more than 1 unique value")
-    elif (data[target_col].dtype == 'float') | ((data[target_col].dtype == 'int') & (data[target_col].nunique() > 10)):
+    if (data[target_col].dtype == 'float') | ((data[target_col].dtype == 'int') & (data[target_col].nunique() > 10)):
         model_type = 'regression'
     else:
         model_type = 'classification'
@@ -82,10 +84,12 @@ if __name__ == '__main__':
         argvals = None
     else:
         # (Dev) script is not being run through the terminal
+        # make sure pwd is the root folder (not in scripts)
+
         # Command line arguments used for testing
-        argvals = '--name trained_models/test ' \
-                  '--data_path input/data/example_multiclass_faults.csv ' \
-                  '--configuration input/configuration/example_multiclass_faults.json ' \
+        argvals = '--name ../trained_models/test ' \
+                  '--data_path ../input/data/example_binary_titanic.csv ' \
+                  '--configuration ../input/configuration/example_binary_titanic.json ' \
                   '--model ebm'.split() # example of passing test params to parser
 
         # settings
@@ -96,7 +100,7 @@ if __name__ == '__main__':
     random_seed = 42
 
     # Get arguments from the CLI
-    args = GetArgs(argvals)
+    args = GetArgs('main', argvals)
 
     # Run main with given arguments
     main(args)

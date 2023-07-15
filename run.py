@@ -21,6 +21,7 @@ print("\n\n")
 # List files in input/data/ directory
 data_dir = "input/data/"
 files = os.listdir(data_dir)
+files.sort()
 
 print("Files in input/data/:")
 for i, file in enumerate(files, 1):
@@ -29,7 +30,7 @@ for i, file in enumerate(files, 1):
 # Ask for CSVPATH
 csv_path = None
 while csv_path is None:
-    csv_file_index = input("\nSelect path to csv file for training the model: ")
+    csv_file_index = input("\nSelect CSV file for training the model: ")
     try:
         csv_file_index = int(csv_file_index) - 1
         csv_path = os.path.join(data_dir, files[csv_file_index])
@@ -42,6 +43,7 @@ print(f"CSV file {csv_path} will be used for modelling")
 # List files in input/configuration/ directory
 configuration_dir = "input/configuration/"
 files = os.listdir(configuration_dir)
+files.sort()
 
 print(f"\n\nFiles in {configuration_dir}:")
 for i, file in enumerate(files, 1):
@@ -50,7 +52,7 @@ for i, file in enumerate(files, 1):
 # Ask for JSONPATH
 json_path = None
 while json_path is None:
-    json_file_index = input("\nSelect path to json file for model configuration: ")
+    json_file_index = input("\nSelect JSON file for training configuration: ")
     try:
         json_file_index = int(json_file_index) - 1
         json_path = os.path.join(configuration_dir, files[json_file_index])
@@ -60,7 +62,7 @@ while json_path is None:
 print(f"Configuration file {json_path} will be used for modelling")
 
 # Ask for MODEL_TYPE
-model_types = ["Explainable Boosting Machine", "Decision Tree", "Decision Rule"]
+model_types = ["Explainable Boosting Machine", "Decision Tree", "Decision Rule", "Logistic/Linear regression"]
 model_type = None
 while model_type is None:
     print("\nWhat type of model do you want?")
@@ -76,17 +78,28 @@ while model_type is None:
         print("Invalid option")
 
 print(f"Algorithm chosen for modelling: {model_type}")
+
+# Rename model choice for easier reference in code later on
 model_type = 'ebm' if model_type == 'Explainable Boosting Machine' else model_type
+model_type = 'l_regression' if model_type == 'Logistic/Linear regression' else model_type
 model_type = model_type.lower().replace(" ", "_")
-print(model_type)
 
 # Model name
-model_name = input("\nGive it a name: ")
+unique_name = False
+while not unique_name: 
+    model_name = input("\nGive it a name: ")
 
-# Current date
-current_date = datetime.today().strftime('%Y%m%d')
+    # Current date
+    current_date = datetime.today().strftime('%Y%m%d')
 
-full_model_name = f"{current_date}_{model_name}"
+    full_model_name = f"{current_date}_{model_name}"
+
+    # Check if folder already exists with this name
+    if os.path.isdir(f"trained_models/{full_model_name}"):
+        print('Folder with this name already exists please try another')
+    else:
+        unique_name = True
+        
 
 # Make directory with current data and model name
 try:
@@ -100,9 +113,13 @@ except FileExistsError:
 
 print("Starting script to create model")
 
-# Run python script with given input
+# Run script with given input using python in the venv (so venv does not need to be activated beforehand)
 print("\nRunning command:")
-command = f"python main.py --name trained_models/{full_model_name} --data_path {csv_path} --configuration {json_path} --model {model_type}"
+if sys.platform == 'win32':
+    command = f".ml2sql\Scripts\python.exe scripts/main.py --name trained_models/{full_model_name} --data_path {csv_path} --configuration {json_path} --model {model_type}"
+else:
+    command = f".ml2sql/bin/python scripts/main.py --name trained_models/{full_model_name} --data_path {csv_path} --configuration {json_path} --model {model_type}"
+
 print(command)
 
 os.system(command)

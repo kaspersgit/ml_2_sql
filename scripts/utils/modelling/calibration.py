@@ -4,6 +4,31 @@ from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
 
 def calibrateModel(model, X, y, logging, method='auto', final_model=False):
+    """
+    Calibrate a classification model.
+
+    Parameters
+    ----------
+    model : object
+        A trained classification model.
+    X : array-like or sparse matrix of shape (n_samples, n_features)
+        The input data.
+    y : array-like of shape (n_samples,)
+        The target values.
+    logging : object
+        A logging object for logging messages.
+    method : str, optional
+        The calibration method to use. If 'auto', the method is chosen automatically based on the size of the calibration dataset. If 'sigmoid', the logistic regression method is used. If 'isotonic', the isotonic regression method is used. Default is 'auto'.
+    final_model : bool, optional
+        If True, a calibrated model and calibration function are returned. Default is False.
+
+    Returns
+    -------
+    model_cal : object
+        A calibrated classifier.
+    cal_reg : object, optional
+        A calibration function. Returned only if `final_model` is True.
+    """
     # set calibration function depending on calibration data size
     if method == 'auto':
         if len(X) > 1000:
