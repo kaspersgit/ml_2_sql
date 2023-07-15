@@ -51,8 +51,8 @@ def plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging):
     plt.xticks(rotation=90)
     plt.savefig('{given_name}/performance/{data_type}_confusion_matrix.png'.format(given_name=given_name, data_type=data_type), bbox_inches='tight')
 
-    print('Confusion matrix saved')
-    logging.info('Confusion matrix saved')
+    print(f'Created and saved confusion matrix for {data_type} data')
+    logging.info(f'Created and saved confusion matrix for {data_type} data')
 
 # Mainly meant for binary classification
 def plotConfusionMatrixSlider(given_name, y_true, y_prob, data_type, logging):
@@ -430,8 +430,8 @@ def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
 
     fig.write_image(f'{given_name}/performance/{data_type}_calibration_plot.png')
 
-    print(f'Created and saved calibration plot')
-    logging.info(f'Created and saved calibration plot')
+    print(f'Created and saved calibration plot for {data_type} data')
+    logging.info(f'Created and saved calibration plot for {data_type} data')
 
     return
 
@@ -930,6 +930,11 @@ def postModellingPlots(clf, model_name, model_type, given_name, post_datasets, p
         elif len(clf['final'].classes_) > 2:
             # loop through classes
             for c in clf['final'].classes_:
+
+                # stating the class
+                print(f'\nFor class {c}:')
+                logging.info(f'\nFor class {c}:')
+
                 # creating a list of all the classes except the current class
                 other_class = [x for x in clf['final'].classes_ if x != c]
 
@@ -949,7 +954,7 @@ def postModellingPlots(clf, model_name, model_type, given_name, post_datasets, p
 
 
                 # Threshold independant
-                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='roc', data_type=f'final_train_class_'{c}, logging=logging)
+                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='roc', data_type=f'final_train_class_{c}', logging=logging)
                 plotClassificationCurve(given_name, y_test_list_ova, y_test_prob_list_ova, curve_type='roc', data_type=f'test_class_{c}', logging=logging)
 
                 # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='pr', data_type='final_train_class1', logging=logging)

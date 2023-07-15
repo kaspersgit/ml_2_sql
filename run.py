@@ -85,12 +85,21 @@ model_type = 'l_regression' if model_type == 'Logistic/Linear regression' else m
 model_type = model_type.lower().replace(" ", "_")
 
 # Model name
-model_name = input("\nGive it a name: ")
+unique_name = False
+while not unique_name: 
+    model_name = input("\nGive it a name: ")
 
-# Current date
-current_date = datetime.today().strftime('%Y%m%d')
+    # Current date
+    current_date = datetime.today().strftime('%Y%m%d')
 
-full_model_name = f"{current_date}_{model_name}"
+    full_model_name = f"{current_date}_{model_name}"
+
+    # Check if folder already exists with this name
+    if os.path.isdir(f"trained_models/{full_model_name}"):
+        print('Folder with this name already exists please try another')
+    else:
+        unique_name = True
+        
 
 # Make directory with current data and model name
 try:

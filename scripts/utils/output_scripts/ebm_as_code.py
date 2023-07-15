@@ -64,7 +64,6 @@ def RestructureReduceInteractions(df_):
     for index, row in df.iterrows():
         # Swap features position if first feature has more bound values then second feature
         if row['score'].shape[0] > row['score'].shape[1]:
-            print(str(row['feature']) + ' will be transponsed')
 
             # loop over column needed to be transposed
             for c in ['feature', 'feat_bound', 'score', 'feat_type']:
@@ -81,7 +80,7 @@ def RestructureReduceInteractions(df_):
     df[['feat_type_1', 'feat_type_2']] = df['feat_type'].apply(pd.Series)
 
     # Drop unused column 
-    df = df.drop(['feat_bound','feat_type'], axis=1)
+    df = df.drop(['feat_bound'], axis=1)
 
     # Set index
     df = df.set_index(['feature'])
@@ -100,10 +99,12 @@ def RestructureReduceInteractions(df_):
 
     # being able for score arrays to be grouped
     # for categorical features do not group by score hence we include value in score_hash
-    lookup_df['pre_hash_column'] = lookup_df['score'].astype(str) + lookup_df['feat_bound_1'].astype(str) + lookup_df['feat_bound_2'].astype(str)
-
+    lookup_df['pre_hash_column'] = np.where(('categorical' in lookup_df['feat_type'])
+                                            , lookup_df['score'].astype(str) + lookup_df['feat_bound_1'].astype(str) + lookup_df['feat_bound_2'].astype(str)
+                                            , lookup_df['score'].astype(str) + lookup_df['feat_bound_1'].astype(str))
     lookup_df['score_hash'] = pd.util.hash_pandas_object(lookup_df['pre_hash_column'], index=False)
     hash_lookup_df = lookup_df[['score_hash','score']].drop_duplicates('score_hash').reset_index(drop=True).copy()
+
 
     # to group by score but keep them in order (not grouping similar scores for different feature values)
     adj_check = (lookup_df.score_hash != lookup_df.score_hash.shift()).cumsum()
@@ -123,10 +124,14 @@ def RestructureReduceInteractions(df_):
     # So reverse the ordering
     lookup_df_grouped = lookup_df_grouped.iloc[::-1].reset_index(drop=True)
 
-    return lookup_df_grouped
-    
-    
+    # Group second feature to list again for easier SQL writing
+    lookup_df_group_feat2 = lookup_df_grouped.groupby(['feat_1', 'feat_2', 'feat_type_1', 'feat_type_2','feat_bound_1']).agg({
+        'feat_bound_2': list
+        ,'score': list
+    }).reset_index(drop=False)
 
+    return lookup_df_group_feat2
+    
  
 def extractLookupTable(ebm):
     """ Provides reformatted structure of EBM
@@ -238,10 +243,14 @@ def extractLookupTable(ebm):
     # Reduce Single featuers lookup
     lookup_df_single = ReduceSingleFeature(df_of_lists_single)
 
-    # Restructure and reduce double feature df 
-    lookup_df_double = RestructureReduceInteractions(df_of_lists_double)
+    # Check if interactions exist
+    if len(df_of_lists_double) > 0:
+        # Restructure and reduce double feature df 
+        lookup_df_double = RestructureReduceInteractions(df_of_lists_double)
+    else:
+        lookup_df_double = None
 
-    return {'intercept': ebm.intercept_, 'feature_single': lookup_df_single, 'feature_double': df_of_lists_double}
+    return {'intercept': ebm.intercept_, 'feature_single': lookup_df_single, 'feature_double': lookup_df_double}
 
 def lookup_df_to_sql(model_name, df_dict, split=True):
     # Create list for all feature score names
@@ -261,11 +270,11 @@ def lookup_df_to_sql(model_name, df_dict, split=True):
     feature_list.append('intercept')
 
     # for single feature
-    single_features = single_features_2_sql(df_dict['feature_single'])
+    single_features = single_feature_handling(df_dict['feature_single'])
     feature_list = feature_list + single_features
 
     if len(df_dict['feature_double']) > 0:
-        double_features = double_features_2_sql(df_dict['feature_double'])
+        double_features = double_feature_sql_handling(df_dict['feature_double'])
         feature_list = feature_list + double_features
 
     if not split:
@@ -298,7 +307,7 @@ def lookup_df_to_sql(model_name, df_dict, split=True):
         print(', EXP(score)/(EXP(score) + 1) AS probability')
         print('FROM add_sum_scores')
 
-def single_features_2_sql(df):
+def single_feature_handling(df):
     feature_nr = 0
     feature_list = []
     for f in df['feature'].unique():
@@ -360,108 +369,90 @@ def single_feature_2_sql(df, feature):
 
     print('END')
 
-def double_features_2_sql(df):
+def double_feature_sql_handling(df):
 
+    feature_nr = 0
     feature_list = []
+    df['double_feature'] = df['feat_1'] + '_x_' + df['feat_2']
+    for f in df['double_feature'].unique():
+        feature_df = df[df['double_feature'] == f].reset_index(drop=True)
 
-    for df_index, df_row in df.iterrows():
-
-        feature_name = '_x_'.join(df_row['feature'])
-        
-        # Each feature score in seperate column
+        # Each double feature score as case statement
         print(',\nCASE')
 
-        double_feature_2_sql(df_index, df_row)
+        double_feature_2_sql(feature_df, f)
+        feature_nr += 1
+        feature_list.append(f'{f}_score')
 
-        feature_list.append(f'{feature_name}_score')
-
-        # Feature score as alias
-        print(f'AS {feature_name}_score')
+        # feature score alias
+        print(f'AS {f}_score')
 
     return feature_list
 
-def double_feature_2_sql(df_index, df_row):
-    first_feature = df_row['feature'][0]
-    second_feature = df_row['feature'][1]
-
-    first_feat_bound = df_row['feat_bound'][0]
-    second_feat_bound = df_row['feat_bound'][1]
-
-    first_feat_type = df_row['feat_type'][0]
-    second_feat_type = df_row['feat_type'][1]
-
-    first_feature_nbounds = len(df_row['feat_bound'][0])
-    second_feature_nbounds = len(df_row['feat_bound'][1])
-
-    scores = pd.DataFrame(df_row['score'])
-
-    # first feature
-    for f_ind in range(first_feature_nbounds):
+def double_feature_2_sql(df, double_feature):
+    for index, row in df.iterrows():
         # check if string/category
-        if first_feat_type == 'categorical':
-            print(" WHEN {feature} = '{b}' THEN \n  CASE".format(feature=first_feature
-                                                                 , b=first_feat_bound[f_ind]))
-        elif first_feat_bound[f_ind] == np.PINF:
-            print(' WHEN {feature} > {b} THEN \n   CASE'.format(feature=first_feature,
-                                                                b=first_feat_bound[f_ind - 1]
-                                                                ))
+        if row['feat_type_1'] == 'categorical':
+            print(" WHEN {feature} = '{lb}' THEN \n     CASE".format(feature=row['feat_1'], lb=row['feat_bound_1']))
+
+        # check for last numeric bound
+        elif row['feat_bound_1'] == np.PINF:
+            print(' WHEN {feature} >= {lb} THEN \n      CASE'.format(feature=row['feat_1'],
+                                                                lb=df.loc[index - 1, 'feat_bound_1']))
 
         # otherwise it should be a float
-        elif isinstance(first_feat_bound[f_ind], float):
-            # Check if first bound
-            if f_ind == 0:
-                print(' WHEN {feature} <= {b}'.format(feature=first_feature,
-                                                      b=first_feat_bound[f_ind]), end='')
-                print(' THEN \n  CASE')
+        elif isinstance(row['feat_bound_1'], float):
+            # First bound
+            if index == 0:
+                print(' WHEN {feature} <= {ub} THEN \n      CASE'.format(feature=row['feat_1'],
+                                                                    ub=row['feat_bound_1']))
+
             else:
-                # After first bound set interval
-                print(' WHEN {feature} > {lb} AND {feature} <= {ub} THEN \n     CASE'.format(feature=first_feature,
-                                                                                             lb=first_feat_bound[
-                                                                                                 f_ind - 1],
-                                                                                             ub=first_feat_bound[
-                                                                                                 f_ind]))
+                print(' WHEN {feature} > {lb} AND {feature} <= {ub} THEN \n     CASE'.format(feature=row['feat_1'],
+                                                                                            lb=
+                                                                                            df.loc[index - 1,'feat_bound_1'],
+                                                                                            ub=row['feat_bound_1']))
+
         else:
             raise "not sure what to do"
+        
+        # Nr of bound values 
+        nr_bounds = len(row['feat_bound_2'])
 
-        # second feature
-        for s_ind in range(second_feature_nbounds):
+        # Looping over the bound values for the second feature
+        for sf_index in range(nr_bounds):
+
             # check if string/category
-            if second_feat_type == 'categorical':
-                print("         WHEN {feature} = '{b}' THEN {score}".format(feature=second_feature,
-                                                                            b=second_feat_bound[s_ind],
-                                                                            score=scores.iloc[f_ind, s_ind]
-                                                                            ))
+            if row['feat_type_2'] == 'categorical':
+                # check for manual imputed null values
+                print("         WHEN {feature} = '{lb}' THEN {score}".format(feature=row['feat_2'], lb=row['feat_bound_2'],
+                                                                    score=row['score'][sf_index]))
 
-            elif second_feat_bound[s_ind] == np.PINF:
-                print('         WHEN {feature} > {b} THEN {score}'.format(feature=second_feature,
-                                                                          b=second_feat_bound[s_ind - 1],
-                                                                          score=scores.iloc[f_ind, s_ind]
-                                                                          ))
+            # check for last numeric bound
+            elif row['feat_bound_2'][sf_index] == np.PINF:
+                print('         WHEN {feature} >= {lb} THEN {score}'.format(feature=row['feat_2'],
+                                                                    lb=row['feat_bound_2'][sf_index - 1],
+                                                                    score=row['score'][sf_index]))
 
             # otherwise it should be a float
-            elif isinstance(second_feat_bound[s_ind], float):
-                # still use either first or second bound (based on if they are for made for null handling or not
-                if s_ind == 0:
-                    print('         WHEN {feature} <= {b} THEN {score}'.format(feature=second_feature,
-                                                                               b=second_feat_bound[s_ind],
-                                                                               score=scores.iloc[
-                                                                                   f_ind, s_ind]))
-                else:
-                    print('         WHEN {feature} > {lb} AND {feature} <= {ub} THEN {score}'.format(
-                        feature=second_feature,
-                        lb=second_feat_bound[
-                            s_ind - 1],
-                        ub=second_feat_bound[
-                            s_ind],
-                        score=scores.iloc[
-                            f_ind, s_ind]))
+            elif isinstance(row['feat_bound_2'][sf_index], float):
+                # First bound
+                if sf_index == 0:
+                    print('         WHEN {feature} <= {ub} THEN {score}'.format(feature=row['feat_2'],
+                                                                        ub=row['feat_bound_2'][sf_index],
+                                                                        score=row['score'][sf_index]))
 
+                else:
+                    print('         WHEN {feature} > {lb} AND {feature} <= {ub} THEN {score}'.format(feature=row['feat_2'],
+                                                                                            lb=row['feat_bound_2'][sf_index - 1],
+                                                                                            ub=row['feat_bound_2'][sf_index],
+                                                                                            score=row['score'][sf_index]))
 
             else:
                 raise "not sure what to do"
-
+            
             # Add ELSE 0.0 as last entry
-            if s_ind == (second_feature_nbounds - 1):
+            if sf_index + 1 == nr_bounds:
                 print("         ELSE 0.0")
 
         print('     END')
@@ -470,7 +461,7 @@ def double_feature_2_sql(df_index, df_row):
     print('END')
 
 
-def lookup_df_to_sql_multiclass(model_name, df, classes, split=True):
+def lookup_df_to_sql_multiclass(model_name, df, classes, split):
     
     print(f'"{model_name}" AS model_name \n, ')
     
@@ -604,7 +595,7 @@ def single_feature_2_sql_multiclass(df, feature, class_nr):
 
 def ebm_to_sql(model_name, df, classes, split=True):
     if len(classes) > 2:
-        lookup_df_to_sql_multiclass(model_name, df['feature_single'], classes, split=True)
+        lookup_df_to_sql_multiclass(model_name, df['feature_single'], classes, split)
     else:
         lookup_df_to_sql(model_name, df, split)
 
@@ -625,28 +616,3 @@ def save_model_and_extras(ebm, model_name, split, logging):
             ebm_to_sql(model_name, lookup_df, ebm.classes_, split)
     print('SQL version of EBM saved')
     logging.info('SQL version of EBM saved')
-
-if __name__ == '__main__':
-    # Used for testing faster
-    import joblib 
-
-    # Variables
-    split = False 
-    model_name = 'easy_there'
-    
-    # Load model in joblibd format
-    filename = f'../trained_models/20230705_test_upgrade_v5/model/ebm_classification.sav'
-
-    ebm = joblib.load(open(filename, 'rb'))
-
-    # extract lookup table from EBM
-    lookup_df = extractLookupTable(ebm)
-
-    # In case of regression
-    if not hasattr(ebm, 'classes_'):
-        ebm.classes_ = [0]
-        lookup_df['intercept'] = [lookup_df['intercept']]
-
-    # Print output
-    ebm_to_sql(model_name, lookup_df, ebm.classes_, split=split)
-    
