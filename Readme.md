@@ -16,7 +16,7 @@
 # In short
 This project tries to make the process simple enough for any SQL user to train a model, check the performance and deploy that model in SQL.
 
-## Phylosophy:
+## Philosophy:
 - Automated and easy to use 
 - Model in SQL (avoid Data Science debt for a complex pipeline)
 - Explainable Boosting Machine on par with other boosted methods
@@ -59,6 +59,7 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
    
     Mac/Linux:
    `source .ml2sql/bin/activate` or `deactivate`
+4. For usage of this tool the virtual environment can be deactivated.
 
 ## Try it out demo
 1. In the terminal in the root of this folder run: 
@@ -70,10 +71,21 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
 ## Try it out using own data
 1. Save csv file containing target and all features in the `input/data/` folder (more on input data at [input data](#data))
 2. Save a settings json file in the `input/configuration/` (explained below at [configuration json](#configuration-json))
-3. In the terminal run: `bash run.sh`
+3. In the terminal in the root of this folder run: 
+  - `python3 run.py` (Mac/Linux)
+  - `python run.py` (Windows)
 4. Follow the instruction on screen
 5. The output will be saved in the folder `trained_models/<current_date>_<your_model_name>/`
 6. The `.sql` file in the `model` folder will contain a SQL written model  
+
+## Testing already trained model on a new dataset
+1. Make sure new dataset is exactly the same format as the dataset the model was trained on
+2. Save dataset in the `input/data/` folder (more on input data at [input data](#data))
+3. In the terminal in the root of this folder run: 
+  - `python3 test_model.py` (Mac/Linux)
+  - `python test_model.py` (Windows)
+4. Follow the instructions on screen
+5. The output will be saved in the folder `trained_models/<selected_model>/tested_datasets/<selected_dataset>/`
 
 </br>
 
