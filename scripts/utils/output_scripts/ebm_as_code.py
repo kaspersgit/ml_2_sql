@@ -63,7 +63,7 @@ def RestructureReduceInteractions(df_):
     # loop over rows
     for index, row in df.iterrows():
         # Swap features position if first feature has more bound values then second feature
-        if row['score'].shape[0] > row['score'].shape[1]:
+        if (row['score'].shape[0] > row['score'].shape[1]) & (row['feat_type'][0]=='numeric'):
 
             # loop over column needed to be transposed
             for c in ['feature', 'feat_bound', 'score', 'feat_type']:
@@ -99,7 +99,9 @@ def RestructureReduceInteractions(df_):
 
     # being able for score arrays to be grouped
     # for categorical features do not group by score hence we include value in score_hash
-    lookup_df['pre_hash_column'] = np.where(('categorical' in lookup_df['feat_type'])
+    mask = ['categorical' in x for x in lookup_df['feat_type']]
+    mask = ['categorical' in x for x in lookup_df['feat_type_2']]
+    lookup_df['pre_hash_column'] = np.where(mask
                                             , lookup_df['score'].astype(str) + lookup_df['feat_bound_1'].astype(str) + lookup_df['feat_bound_2'].astype(str)
                                             , lookup_df['score'].astype(str) + lookup_df['feat_bound_1'].astype(str))
     lookup_df['score_hash'] = pd.util.hash_pandas_object(lookup_df['pre_hash_column'], index=False)
@@ -425,7 +427,8 @@ def double_feature_2_sql(df, double_feature):
             # check if string/category
             if row['feat_type_2'] == 'categorical':
                 # check for manual imputed null values
-                print("         WHEN {feature} = '{lb}' THEN {score}".format(feature=row['feat_2'], lb=row['feat_bound_2'],
+                print("         WHEN {feature} = '{lb}' THEN {score}".format(feature=row['feat_2'], 
+                                                                    lb=row['feat_bound_2'][sf_index - 1],
                                                                     score=row['score'][sf_index]))
 
             # check for last numeric bound

@@ -249,6 +249,9 @@ def plotCramervCorrelation(df, given_name, file_type, logging):
     df_cramerv.fillna(0, inplace=True)
     df_cramerv = np.clip(df_cramerv, 0, 1)
 
+    # cast matrix content to float
+    df_cramerv=df_cramerv.astype(float)
+
     # set matrix data type
     matrix_type = 'categorical'
 
