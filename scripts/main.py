@@ -88,8 +88,8 @@ if __name__ == '__main__':
 
         # Command line arguments used for testing
         argvals = '--name ../trained_models/test ' \
-                  '--data_path ../input/data/example_binary_titanic.csv ' \
-                  '--configuration ../input/configuration/example_binary_titanic.json ' \
+                  '--data_path ../input/data/20230912_fc_predict_casenums_v123.csv ' \
+                  '--configuration ../input/configuration/fc_casenum_0.json ' \
                   '--model ebm'.split() # example of passing test params to parser
 
         # settings
