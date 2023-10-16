@@ -40,7 +40,7 @@ def ReduceSingleFeature(df_):
     adj_check = (lookup_df.score_hash != lookup_df.score_hash.shift()).cumsum()
 
     lookup_df['adj_score'] = adj_check
-    lookup_df_simple = lookup_df.groupby(['feature', 'feat_type', 'score_hash', 'adj_score']).agg({'feat_bound':'first'
+    lookup_df_simple = lookup_df.groupby(['feature', 'feat_type', 'score_hash', 'adj_score']).agg({'feat_bound':'last'
                                                 ,'score_lower_bound':'first'
                                                 ,'score_upper_bound':'last'
                                                 }, sort=False).reset_index(drop=False)
@@ -99,8 +99,10 @@ def RestructureReduceInteractions(df_):
 
     # being able for score arrays to be grouped
     # for categorical features do not group by score hence we include value in score_hash
-    mask = ['categorical' in x for x in lookup_df['feat_type']]
-    mask = ['categorical' in x for x in lookup_df['feat_type_2']]
+    mask_category = ['categorical' in x for x in lookup_df['feat_type_2']]
+    mask_inf_bound = [np.PINF == x for x in lookup_df['feat_bound_2']]
+    mask = [a or b for a, b in zip(mask_category, mask_inf_bound)]
+
     lookup_df['pre_hash_column'] = np.where(mask
                                             , lookup_df['score'].astype(str) + lookup_df['feat_bound_1'].astype(str) + lookup_df['feat_bound_2'].astype(str)
                                             , lookup_df['score'].astype(str) + lookup_df['feat_bound_1'].astype(str))
@@ -113,7 +115,7 @@ def RestructureReduceInteractions(df_):
 
     lookup_df['adj_score'] = adj_check
     lookup_df_simple = lookup_df.groupby(['feat_1', 'feat_2', 'feat_type_1', 'feat_type_2', 'score_hash', 'adj_score']).agg({'feat_bound_1':'first'
-                                                , 'feat_bound_2':'first'
+                                                , 'feat_bound_2':'last' # last to have numeric bounds correctly (with the existence of inf)
                                                 ,'score_lower_bound':'first'
                                                 ,'score_upper_bound':'last'
                                                 }, sort=False).reset_index(drop=False)
