@@ -57,7 +57,6 @@ def make_model(given_name, datasets, model_name, model_type, model_params, post_
         clf_dict = {'test': {}}
 
         for fold_id in range(len(X_train)):
-            print(f'Fold {fold_id} \nTrain model on test data')
             logging.info(f'Fold {fold_id} \nTrain model on test data')
 
             # Check if model needs to be calibrated
@@ -105,7 +104,6 @@ def make_model(given_name, datasets, model_name, model_type, model_params, post_
             y_test_prob = clf.predict_proba(X_test)[:,1]
 
     # train model one last time on all samples (upsampled)
-    print('Train final model on all data')
     logging.info('Train final model on all data')
 
     # Check if model needs to be calibrated

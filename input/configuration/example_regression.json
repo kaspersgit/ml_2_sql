@@ -1,0 +1,29 @@
+{
+    "features": [
+        "registration_year",
+        "insurance_validity",
+        "fuel_type",
+        "seats",
+        "kms_driven",
+        "ownsership",
+        "transmission",
+        "manufacturing_year",
+        "mileage",
+        "engine",
+        "max_power",
+        "torque"
+    ],
+    "model_params": {},
+    "post_params": {
+        "calibration": "false",
+        "sql_split": "true",
+        "file_type": "png"
+    },
+    "pre_params": {
+        "cv_type": "kfold",
+        "max_rows": 99999,
+        "time_sensitive_column": "_",
+        "upsampling": "false"
+    },
+    "target": "price"
+}

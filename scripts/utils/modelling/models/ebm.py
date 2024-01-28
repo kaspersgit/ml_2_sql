@@ -53,13 +53,10 @@ def trainModel(X_train, y_train, params, model_type, logging):
     elif model_type == 'classification':
         clf = ExplainableBoostingClassifier(**params)
     else:
-        print('Only regression or classification available')
         logging.warning('Only regression or classification available')
 
     clf.fit(X_train, y_train)
     logging.info(f'Model params:\n {clf.get_params}')
-
-    print('Trained explainable boosting machine \n')
     logging.info('Trained explainable boosting machine')
 
     return clf
@@ -134,7 +131,6 @@ def featureExplanationSave(clf, given_name, file_type, logging):
             # or as html file
             plotly_fig.write_html(f'{given_name}/explain_{feature_name}.html')
 
-    print('Explanation plots of {n_features} features saved'.format(n_features=index+1))
     logging.info('Explanation plots of {n_features} features saved'.format(n_features=index+1))
 
 def postModelPlots(clf, given_name, file_type, logging):

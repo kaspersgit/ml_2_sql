@@ -263,12 +263,13 @@ def lookup_df_to_sql(model_name, df_dict, split=True):
     # Start with intercept term
     intercept = df_dict['intercept'][0]
     if not split:
-        print(f'"{model_name}" AS model_name \n, ')
+        print("SELECT \n")
+        print(f"'{model_name}' AS model_name \n, ")
         print(f'{intercept} AS intercept')
     elif split:
         # Creating CTE to create table aliases
         print('WITH feature_scores AS (\nSELECT')
-        print(f'"{model_name}" AS model_name \n, ')
+        print(f"'{model_name}' AS model_name \n, ")
         print(f'{intercept} AS intercept')
 
     feature_list.append('intercept')
@@ -289,6 +290,9 @@ def lookup_df_to_sql(model_name, df_dict, split=True):
         
         # Applying softmax
         print(', EXP(score)/(EXP(score) + 1) AS probability')
+
+        # Add placeholder for source table
+        print('FROM <source_table> -- TODO replace with correct table')
 
     elif split:
         # Add placeholder for source table
@@ -468,7 +472,12 @@ def double_feature_2_sql(df, double_feature):
 
 def lookup_df_to_sql_multiclass(model_name, df, classes, split):
     
-    print(f'"{model_name}" AS model_name \n, ')
+    if split:
+        # Add starting cte
+        print('WITH feature_scores AS (')
+
+    print('SELECT')
+    print(f"'{model_name}' AS model_name \n, ")
     
     class_nr = 0
     feature_list = {}
@@ -549,6 +558,8 @@ def lookup_df_to_sql_multiclass(model_name, df, classes, split):
     if not split:
         for c in classes:
             print(f', EXP(score_{c}) / (total_score) AS probability_{c}', end='\n')
+        # Add placeholder for source table
+        print('FROM <source_table> -- TODO replace with correct table')
     elif split: 
         for c in classes:
             print(f', EXP(score_{c}) / (total_score) AS probability_{c}', end='\n')
@@ -615,9 +626,8 @@ def save_model_and_extras(ebm, model_name, split, logging):
         lookup_df['intercept'] = [lookup_df['intercept']]
 
     # Write printed output to file
-    with open('{model_name}/model/ebm_in_sql.sql'.format(model_name=model_name), 'w') as f:
+    with open(f'{model_name}/model/ebm_in_sql.sql', 'w') as f:
         with redirect_stdout(f):
-            model_name = model_name.split('/')[1]
+            model_name = model_name.split('/')[-1]
             ebm_to_sql(model_name, lookup_df, ebm.classes_, split)
-    print('SQL version of EBM saved')
     logging.info('SQL version of EBM saved')

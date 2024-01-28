@@ -3,8 +3,8 @@
     "Pclass",
     "Sex",
     "Age",
-    "Siblings/Spouses Aboard",
-    "Parents/Children Aboard",
+    "Siblings_Spouses_Aboard",
+    "Parents_Children_Aboard",
     "Fare"
   ],
   "model_params": {

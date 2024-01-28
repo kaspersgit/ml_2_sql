@@ -53,7 +53,6 @@ def calibrateModel(model, X, y, logging, method='auto', final_model=False):
     # set attributes
     model_cal.feature_names = model.feature_names
 
-    print('Trained calibrated model')
     logging.info('Trained calibrated model')
 
     # plotCalibrationCurve(given_name='trained_models/20220303_henkie', y_true=y_test[part_id], y_prob=y_pred,

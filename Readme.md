@@ -82,8 +82,8 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
 1. Make sure new dataset is exactly the same format as the dataset the model was trained on
 2. Save dataset in the `input/data/` folder (more on input data at [input data](#data))
 3. In the terminal in the root of this folder run: 
-  - `python3 test_model.py` (Mac/Linux)
-  - `python test_model.py` (Windows)
+  - `python3 check_model.py` (Mac/Linux)
+  - `python check_model.py` (Windows)
 4. Follow the instructions on screen
 5. The output will be saved in the folder `trained_models/<selected_model>/tested_datasets/<selected_dataset>/`
 
@@ -150,13 +150,12 @@ Name of target column (required)
 
 ## TODO list
 - EBM
-  - SQL interaction terms first term with least values
-  - SQL interaction terms group by to merge similar score bounds
   - Make multi class classification EBM work fully
   - Make regression EBM work fully
 
 - Checks and config
   - Add check if variables and target are finite 
+  - Add check such that variables have (enough different values)
   - Add variables being NULL checked
   - Add random seed to config file
   - Implement null handling (there is an implementation mentioned [here](https://github.com/interpretml/interpret/issues/18))
@@ -170,6 +169,7 @@ Name of target column (required)
   - Add calibration (platt scaling/isotonic regression)
   - Add changelog and versioning
   - Extend logging granularity 
+  - Add package versions to logging
   - Add SQL translation for decision rule
   - Make a proper testing procedure
   - Add more example files (binary/regression/multiclass)

@@ -22,12 +22,19 @@ def main(args):
     given_name = args.name
 
     # set logger
-    logging.basicConfig(format='%(asctime)s %(message)s', filename=given_name+'/logging.log', level=logging.DEBUG)
+    logging.basicConfig(
+            level=logging.DEBUG,
+            format="%(asctime)s [%(levelname)s] %(message)s",
+            handlers=[
+                logging.FileHandler(given_name+'/logging.log'),
+                logging.StreamHandler()
+            ]
+        )
     logging.getLogger('matplotlib.font_manager').disabled = True # ignore matplotlibs font warnings
     logging.info(f'Script input arguments: \n{args}')
 
     # Load in data
-    data = pd.read_csv(args.data_path)
+    data = pd.read_csv(args.data_path, keep_default_na=False, na_values=['', 'N/A', 'NULL'])
 
     # Get configuration file
     with open(args.configuration) as json_file:
@@ -51,10 +58,8 @@ def main(args):
     else:
         model_type = 'classification'
 
-        print(f'\nTarget column has {data[target_col].nunique()} unique values')
         logging.info(f'\nTarget column has {data[target_col].nunique()} unique values')
 
-    print('\nThis problem will be treated as a {model_type} problem'.format(model_type=model_type))
     logging.info('This problem will be treated as a {model_type} problem'.format(model_type=model_type))
 
     # pre process data
@@ -88,8 +93,8 @@ if __name__ == '__main__':
 
         # Command line arguments used for testing
         argvals = '--name ../trained_models/test ' \
-                  '--data_path ../input/data/20230912_fc_predict_casenums_v123.csv ' \
-                  '--configuration ../input/configuration/fc_casenum_0.json ' \
+                  '--data_path ../input/data/example_binary_titanic.csv ' \
+                  '--configuration ../input/configuration/example_binary_titanic.json ' \
                   '--model ebm'.split() # example of passing test params to parser
 
         # settings

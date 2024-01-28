@@ -51,7 +51,6 @@ def plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging):
     plt.xticks(rotation=90)
     plt.savefig('{given_name}/performance/{data_type}_confusion_matrix.png'.format(given_name=given_name, data_type=data_type), bbox_inches='tight')
 
-    print(f'Created and saved confusion matrix for {data_type} data')
     logging.info(f'Created and saved confusion matrix for {data_type} data')
 
 # Mainly meant for binary classification
@@ -179,7 +178,6 @@ def plotConfusionMatrixSlider(given_name, y_true, y_prob, data_type, logging):
 
     fig.write_html(f'{given_name}/performance/{data_type}_confusion_matrix.html', auto_play=False)
 
-    print(f'Created and saved confusion matrix for {data_type} data')
     logging.info(f'Created and saved confusion matrix for {data_type} data')
 
 
@@ -223,7 +221,6 @@ def classificationReportSave(given_name, y_true, y_pred, data_type, logging):
     report_df = pd.DataFrame(report).transpose()
     report_df.to_csv('{given_name}/performance/{data_type}_classification_report.csv'.format(given_name=given_name, data_type=data_type))
 
-    print('Classification report saved')
     logging.info('Classification report saved')
 
 def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type, logging):
@@ -332,7 +329,6 @@ def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type, l
 
     fig.write_image(f'{given_name}/performance/{data_type}_{curve_type}_plot.png')
 
-    print(f'Created and saved {curve_type} plot for {data_type} data')
     logging.info(f'Created and saved {curve_type} plot for {data_type} data')
 
     return np.mean(auc_list)
@@ -430,7 +426,6 @@ def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
 
     fig.write_image(f'{given_name}/performance/{data_type}_calibration_plot.png')
 
-    print(f'Created and saved calibration plot for {data_type} data')
     logging.info(f'Created and saved calibration plot for {data_type} data')
 
     return
@@ -515,7 +510,6 @@ def plotProbabilityDistribution(given_name, y_true, y_prob, data_type, logging):
         # Create distplot with custom bin_size
         fig = ff.create_distplot([do,dont], ['1','0'], colors=['green','red'], bin_size=.01)
     except Exception as e:
-        print(f'Could not create distribution plot because of \n{e}')
         logging.info(f'Could not create distribution plot because of \n{e}')
         return
 
@@ -529,7 +523,6 @@ def plotProbabilityDistribution(given_name, y_true, y_prob, data_type, logging):
 
     fig.write_image(f'{given_name}/performance/{data_type}_distribution_plot.png')
 
-    print(f'Created and saved probability distribution plot')
     logging.info(f'Created and saved probability distribution plot')
 
     return
@@ -592,7 +585,6 @@ def plotDistribution(given_name, groups, values, data_type, logging):
                 opacity=0.75
             ))
     except Exception as e:
-        print(f'Could not create distribution plot because of \n{e}')
         logging.info(f'Could not create distribution plot because of \n{e}')
         return
 
@@ -608,7 +600,6 @@ def plotDistribution(given_name, groups, values, data_type, logging):
 
     fig.write_image(f'{given_name}/performance/{data_type}_distribution_plot.png')
 
-    print(f'Created and saved probability distribution plot')
     logging.info(f'Created and saved probability distribution plot')
 
     return
@@ -644,7 +635,6 @@ def plotYhatVsYSave(given_name, y_true, y_pred, data_type, logging):
     fig = px.scatter(plot_df, 'y_true', 'y_pred')
     fig.write_image('{given_name}/performance/{data_type}_scatter_yhat_vs_y.png'.format(given_name=given_name, data_type=data_type))
 
-    print(f'Scatter plot of yhat vs y saved for {data_type}')
     logging.info(f'Scatter plot of yhat vs y saved for {data_type}')
 
 def plotQuantileError(given_name, y_true, y_pred, data_type, logging):
@@ -670,7 +660,6 @@ def plotQuantileError(given_name, y_true, y_pred, data_type, logging):
 
     fig.write_image('{given_name}/performance/{data_type}_quantile_error_plot.png'.format(given_name=given_name, data_type=data_type))
 
-    print(f'Quantile error plot saved for {data_type}')
     logging.info(f'Quantile error plot saved for {data_type}')
 
 def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type, logging):
@@ -745,7 +734,6 @@ def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type, logging
     # Save table
     fig.write_image(f'{given_name}/performance/{data_type}_regression_metrics.png')
 
-    print(f'Created and saved regression metrics table')
     logging.info(f'Created and saved regression metrics table')
 
     return
@@ -803,7 +791,6 @@ def plotDistributionViolin(given_name, groups, values, data_type, logging):
                 opacity=0.75
             ))
     except Exception as e:
-        print(f'Could not create distribution plot because of \n{e}')
         logging.info(f'Could not create distribution plot because of \n{e}')
         return
 
@@ -817,7 +804,6 @@ def plotDistributionViolin(given_name, groups, values, data_type, logging):
 
     fig.write_image(f'{given_name}/feature_info/{feature_name}_class_distributions.png')
 
-    print(f'Created and saved feature distribution plot')
     logging.info(f'Created and saved feature distribution plot')
 
     return
@@ -932,7 +918,6 @@ def postModellingPlots(clf, model_name, model_type, given_name, post_datasets, p
             for c in clf['final'].classes_:
 
                 # stating the class
-                print(f'\nFor class {c}:')
                 logging.info(f'\nFor class {c}:')
 
                 # creating a list of all the classes except the current class

@@ -142,7 +142,6 @@ def plotPearsonCorrelation(df, given_name, file_type, logging):
 
     # if above dataframe is empty then skip function
     if data_.empty:
-        print(f'No numerical variables found')
         logging.info(f'No numerical variables found')
         return
 
@@ -156,7 +155,6 @@ def plotPearsonCorrelation(df, given_name, file_type, logging):
     plotClustermap(data_corr, matrix_type, given_name, file_type, logging)
 
     # success message
-    print(f'Created Pearson correlation matrix (for numerical features)')
     logging.info(f'Created Pearson correlation matrix (for numerical features)')
 
 
@@ -229,7 +227,6 @@ def plotCramervCorrelation(df, given_name, file_type, logging):
 
     # if above dataframe is empty then skip function
     if data_.shape[1] < 2:
-        print(f'Skip CramerV correlation matrix due to fewer than 2 categorical variables found')
         logging.info(f'Skip CramerV correlation matrix due to fewer than 2 categorical variables found')
         return
 
@@ -259,5 +256,4 @@ def plotCramervCorrelation(df, given_name, file_type, logging):
     plotClustermap(df_cramerv, matrix_type, given_name, file_type, logging)
 
     # Success message
-    print(f'Created CramerV correlation matrix (for categorical values)')
     logging.info(f'Created CramerV correlation matrix (for categorical values)')

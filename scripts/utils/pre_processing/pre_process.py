@@ -9,7 +9,6 @@ def cleanAndCastColumns(data, feature_cols, target_col, model_name, model_type, 
     _data = data.copy()
 
     # clean out where target is NaN
-    print('\nRows being removed due to NaN in target column: {nans} \n'.format(nans=len(_data[_data[target_col].isna()])))
     logging.info('Rows being removed due to NaN in target column: {nans} \n'.format(nans=len(_data[_data[target_col].isna()])))
 
     _data = _data.loc[_data[target_col].notna(), :].reset_index(drop=True)
@@ -19,7 +18,6 @@ def cleanAndCastColumns(data, feature_cols, target_col, model_name, model_type, 
 
     if len(one_nunique) > 0:
         _data = _data.loc[:, ~_data.columns.isin(one_nunique)]
-        print(f'\nFeatures being removed due to single unique value: {one_nunique} \n')
         logging.info(f'Features being removed due to single unique value: {one_nunique} \n')
 
         # Remove feature from feature_cols if in there
@@ -33,7 +31,6 @@ def cleanAndCastColumns(data, feature_cols, target_col, model_name, model_type, 
         if len(one_occurence_class) > 0:
             _data = _data[~_data[target_col].isin(one_occurence_class)]
 
-            print('Removed class {classification} due to having only 1 observation \n'.format(classification=one_occurence_class))
             logging.info('Removed class {classification} due to having only 1 observation'.format(classification=one_occurence_class))
 
 
@@ -41,7 +38,6 @@ def cleanAndCastColumns(data, feature_cols, target_col, model_name, model_type, 
     # assuming only int/float and bool column types
     nan_cols = _data[feature_cols][_data[feature_cols].columns[_data[feature_cols].isna().sum() > 0]]
     if len(nan_cols) > 0:
-        print('Columns with NaN values: \n{nans} \n'.format(nans=nan_cols.isna().sum()))
         logging.info('Columns with NaN values: \n{nans}'.format(nans=nan_cols.isna().sum()))
 
     # Adjust this to allow for categorical features
@@ -54,7 +50,6 @@ def cleanAndCastColumns(data, feature_cols, target_col, model_name, model_type, 
 
     if model_name != 'ebm': # otherwise model can't handle categorical features
         cat_col = _data[feature_cols].select_dtypes(include=['category']).columns
-        print(f'\nFeatures being removed due to type being categorical: {cat_col} \n')
         logging.info(f'Features being removed due to  type being categorical: {cat_col} \n')
         # Remove feature from feature_cols if in there
         for f in cat_col:
@@ -62,7 +57,7 @@ def cleanAndCastColumns(data, feature_cols, target_col, model_name, model_type, 
                 feature_cols.remove(f)
 
     # Overview of _data types
-    print('Column types in data set (including target)\n{col_types} \n'.format(col_types=_data[feature_cols].dtypes.value_counts()))
+    logging.info('Column types in data set (including target)\n{col_types} \n'.format(col_types=_data[feature_cols].dtypes.value_counts()))
 
     # change boolean into 0's and 1's
     for col in _data[feature_cols].select_dtypes(include=['bool']).columns:
@@ -89,7 +84,6 @@ def pre_process_kfold(given_name, data, target_col, feature_cols, model_name, mo
     if 'max_rows' in pre_params:
         max_rows = min(pre_params['max_rows'], len(data_clean))
         data_clean = data_clean.sample(n=max_rows).reset_index(drop=True)
-        print(f'Limited dataset to {max_rows}')
         logging.info(f'Limited dataset to {max_rows}')
 
     # Create correlation plots
@@ -101,16 +95,13 @@ def pre_process_kfold(given_name, data, target_col, feature_cols, model_name, mo
 
     # initiate kfold
     if pre_params['cv_type'] == 'timeseriesplit':
-        print('Performing time series split cross validation')
         logging.info('Performing time series split cross validation')
         data.sort_values(pre_params['time_sensitive_column'], inplace=True)
         kfold = TimeSeriesSplit(n_splits=5)
     elif model_type == 'classification':
-        print('Performing stratified kfold cross validation')
         logging.info('Performing stratified kfold cross validation')
         kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=random_seed)
     elif model_type == 'regression':
-        print('Performing normal kfold cross validation')
         logging.info('Performing normal kfold cross validation')
         kfold = KFold(n_splits=5, shuffle=True, random_state=random_seed)
 
@@ -161,7 +152,6 @@ def pre_process_kfold(given_name, data, target_col, feature_cols, model_name, mo
     kfold_nr = 0
     for train_ix, test_ix in kfold.split(X, y):
         # Record kfold
-        print(f'\nCreating fold nr {kfold_nr+1}')
         logging.info(f'Creating fold nr {kfold_nr+1}')
 
         # select rows
@@ -170,16 +160,12 @@ def pre_process_kfold(given_name, data, target_col, feature_cols, model_name, mo
 
         if pre_params['upsampling'] != 'false':
             # report on nr rows
-            print(f'Nr rows pre trimming: {len(X_train)}')
-            print(f'imbalanceness pre trimming: \n {y_train.value_counts()}')
             logging.info(f'Nr rows pre trimming: {len(X_train)}')
             logging.info(f'imbalanceness pre trimming: \n {y_train.value_counts()}')
 
             X_train_trim, y_train_trim = trimPreUpsampleDataRows(X_train, y_train, max_cells, logging)
 
             # Nr rows after trimming down dataset
-            print(f'Nr rows pre upsampling: {len(X_train_trim)}')
-            print(f'imbalanceness pre upsampling: \n {y_train_trim.value_counts()}')
             logging.info(f'Nr rows pre upsampling: {len(X_train_trim)}')
             logging.info(f'imbalanceness pre upsampling: \n {y_train_trim.value_counts()}')
 
@@ -187,9 +173,6 @@ def pre_process_kfold(given_name, data, target_col, feature_cols, model_name, mo
             X_train, y_train = upsampleData(X_train_trim, y_train_trim, model_type, logging, random_seed=42)
 
         # Nr rows of training set
-        print(f'Nr rows train set: {len(X_train)}')
-        print(f'Nr rows test set: {len(X_test)}')
-        print(f'imbalanceness train: \n {y_train.value_counts()}')
         logging.info(f'Nr rows train set: {len(X_train)}')
         logging.info(f'Nr rows test set: {len(X_test)}')
         logging.info(f'imbalanceness train: \n {y_train.value_counts()}')
@@ -220,17 +203,14 @@ def upsampleData(X, y, model_type, logging, random_seed=42):
             if categorical_cols.sum() > 0:
                 ros = SMOTENC(categorical_features=categorical_cols, random_state=random_seed)
                 X_ups, y_ups = ros.fit_resample(X, y)
-                print('SMOTE-NC oversampling')
                 logging.info('SMOTE-NC oversampling')
             else:
                 ros = SMOTE(random_state=random_seed)
                 X_ups, y_ups = ros.fit_resample(X, y)
-                print('SMOTE oversampling')
                 logging.info('SMOTE oversampling')
         except:
             ros = RandomOverSampler(random_state=random_seed)
             X_ups, y_ups = ros.fit_resample(X, y)
-            print('Random oversampling')
             logging.info('Random oversampling')
 
     elif model_type == 'regression':
@@ -242,14 +222,12 @@ def trimDownDataRows(X, y, max_cells, logging):
     # Trim dataset if necessary based on amount of cells (columns x rows)
     nr_cells = X.shape[0] * X.shape[1]
     if nr_cells > max_cells:
-        print(f'Dataset shape {X.shape} resulting in {nr_cells} cells \nTrimming down...')
         logging.info(f'Dataset shape {X.shape} resulting in {nr_cells} cells \nTrimming down...')
         df_pretrim = X.join(y)
         df_posttrim = df_pretrim.sample(n=round(max_cells / X.shape[1]))
         X_trim = df_posttrim[X.columns].reset_index(drop=True)
         y_trim = df_posttrim[y.name].reset_index(drop=True)
         nr_cells_trim = X_trim.shape[0] * X_trim.shape[1]
-        print(f'Trimmed down to {X_trim.shape} resulting in {nr_cells_trim} cells.')
         logging.info(f'Trimmed down to {X_trim.shape} resulting in {nr_cells_trim} cells.')
     else:
         X_trim = X
@@ -271,7 +249,6 @@ def trimPreUpsampleDataRows(X, y, max_cells, logging):
     max_rows = round(max_cells/(X_.shape[1])) # * nr_classes
 
     if exp_nr_cells > max_cells:
-        print(f'Expecting {exp_nr_cells} cells, more than set limit of {max_cells}')
         logging.info(f'Expecting {exp_nr_cells} cells, more than set limit of {max_cells}')
         big_classes = classes_counts.index[classes_counts > max_rows]
 
@@ -286,7 +263,6 @@ def trimPreUpsampleDataRows(X, y, max_cells, logging):
         y_trim = y_
         X_trim = X_
 
-    print(f'Original nr of rows {len(X_)} \nNew nr of rows {len(X_trim)}')
     logging.info(f'Original nr of rows {len(X_)} \nNew nr of rows {len(X_trim)}')
 
     return X_trim.reset_index(drop=True), y_trim.reset_index(drop=True)
