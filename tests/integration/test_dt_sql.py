@@ -11,17 +11,18 @@ import pandas as pd
 import numpy as np
 import pytest
 from utils.test_helpers.sql_model import execute_sql_script
-from utils.output_scripts.ebm_as_code import save_model_and_extras
+from utils.output_scripts.decision_tree_as_code import save_model_and_extras
 
 # Assuming your_model.pkl is the pickled model and df is the DataFrame for testing
-SQL_OUTPUT_PATH = 'tests/model/ebm_in_sql.sql'
+SQL_OUTPUT_PATH = 'tests/model/tree_in_sql.sql'
 
 # Define a list of models - datasets to test
-clf_binary = ['tests/model/binary_ebm_classification.sav', 'input/data/example_binary_titanic.csv']
-regr_regression = ['tests/model/regression_ebm_regression.sav', 'input/data/example_regression_used_cars.csv']
+clf_binary = ['tests/model/binary_dt_classification.sav', 'input/data/example_binary_titanic.csv']
+regr_regression = ['tests/model/regression_dt_regression.sav', 'input/data/example_regression_used_cars.csv']
 
 # combine into 1 list to iterate over
 fixture_data = [clf_binary, regr_regression]
+
 
 @pytest.fixture(params=fixture_data)
 def load_model_data(request):
@@ -42,19 +43,14 @@ def load_model_data(request):
     if model_type == data_type:
         return data, model, model_type
 
-# Define a fixture for split parameter
-@pytest.fixture(params=[True, False])
-def split(request):
-    return request.param
 
-
-def test_model_processing(load_model_data, split, logging=logging.getLogger(__name__)):
+def test_model_processing(load_model_data, sql_split=None, logging=logging.getLogger(__name__)):
 
     # unpack data and model
     data, model, model_type = load_model_data
 
     # Generate SQL from the loaded model
-    save_model_and_extras(ebm=model, model_name='tests', split=split, logging=logging)
+    save_model_and_extras(clf=model, model_name='tests', sql_split=sql_split, logging=logging)
 
     # Load the SQL version
     with open(SQL_OUTPUT_PATH, 'r') as sql_file:
@@ -63,34 +59,35 @@ def test_model_processing(load_model_data, split, logging=logging.getLogger(__na
     # Run SQL against the DataFrame using DuckDB
     
     if model_type == 'multiclass':
-        prob_column = 'total_score'
+        pred_column = 'prediction'
     elif model_type == 'binary':
-        prob_column = 'score'
+        pred_column = 'prediction'
     elif model_type == 'regression':
-        prob_column = 'prediction'
+        pred_column = 'prediction'
 
-    sql_prob = execute_sql_script(loaded_sql, data, prob_column)
+    sql_pred = execute_sql_script(loaded_sql, data, pred_column)
 
     # Add assertions to check if the results are as expected
-    assert sql_prob is not None
+    assert sql_pred is not None
 
     # Predict scores using pickled model
     if model_type == 'multiclass':
-        score_pred = model.decision_function(data)
+        model_pred = model.predict(data[model.feature_names_in_])
     elif model_type == 'binary':
-        score_pred = model.decision_function(data)
+        model_pred = model.predict(data[model.feature_names_in_])
     elif model_type == 'regression':
-        score_pred = model.predict(data)
+        model_pred = model.predict(data[model.feature_names_in_])
 
-    score_pred = score_pred if score_pred.ndim == 1 else np.sum(score_pred, axis=1)
-    logging.info(f'Max difference SQL - pickled model: {(abs(sql_prob - score_pred)).max()}')
-
+    model_pred = model_pred if model_pred.ndim == 1 else np.sum(model_pred, axis=1)
+    logging.info(f'Max difference SQL - pickled model: {(abs(sql_pred - model_pred)).max()}')
+    print(sql_pred)
+    print(model_pred)
     # Check if SQL model prediction is same as pickled model prediction 
     # use a tolerance of 
     tolerance = 0.00001
-    assert (abs(sql_prob - score_pred) <= tolerance).all()
+    assert (abs(sql_pred - model_pred) <= tolerance).all()
 
-    # Clean up: Delete the generated SQL file after the test
+    # Clean up: Optionally, you can delete the generated SQL file after the test
     import os
     os.remove(SQL_OUTPUT_PATH)
 

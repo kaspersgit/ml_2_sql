@@ -59,18 +59,18 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
    
     Mac/Linux:
    `source .ml2sql/bin/activate` or `deactivate`
-4. For usage of this tool the virtual environment can be deactivated.
+4. For usage of this tool the virtual environment does not need to be activated.
 
 ## Try it out demo
 1. In the terminal in the root of this folder run: 
   - `python3 run.py` (Mac/Linux)
   - `python run.py` (Windows)
-2. Follow the instructions on screen by selecting the demo data and (similarly named) config file
+2. Follow the instructions on screen by selecting the example data and (similarly named) config file
 3. Check the output in the newly created folder
 
 ## Try it out using own data
 1. Save csv file containing target and all features in the `input/data/` folder (more on input data at [input data](#data))
-2. Save a settings json file in the `input/configuration/` (explained below at [configuration json](#configuration-json))
+2. Save a configuration json file in the `input/configuration/` (explained below at [configuration json](#configuration-json))
 3. In the terminal in the root of this folder run: 
   - `python3 run.py` (Mac/Linux)
   - `python run.py` (Windows)
@@ -79,7 +79,7 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
 6. The `.sql` file in the `model` folder will contain a SQL written model  
 
 ## Testing already trained model on a new dataset
-1. Make sure new dataset is exactly the same format as the dataset the model was trained on
+1. Make sure new dataset has the same features as the dataset the model was trained on (same features)
 2. Save dataset in the `input/data/` folder (more on input data at [input data](#data))
 3. In the terminal in the root of this folder run: 
   - `python3 check_model.py` (Mac/Linux)
@@ -102,6 +102,7 @@ List with names of the columns which should be used as feature (optional)
 ### model_params
 Dictionary of parameters that can be used with model of choice (optional). Check the model's documentation:
 - EBM ([model documentation](https://interpret.ml/docs/ebm.html))
+- Linear/Logistic regression ([model documentation](https://interpret.ml/docs/lr.html))
 - Decision tree ([model documentation](https://interpret.ml/docs/dt.html))
 - Decision rule ([model documentation](https://interpret.ml/docs/dr.html))
 
@@ -171,7 +172,8 @@ Name of target column (required)
   - Extend logging granularity 
   - Add package versions to logging
   - Add SQL translation for decision rule
-  - Make a proper testing procedure
-  - Add more example files (binary/regression/multiclass)
+  - Add testing for multiclass
+  - Add pass through columns
+  - Add quick config maker (only specify target, should remove dates and ID columns)
 
 # Troubleshooting

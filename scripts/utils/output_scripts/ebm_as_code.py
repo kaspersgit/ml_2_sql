@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from interpret.glassbox import ExplainableBoostingClassifier
 from contextlib import redirect_stdout
 
 def ReduceSingleFeature(df_):
@@ -256,7 +255,7 @@ def extractLookupTable(ebm):
 
     return {'intercept': ebm.intercept_, 'feature_single': lookup_df_single, 'feature_double': lookup_df_double}
 
-def lookup_df_to_sql(model_name, df_dict, split=True):
+def lookup_df_to_sql(model_name, df_dict, model_type, split):
     # Create list for all feature score names
     feature_list = []
 
@@ -286,11 +285,14 @@ def lookup_df_to_sql(model_name, df_dict, split=True):
         # Sum up all separate scores
         print(', ', end='')
         print(*feature_list, sep=' + ')
-        print(' AS score')
-        
-        # Applying softmax
-        print(', EXP(score)/(EXP(score) + 1) AS probability')
 
+        if model_type == 'regression':
+            print(' AS prediction')
+        else:
+            print(' AS score')
+             # Applying softmax
+            print(', EXP(score)/(EXP(score) + 1) AS probability')
+        
         # Add placeholder for source table
         print('FROM <source_table> -- TODO replace with correct table')
 
@@ -305,14 +307,22 @@ def lookup_df_to_sql(model_name, df_dict, split=True):
         # Sum up all separate scores
         print(', ', end='')
         print(*feature_list, sep=' + ')
-        print(' AS score')
+
+        if model_type == 'regression':
+            print(' AS prediction')
+        else:
+            print(' AS score')
+
         print('FROM feature_scores')
 
         # Close CTE and make final Select statement
         print(')')
         print('SELECT *')
-        # Applying softmax
-        print(', EXP(score)/(EXP(score) + 1) AS probability')
+        
+        if model_type != 'regression':
+            # Applying softmax
+            print(', EXP(score)/(EXP(score) + 1) AS probability')
+
         print('FROM add_sum_scores')
 
 def single_feature_handling(df):
@@ -612,8 +622,12 @@ def single_feature_2_sql_multiclass(df, feature, class_nr):
 def ebm_to_sql(model_name, df, classes, split=True):
     if len(classes) > 2:
         lookup_df_to_sql_multiclass(model_name, df['feature_single'], classes, split)
+    elif len(classes) == 1:
+        model_type = 'regression'
+        lookup_df_to_sql(model_name, df, model_type, split)
     else:
-        lookup_df_to_sql(model_name, df, split)
+        model_type = 'binary'
+        lookup_df_to_sql(model_name, df, model_type, split)
 
 
 def save_model_and_extras(ebm, model_name, split, logging):

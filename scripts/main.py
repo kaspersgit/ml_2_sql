@@ -10,6 +10,7 @@ from utils.modelling.main_modeler import make_model
 from utils.output_scripts import decision_tree_as_code
 from utils.output_scripts import decision_rule_as_code
 from utils.output_scripts import ebm_as_code
+from utils.output_scripts import l_regression_as_code
 
 from utils.helper_functions.checks import checkInputDataHard
 

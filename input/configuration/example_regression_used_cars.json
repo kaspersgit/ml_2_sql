@@ -1,22 +1,17 @@
 {
     "features": [
-        "registration_year",
-        "insurance_validity",
-        "fuel_type",
         "seats",
-        "kms_driven",
-        "ownsership",
-        "transmission",
         "manufacturing_year",
         "mileage",
         "engine",
         "max_power",
         "torque"
     ],
-    "model_params": {},
+    "model_params": {
+    },
     "post_params": {
         "calibration": "false",
-        "sql_split": "true",
+        "sql_split": "false",
         "file_type": "png"
     },
     "pre_params": {

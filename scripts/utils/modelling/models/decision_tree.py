@@ -1,5 +1,4 @@
 from sklearn import tree
-import pickle
 from utils.modelling.performance import *
 
 def trainModel(X_train, y_train, params, model_type, logging):
@@ -108,7 +107,7 @@ def featureImportanceSave(clf, given_name, file_type, logging):
 
     # Update size of figure
     plotly_fig.update_layout(xaxis_title='Importance', yaxis_title='Feature',
-                      title=f'Feature importance',
+                      title='Feature importance',
                       width=1000,
                       height=800)
 

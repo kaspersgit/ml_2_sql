@@ -1,15 +1,10 @@
-import os 
 import joblib 
 import pandas as pd
 import logging
 
-from interpret.glassbox import ExplainableBoostingClassifier, ExplainableBoostingRegressor
-from interpret.glassbox import DecisionListClassifier
-from interpret.glassbox import LinearRegression, LogisticRegression
 
 from utils.helper_functions.parsing_arguments import GetArgs
 from utils.modelling.performance import *
-from sklearn import tree
 
 def apply_model(args):
 
@@ -79,7 +74,7 @@ def apply_model(args):
                 class_index = list(model.classes_).index(c)
 
                 # marking the current class as 1 and all other classes as 0
-                y_ova = [0 if x in other_class else 1 for x in y]
+                y_ova = [0 if x in other_class else 1 for x in y_true]
                 y_prob_ova = [x[class_index] for x in y_prob]  
 
                 # Threshold independant

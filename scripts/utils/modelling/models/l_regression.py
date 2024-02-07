@@ -1,4 +1,3 @@
-import pickle
 from interpret.glassbox import LinearRegression, LogisticRegression
 from utils.modelling.performance import *
 
@@ -38,11 +37,11 @@ def featureExplanationSave(clf, given_name, file_type, logging):
         plotly_fig.write_html('{given_name}/1_overall_feature_importance.html'.format(given_name=given_name))
 
     # Save feature specific explanation graphs
-    for index, value in enumerate(clf.feature_groups_):
+    for index, value in enumerate(clf.feature_names_in_):
         plotly_fig = clf_global.visualize(index)
 
         # reformatting feature name
-        feature_name = clf.feature_names[index]
+        feature_name = clf.feature_names_in_[index]
         chars = "\\`./ "
         for c in chars:
             if c in feature_name:

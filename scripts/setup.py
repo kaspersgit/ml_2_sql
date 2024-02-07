@@ -13,7 +13,7 @@ else:
     subprocess.run(["python3", "-m", "venv", VENV_NAME])
 
 # Install packages in virtual environment
-print(f"Installing packages in virtual environment...")
+print("Installing packages in virtual environment...")
 if sys.platform.startswith("win"):
     install_packages = os.path.join(VENV_NAME, "Scripts", "pip")
 else:

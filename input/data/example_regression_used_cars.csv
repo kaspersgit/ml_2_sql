@@ -465,7 +465,6 @@
 464,2010 Maruti Alto 800 LXi BSIII,Oct-10,Comprehensive,Petrol,5,77684,Second Owner,Manual,2010,796,463,463,62,1.54
 465,2021 Audi Q5 Technology BSVI,Jan-22,Third Party insurance,Petrol,5,22900,First Owner,Automatic,2021,13.47,1984,1984,24559,54.8
 466,2022 Mercedes-Benz A-Class Limousine A 200d BSVI,2022,Third Party insurance,Diesel,5,10000,1950 cc,2022,Power Steering,147.51,320,320,17,42
-467,2022 Mercedes-Benz GLS 400d 4MATIC,Dec-22,Comprehensive,Diesel,7,19000,Second Owner,Automatic,2022,2925,3.25864E+12,3.25864E+12,700,1.15
 468,2014 Hyundai Grand i10 Sportz,Jun-14,Comprehensive,Petrol,5,74846,Second Owner,Manual,2014,18.9,1197,1197,82,3.1
 469,2022 Toyota Glanza S,Nov-22,Comprehensive,Petrol,5,4500,First Owner,Manual,2022,22.35,1197,1197,8850,7.55
 470,2012 Hyundai i20 Magna,Feb-12,Comprehensive,Petrol,5,97722,Third Owner,Manual,2012,18.5,1197,1197,805200,2.27
@@ -485,7 +484,6 @@
 484,2011 Maruti A-Star AT VXI,Jun-11,Comprehensive,Petrol,5,89057,Second Owner,Automatic,2011,16.98,998,998,661,2.26
 485,2021 Mercedes-Benz C-Class Progressive C 200,Nov-21,Comprehensive,Petrol,5,12000,First Owner,Automatic,2021,11.9,1950,1950,20115,44.5
 486,2022 Maruti Vitara Brezza VXI AT,Nov-22,Comprehensive,Petrol,5,11000,First Owner,Automatic,2022,18.76,1462,1462,10326,9.99
-487,2022 Mercedes-Benz GLS 400d 4MATIC,Dec-22,Comprehensive,Diesel,7,19000,Second Owner,Automatic,2022,2925,3.25864E+12,3.25864E+12,700,1.15
 488,2014 Hyundai Grand i10 Sportz,Jun-14,Comprehensive,Petrol,5,74846,Second Owner,Manual,2014,18.9,1197,1197,82,3.1
 489,2022 Toyota Glanza S,Nov-22,Comprehensive,Petrol,5,4500,First Owner,Manual,2022,22.35,1197,1197,8850,7.55
 490,2012 Hyundai i20 Magna,Feb-12,Comprehensive,Petrol,5,97722,Third Owner,Manual,2012,18.5,1197,1197,805200,2.27
@@ -699,8 +697,7 @@
 701,2018 Hyundai Creta 1.6 E Plus,Nov-18,Third Party insurance,Petrol,5,31000,First Owner,Manual,2018,15.8,1591,1591,1213,8.65
 702,2018 Maruti Swift Dzire AMT ZDI,Mar-18,Comprehensive,Diesel,5,97610,First Owner,Automatic,2018,28.4,1248,1248,7402,5.64
 703,2019 Nissan Sunny XV CVT,Jun-19,Comprehensive,Petrol,5,44000,First Owner,Automatic,2019,17.5,1498,1498,996,6.25
-704,2019 Mercedes-Benz C-Class Prime C 220d,Mar-20,Third Party insurance,Diesel,5,34496,First Owner,Automatic,2019,12.6,1950,1950,194,39
-705,2023 Mercedes-Benz GLS 400d 4MATIC BSVI,Jul-23,Third Party insurance,Diesel,7,16000,First Owner,Automatic,2023,2925,3.25864E+12,3.25864E+12,700,1.32
+704,2019 Mercedes-Benz C-Class Prime C 220d,Mar-20,Third Party insurance,Diesel,5,34496,First Owner,Automatic,2019,12.6,1950,1950,194,3932
 706,2016 Maruti Baleno 1.2 Alpha,Mar-16,Comprehensive,Petrol,5,75163,First Owner,Manual,2016,21.4,1197,1197,831,5.14
 707,2022 Maruti Ciaz Alpha BSVI,Oct-22,Third Party insurance,Petrol,5,6900,First Owner,Manual,2022,20.65,1462,1462,10325,10.25
 708,2015 Honda Amaze S i-Vtech,Jun-15,Comprehensive,Petrol,5,89961,Second Owner,Manual,2015,18,1198,1198,867,3.74
@@ -718,8 +715,7 @@
 720,2023 Volkswagen Virtus Highline BSVI,Apr-23,Comprehensive,Petrol,5,9818,First Owner,Manual,2023,19.4,999,999,11398,13.9
 721,2019 Maruti SX4 S Cross Zeta DDiS 200 SH,Jul-19,Comprehensive,Diesel,5,49230,First Owner,Manual,2019,25.1,1248,1248,885,8.7
 722,2018 Hyundai Verna VTVT 1.6 AT EX,Mar-18,Comprehensive,Petrol,5,65000,First Owner,Automatic,2018,17,1591,1591,1213,8.85
-723,2017 BMW X1 sDrive 20d xLine,May-17,Comprehensive,Diesel,5,69000,First Owner,Automatic,2017,20.68,1995,1995,188,19.9
-724,2023 Mercedes-Benz GLS 400d 4MATIC BSVI,Jul-23,Third Party insurance,Diesel,7,16000,First Owner,Automatic,2023,2925,3.25864E+12,3.25864E+12,700,1.32
+723,2017 BMW X1 sDrive 20d xLine,May-17,Comprehensive,Diesel,5,69000,First Owner,Automatic,2017,20.68,1995,1995,188,19.932
 725,2016 Maruti Baleno 1.2 Alpha,Mar-16,Comprehensive,Petrol,5,75163,First Owner,Manual,2016,21.4,1197,1197,831,5.14
 726,2022 Maruti Ciaz Alpha BSVI,Oct-22,Third Party insurance,Petrol,5,6900,First Owner,Manual,2022,20.65,1462,1462,10325,10.25
 727,2015 Honda Amaze S i-Vtech,Jun-15,Comprehensive,Petrol,5,89961,Second Owner,Manual,2015,18,1198,1198,867,3.74
@@ -910,8 +906,7 @@
 912,2017 Mini 3 DOOR John Cooper Works 2019-2020,Nov-17,Comprehensive,Petrol,4,31900,Second Owner,Automatic,2017,16.47,1998,1998,231,31
 913,2015 Mercedes-Benz E-Class E 200 CGI,Nov-15,Comprehensive,Petrol,5,76000,First Owner,Automatic,2015,12,1991,1991,18103,23.9
 914,2019 Maruti Ciaz Alpha AT BSVI,Feb-19,Comprehensive,Petrol,5,40775,Second Owner,Automatic,2019,20.04,1462,1462,10325,8.14
-915,2020 Mercedes-Benz S-Class S 350 d,Apr-20,Third Party,Diesel,5,18346,First Owner,Automatic,2020,13.5,2925,2925,28161,97
-916,2021 Mercedes-Benz GLS 400d 4MATIC BSVI,Nov-21,Third Party insurance,Diesel,7,46001,First Owner,Automatic,2021,2925,3.25864E+12,3.25864E+12,700,1.06
+915,2020 Mercedes-Benz S-Class S 350 d,Apr-20,Third Party,Diesel,5,18346,First Owner,Automatic,2020,13.5,2925,2925,28161,9706
 917,2018 Maruti SX4 S Cross Alpha DDiS 200 SH,Feb-19,Comprehensive,Diesel,5,59710,First Owner,Manual,2018,25.1,1248,1248,885,7.8
 918,2020 Honda City VX CVT,Mar-20,Comprehensive,Petrol,5,40000,First Owner,Automatic,2020,17.4,1497,1497,1176,10.95
 919,2015 Mercedes-Benz M-Class ML 350 4Matic,May-15,Comprehensive,Diesel,5,76000,First Owner,Automatic,2015,2987,1652243800,1652243800,510,19.99
@@ -929,8 +924,7 @@
 931,2017 Mini 3 DOOR John Cooper Works 2019-2020,Nov-17,Comprehensive,Petrol,4,31900,Second Owner,Automatic,2017,16.47,1998,1998,231,31
 932,2015 Mercedes-Benz E-Class E 200 CGI,Nov-15,Comprehensive,Petrol,5,76000,First Owner,Automatic,2015,12,1991,1991,18103,23.9
 933,2019 Maruti Ciaz Alpha AT BSVI,Feb-19,Comprehensive,Petrol,5,40775,Second Owner,Automatic,2019,20.04,1462,1462,10325,8.14
-934,2020 Mercedes-Benz S-Class S 350 d,Apr-20,Third Party,Diesel,5,18346,First Owner,Automatic,2020,13.5,2925,2925,28161,97
-935,2021 Mercedes-Benz GLS 400d 4MATIC BSVI,Nov-21,Third Party insurance,Diesel,7,46001,First Owner,Automatic,2021,2925,3.25864E+12,3.25864E+12,700,1.06
+934,2020 Mercedes-Benz S-Class S 350 d,Apr-20,Third Party,Diesel,5,18346,First Owner,Automatic,2020,13.5,2925,2925,28161,9706
 936,2018 Maruti SX4 S Cross Alpha DDiS 200 SH,Feb-19,Comprehensive,Diesel,5,59710,First Owner,Manual,2018,25.1,1248,1248,885,7.8
 937,2020 Honda City VX CVT,Mar-20,Comprehensive,Petrol,5,40000,First Owner,Automatic,2020,17.4,1497,1497,1176,10.95
 938,2015 Mercedes-Benz M-Class ML 350 4Matic,May-15,Comprehensive,Diesel,5,76000,First Owner,Automatic,2015,2987,1652243800,1652243800,510,19.99
@@ -1458,7 +1452,6 @@
 1460,2019 Toyota Innova Crysta 2.4 VX MT BSIV,Aug-19,Comprehensive,Diesel,7,41000,First Owner,Manual,2019,13.68,2393,2393,1478,16.95
 1461,2021 Maruti Ciaz S,Mar-21,Comprehensive,Petrol,5,23838,First Owner,Manual,2021,20.65,1462,1462,10325,8.85
 1462,2021 Skoda Octavia L and K 1.9 TDI MT,Mar-21,Comprehensive,Diesel,5,26719,First Owner,Manual,2021,16.4,1896,1896,90,7.89
-1463,2020 Mercedes-Benz GLS 400d 4MATIC BSVI,Jul-20,Comprehensive,Diesel,7,34987,First Owner,Automatic,2020,2925,3.25864E+12,3.25864E+12,700,1.1
 1464,2017 Mahindra TUV 300 mHAWK100 T8,Apr-17,Comprehensive,Diesel,7,27236,Second Owner,Manual,2017,18.49,1493,1493,100,6.5
 1465,2015 Honda City i DTEC VX,May-15,Comprehensive,Diesel,5,41080,First Owner,Manual,2015,25.1,1498,1498,986,5.9
 1466,2016 Toyota Etios 1.4 VXD,Jan-16,Comprehensive,Diesel,5,72793,First Owner,Manual,2016,23.59,1364,1364,6704,4.55

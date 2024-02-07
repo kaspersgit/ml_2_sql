@@ -8,7 +8,7 @@ import pingouin
 from sklearn.calibration import calibration_curve
 from sklearn.metrics import brier_score_loss
 from sklearn.metrics import classification_report
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, mean_absolute_percentage_error, explained_variance_score, max_error, median_absolute_error, mean_squared_log_error, mean_poisson_deviance, mean_gamma_deviance
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, mean_absolute_percentage_error, explained_variance_score, max_error, median_absolute_error, mean_squared_log_error
 
 
 # The actual algorithms (grey as we refer to them dynamically)
@@ -44,7 +44,7 @@ def plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging):
 
     """
 
-    from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+    from sklearn.metrics import ConfusionMatrixDisplay
     fig, ax = plt.subplots(figsize=(10, 8))
 
     disp = ConfusionMatrixDisplay.from_predictions(y_true, y_pred, ax=ax)
@@ -319,7 +319,7 @@ def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type, l
 
         # Calculate area under curve (AUC)
         auc_list.append(auc(xVar, yVar))
-        fig.add_trace(go.Scatter(x=xVar, y=yVar, mode='lines', name=f'Fitted model'))
+        fig.add_trace(go.Scatter(x=xVar, y=yVar, mode='lines', name='Fitted model'))
 
     # add (average) auc in image
     fig.add_annotation(x=0.5, y=0,
@@ -416,7 +416,7 @@ def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
 
         # Calculate area under curve (AUC)
         bsl_list.append(brier_score_loss(y_true, y_prob))
-        fig.add_trace(go.Scatter(x=mean_predicted_value, y=fraction_of_positives, mode='markers+lines', name=f'Fitted model'))
+        fig.add_trace(go.Scatter(x=mean_predicted_value, y=fraction_of_positives, mode='markers+lines', name='Fitted model'))
 
     # add (average) auc in image
     fig.add_annotation(x=0.5, y=0,
@@ -523,7 +523,7 @@ def plotProbabilityDistribution(given_name, y_true, y_prob, data_type, logging):
 
     fig.write_image(f'{given_name}/performance/{data_type}_distribution_plot.png')
 
-    logging.info(f'Created and saved probability distribution plot')
+    logging.info('Created and saved probability distribution plot')
 
     return
 
@@ -600,7 +600,7 @@ def plotDistribution(given_name, groups, values, data_type, logging):
 
     fig.write_image(f'{given_name}/performance/{data_type}_distribution_plot.png')
 
-    logging.info(f'Created and saved probability distribution plot')
+    logging.info('Created and saved probability distribution plot')
 
     return
 
@@ -734,7 +734,7 @@ def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type, logging
     # Save table
     fig.write_image(f'{given_name}/performance/{data_type}_regression_metrics.png')
 
-    logging.info(f'Created and saved regression metrics table')
+    logging.info('Created and saved regression metrics table')
 
     return
     
@@ -804,7 +804,7 @@ def plotDistributionViolin(given_name, groups, values, data_type, logging):
 
     fig.write_image(f'{given_name}/feature_info/{feature_name}_class_distributions.png')
 
-    logging.info(f'Created and saved feature distribution plot')
+    logging.info('Created and saved feature distribution plot')
 
     return
 
