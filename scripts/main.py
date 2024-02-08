@@ -7,10 +7,10 @@ import json
 from utils.modelling.main_modeler import make_model
 
 # The translations to SQL (grey as we refer to them dynamically)
-from utils.output_scripts import decision_tree_as_code
-from utils.output_scripts import decision_rule_as_code
-from utils.output_scripts import ebm_as_code
-from utils.output_scripts import l_regression_as_code
+from utils.output_scripts import decision_tree_as_code # noqa: F401
+from utils.output_scripts import decision_rule_as_code # noqa: F401
+from utils.output_scripts import ebm_as_code # noqa: F401
+from utils.output_scripts import l_regression_as_code # noqa: F401
 
 from utils.helper_functions.checks import checkInputDataHard
 
@@ -45,7 +45,7 @@ def main(args):
     model_name = args.model_name
 
     # Handle the configuration file
-    target_col, feature_cols, model_params, pre_params, post_params = config_handling(configuration, logging)
+    target_col, feature_cols, model_params, pre_params, post_params = config_handling(configuration, data, logging)
 
     # Log parameters
     logging.info(f'Configuration file content: \n{configuration}')

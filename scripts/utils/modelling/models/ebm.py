@@ -1,6 +1,4 @@
 from interpret.glassbox import ExplainableBoostingClassifier, ExplainableBoostingRegressor
-from utils.modelling.performance import *
-from utils.modelling.calibration import *
 
 def trainModel(X_train, y_train, params, model_type, logging):
     """

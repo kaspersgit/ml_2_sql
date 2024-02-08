@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from imblearn.over_sampling import RandomOverSampler, SMOTE, SMOTENC
-from utils.feature_selection.correlations import *
+from utils.feature_selection.correlations import plotPearsonCorrelation, plotCramervCorrelation
 
 def cleanAndCastColumns(data, feature_cols, target_col, model_name, model_type, logging):
     # make copy of data
@@ -145,7 +145,7 @@ def pre_process_kfold(given_name, data, target_col, feature_cols, model_name, mo
 
     #### Create datasets based on the different folds
     # listing the different folds
-    X_train_list, X_train_ups_list, X_test_list, y_train_list, y_train_ups_list, y_test_list = list(), list(), list(), list(), list(), list()
+    X_train_list, X_test_list, y_train_list, y_test_list = list(), list(), list(), list()
 
     # enumerate the splits and summarize the distributions
     kfold_nr = 0
@@ -207,7 +207,7 @@ def upsampleData(X, y, model_type, logging, random_seed=42):
                 ros = SMOTE(random_state=random_seed)
                 X_ups, y_ups = ros.fit_resample(X, y)
                 logging.info('SMOTE oversampling')
-        except:
+        except Exception:
             ros = RandomOverSampler(random_state=random_seed)
             X_ups, y_ups = ros.fit_resample(X, y)
             logging.info('Random oversampling')
@@ -241,7 +241,6 @@ def trimPreUpsampleDataRows(X, y, max_cells, logging):
 
     # Trim dataset if necessary based on amount of cells (columns x rows)
     classes_counts = y_.value_counts()
-    nr_classes = len(classes_counts)
     size_majority_class = classes_counts.max()
 
     exp_nr_cells = size_majority_class * X_.shape[1] # * nr_classes

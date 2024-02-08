@@ -1,5 +1,4 @@
 from interpret.glassbox import DecisionListClassifier
-from utils.modelling.performance import *
 
 def trainModel(X_train, y_train, params, model_type, logging):
     """

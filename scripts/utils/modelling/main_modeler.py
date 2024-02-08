@@ -3,14 +3,14 @@ import random
 import numpy as np 
 
 from sklearn.model_selection import train_test_split
-from utils.modelling.performance import *
-from utils.modelling.calibration import *
+from utils.modelling.performance import postModellingPlots
+from utils.modelling.calibration import calibrateModel
 
 # The actual algorithms (grey as we refer to them dynamically)
-from utils.modelling.models import ebm
-from utils.modelling.models import decision_rule
-from utils.modelling.models import decision_tree
-from utils.modelling.models import l_regression
+from utils.modelling.models import ebm # noqa: F401
+from utils.modelling.models import decision_rule # noqa: F401
+from utils.modelling.models import decision_tree # noqa: F401
+from utils.modelling.models import l_regression # noqa: F401
 
 def make_model(given_name, datasets, model_name, model_type, model_params, post_params, logging):
     """

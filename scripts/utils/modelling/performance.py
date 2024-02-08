@@ -12,10 +12,10 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, m
 
 
 # The actual algorithms (grey as we refer to them dynamically)
-from utils.modelling.models import ebm
-from utils.modelling.models import decision_rule
-from utils.modelling.models import decision_tree
-from utils.modelling.models import l_regression
+from utils.modelling.models import ebm # noqa: F401
+from utils.modelling.models import decision_rule # noqa: F401
+from utils.modelling.models import decision_tree # noqa: F401
+from utils.modelling.models import l_regression # noqa: F401
 
 def plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging):
     """
@@ -47,7 +47,7 @@ def plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging):
     from sklearn.metrics import ConfusionMatrixDisplay
     fig, ax = plt.subplots(figsize=(10, 8))
 
-    disp = ConfusionMatrixDisplay.from_predictions(y_true, y_pred, ax=ax)
+    disp = ConfusionMatrixDisplay.from_predictions(y_true, y_pred, ax=ax) # noqa: F841
     plt.xticks(rotation=90)
     plt.savefig('{given_name}/performance/{data_type}_confusion_matrix.png'.format(given_name=given_name, data_type=data_type), bbox_inches='tight')
 
@@ -460,8 +460,8 @@ def multiClassPlotCalibrationCurvePlotly(given_name, actuals, probs, title, bins
 
 
     # Make trace be line plus dots
-    for l in range(len(fig.data)):
-        fig.data[l].update(mode='markers+lines')
+    for ld in range(len(fig.data)):
+        fig.data[ld].update(mode='markers+lines')
 
     # set axis range to 0 - 1
     # fig.update_layout(xaxis_range=[-0.1,1.1], yaxis_range=[-0.1,1.1], xaxis_title='Predicted probability', yaxis_title='Fraction of positives')
@@ -740,7 +740,7 @@ def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type, logging
     
 
 # To be used for feature exploration (TODO add more colors)
-def plotDistributionViolin(given_name, groups, values, data_type, logging):
+def plotDistributionViolin(given_name, feature_name, groups, values, data_type, logging):
     """
     Plot violin plot of distribution of values across different groups.
 
@@ -802,7 +802,7 @@ def plotDistributionViolin(given_name, groups, values, data_type, logging):
         height=800
     )
 
-    fig.write_image(f'{given_name}/feature_info/{feature_name}_class_distributions.png')
+    fig.write_image(f'{given_name}/feature_info/{feature_name}_distributions.png')
 
     logging.info('Created and saved feature distribution plot')
 
@@ -842,7 +842,7 @@ def scorePartialCorrelation(given_name, clf, post_datasets):
 
     parscore_test = partial_correlation(X_test_scores, y_test_label)
     parscore_train = partial_correlation(X_train_scores, y_train_label)
-    parscore_diff = pd.Series(parscore_test - parscore_train, name = 'parscore_diff')
+    # parscore_diff = pd.Series(parscore_test - parscore_train, name = 'parscore_diff')
 
     # Plot parshap
     plotmin, plotmax = min(parscore_train.min(), parscore_test.min()), max(parscore_train.max(), parscore_test.max())
@@ -934,8 +934,8 @@ def postModellingPlots(clf, model_name, model_type, given_name, post_datasets, p
                 y_test_ova = np.concatenate(y_test_list_ova, axis=0)
                 y_test_prob_ova = np.concatenate(y_test_prob_list_ova, axis=0)
 
-                y_all_ova = [0 if x in other_class else 1 for x in y_all]
-                y_all_prob_ova = [x[class_index] for x in y_all_prob]
+                # y_all_ova = [0 if x in other_class else 1 for x in y_all]
+                # y_all_prob_ova = [x[class_index] for x in y_all_prob]
 
 
                 # Threshold independant

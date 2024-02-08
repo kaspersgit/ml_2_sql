@@ -1,5 +1,4 @@
 from interpret.glassbox import LinearRegression, LogisticRegression
-from utils.modelling.performance import *
 
 def trainModel(X_train, y_train, params, model_type, logging):
     # if 'feature_names' not in params.keys():
@@ -13,13 +12,10 @@ def trainModel(X_train, y_train, params, model_type, logging):
         clf.classes_ = list(set(y_train))
         clf_name = 'Logistic regression'
     else:
-        print('Only regression or classification available')
         logging.warning('Only regression or classification available')
 
     clf.fit(X_train, y_train)
     logging.info(f'Model non default params:\n {clf.kwargs}')
-
-    print(f'Trained {clf_name.lower()} \n')
     logging.info(f'Trained {clf_name.lower()}')
 
     return clf
@@ -53,7 +49,6 @@ def featureExplanationSave(clf, given_name, file_type, logging):
             # or as html file
             plotly_fig.write_html(f'{given_name}/explain_{feature_name}.html')
 
-    print('Explanation plots of {n_features} features saved'.format(n_features=index+1))
     logging.info('Explanation plots of {n_features} features saved'.format(n_features=index+1))
 
 def postModelPlots(clf, given_name, file_type, logging):

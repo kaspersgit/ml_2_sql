@@ -174,6 +174,7 @@ Name of target column (required)
   - Add SQL translation for decision rule
   - Add testing for multiclass
   - Add pass through columns
+  - Add create config option when needing to select config
   - Add quick config maker (only specify target, should remove dates and ID columns)
 
 # Troubleshooting

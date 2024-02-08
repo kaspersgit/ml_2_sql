@@ -1,5 +1,6 @@
 from sklearn import tree
-from utils.modelling.performance import *
+import pandas as pd
+import plotly.express as px
 
 def trainModel(X_train, y_train, params, model_type, logging):
     """
@@ -51,26 +52,14 @@ def trainModel(X_train, y_train, params, model_type, logging):
     elif model_type == 'classification':
         clf = tree.DecisionTreeClassifier(**params)
     else:
-        print('Only regression or classification available')
         logging.warning('Only regression or classification available')
 
     clf.fit(X_train, y_train)
     logging.info(f'Model params:\n {clf.get_params}')
 
-    print('Trained decision tree \n')
     logging.info('Trained decision tree')
 
     return clf
-
-def plotTreeStructureSave(clf, given_name):
-
-    plt.figure(figsize=(30,30))
-
-    tree.plot_tree(clf, fontsize=10, feature_names=clf.feature_names_in_, class_names=clf.classes_)
-    plt.savefig(f'{given_name}/tree_plot.png')
-
-    print('Tree structure plot saved')
-
 
 def featureImportanceSave(clf, given_name, file_type, logging):
     """
@@ -116,7 +105,7 @@ def featureImportanceSave(clf, given_name, file_type, logging):
     elif file_type == 'html':
         plotly_fig.write_html(f'{given_name}/gini_feature_importance.html')
 
-    print('Gini feature importance plot saved')
+    logging.info('Gini feature importance plot saved')
 
 def postModelPlots(clf, given_name, file_type, logging):
     featureImportanceSave(clf, given_name, file_type, logging)

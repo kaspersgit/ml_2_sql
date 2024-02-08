@@ -1,4 +1,4 @@
-import os 
+import os
 import re
 import sys
 
@@ -58,22 +58,24 @@ print(f"Model {model_path} will be used for testing")
 # Create extra folder in trained model folder
 # Make directory with current data and model name
 try:
-    model_folder = model_path.split('trained_models/')[1].split('/')[0]
-    csv_name = csv_path.split('/')[-1]
+    model_folder = model_path.split("trained_models/")[1].split("/")[0]
+    csv_name = csv_path.split("/")[-1]
     destination_path = f"trained_models/{model_folder}/tested_datasets/{csv_name}"
 
     if not os.path.exists(destination_path.split(csv_name)[0]):
         os.makedirs(destination_path.split(csv_name)[0])
-        
+
     os.makedirs(destination_path)
     os.makedirs(f"{destination_path}/performance")
 
 except FileExistsError:
-    sys.exit("Error: tested_datasets directory already exists within trained_models/{model_folder}")
+    sys.exit(
+        "Error: tested_datasets directory already exists within trained_models/{model_folder}"
+    )
 
 # Trigger python script to do the actual work
 print("\nRunning command:")
-if sys.platform == 'win32':
+if sys.platform == "win32":
     command = f".ml2sql\Scripts\python.exe scripts/modeltester.py --model_path {model_path} --data_path {csv_path} --destination_path {destination_path}"
 else:
     command = f".ml2sql/bin/python scripts/modeltester.py --model_path {model_path} --data_path {csv_path} --destination_path {destination_path}"
@@ -84,5 +86,3 @@ os.system(command)
 
 print("\nModel performance outputs can be found in folder:")
 print(f"{os.getcwd()}/trained_models/{model_folder}/tested_datasets/{csv_name}/")
-
-

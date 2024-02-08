@@ -1,6 +1,6 @@
 # Handle the configuration file
 
-def config_handling(configuration, logging):
+def config_handling(configuration, data, logging):
     """
     Handles the configuration file and extracts necessary information.
 
@@ -37,7 +37,7 @@ def config_handling(configuration, logging):
         logging.info(f'{len(feature_cols)} features specified in file')
     else:
         # treat all other columns as features
-        feature_cols = list(data_.columns)
+        feature_cols = list(data.columns)
         feature_cols.remove(target_col)
         logging.info(f'Using {len(feature_cols)} features (all columns except target)')
 
