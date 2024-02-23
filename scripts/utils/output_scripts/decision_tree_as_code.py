@@ -8,14 +8,14 @@ from contextlib import redirect_stdout
 
 
 def tree_to_sql(tree):
-    '''
-	Outputs a decision tree model as an SQL Case When statement
+    """
+    Outputs a decision tree model as an SQL Case When statement
 
-	Parameters:
-	-----------
-	tree: sklearn decision tree model
-		The decision tree to represent as an SQL function
-	'''
+    Parameters:
+    -----------
+    tree: sklearn decision tree model
+            The decision tree to represent as an SQL function
+    """
 
     tree_ = tree.tree_
     feature_name = [
@@ -33,9 +33,9 @@ def tree_to_sql(tree):
             threshold = tree_.threshold[node]
 
             if threshold % 1 == 0.5:
-                cast = '::INT'
+                cast = "::INT"
             else:
-                cast = ''
+                cast = ""
 
             print("{}CASE WHEN {}{} <= {} THEN".format(indent, name, cast, threshold))
             recurse(tree_.children_left[node], depth + 1)
@@ -43,29 +43,34 @@ def tree_to_sql(tree):
             recurse(tree_.children_right[node], depth + 1)
             print("{}END".format(indent))
         else:
-            if hasattr(tree, 'classes_'):
+            if hasattr(tree, "classes_"):
                 class_values = tree_.value[node]
                 samples = tree_.n_node_samples[node]
                 max_value = int(np.max(class_values))
                 predicted_class = tree.classes_[np.argmax(class_values)]
-                print("{} {} -- train data precision: {:.2f} ({}/{})".format(indent, predicted_class, max_value / samples, max_value,
-                                                                    samples))
+                print(
+                    "{} {} -- train data precision: {:.2f} ({}/{})".format(
+                        indent, predicted_class, max_value / samples, max_value, samples
+                    )
+                )
             else:
-                prediction = tree_.value[node][0,0]
+                prediction = tree_.value[node][0, 0]
                 samples = tree_.n_node_samples[node]
                 print("{} {} -- samples ({})".format(indent, prediction, samples))
 
-
-    print('SELECT')
+    print("SELECT")
 
     recurse(0, 1)
 
-    print('AS prediction')
-    print('FROM <source_table> -- change to your table name')
+    print("AS prediction")
+    print("FROM <source_table> -- change to your table name")
+
 
 def save_model_and_extras(clf, model_name, sql_split, logging):
     # Write printed output to file
-    with open('{model_name}/model/tree_in_sql.sql'.format(model_name=model_name), 'w') as f:
+    with open(
+        "{model_name}/model/tree_in_sql.sql".format(model_name=model_name), "w"
+    ) as f:
         with redirect_stdout(f):
             tree_to_sql(clf)
-    print('SQL version of decision tree saved')
+    print("SQL version of decision tree saved")

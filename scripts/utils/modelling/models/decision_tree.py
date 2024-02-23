@@ -2,6 +2,7 @@ from sklearn import tree
 import pandas as pd
 import plotly.express as px
 
+
 def trainModel(X_train, y_train, params, model_type, logging):
     """
     Trains a decision tree model using the given training data and parameters.
@@ -47,24 +48,25 @@ def trainModel(X_train, y_train, params, model_type, logging):
     >>> params = {'max_depth': 3, 'min_samples_split': 2}
     >>> clf = trainModel(X_train, y_train, params, 'classification', logging)
     """
-    if model_type == 'regression':
+    if model_type == "regression":
         clf = tree.DecisionTreeRegressor(**params)
-    elif model_type == 'classification':
+    elif model_type == "classification":
         clf = tree.DecisionTreeClassifier(**params)
     else:
-        logging.warning('Only regression or classification available')
+        logging.warning("Only regression or classification available")
 
     clf.fit(X_train, y_train)
-    logging.info(f'Model params:\n {clf.get_params}')
+    logging.info(f"Model params:\n {clf.get_params}")
 
-    logging.info('Trained decision tree')
+    logging.info("Trained decision tree")
 
     return clf
+
 
 def featureImportanceSave(clf, given_name, file_type, logging):
     """
     Generates and saves a bar plot of feature importance using Plotly.
-    
+
     Parameters:
     -----------
     clf: DecisionTreeClassifier or DecisionTreeRegressor object
@@ -75,37 +77,47 @@ def featureImportanceSave(clf, given_name, file_type, logging):
         The type of file in which the plot should be saved.
     logging: logging.Logger object
         A logging object to log information or errors.
-        
+
     Returns:
     --------
     None
-    
+
     Raises:
     -------
     None
-    
+
     Notes:
     ------
     - This function requires the Plotly package.
-    - The plot is saved in the given directory with the name 'gini_feature_importance.png' if 'file_type' is 'png', 
+    - The plot is saved in the given directory with the name 'gini_feature_importance.png' if 'file_type' is 'png',
       or 'gini_feature_importance.html' if 'file_type' is 'html'.
     """
-    importance_df = pd.DataFrame({'importance':clf.feature_importances_, 'feature':clf.feature_names_in_}).sort_values('importance', ascending=True).reset_index(drop=True)
-    importance_non_zero = importance_df[importance_df['importance'] > 0]
-    plotly_fig = px.bar(importance_non_zero, x='importance', y='feature')
+    importance_df = (
+        pd.DataFrame(
+            {"importance": clf.feature_importances_, "feature": clf.feature_names_in_}
+        )
+        .sort_values("importance", ascending=True)
+        .reset_index(drop=True)
+    )
+    importance_non_zero = importance_df[importance_df["importance"] > 0]
+    plotly_fig = px.bar(importance_non_zero, x="importance", y="feature")
 
     # Update size of figure
-    plotly_fig.update_layout(xaxis_title='Importance', yaxis_title='Feature',
-                      title='Feature importance',
-                      width=1000,
-                      height=800)
+    plotly_fig.update_layout(
+        xaxis_title="Importance",
+        yaxis_title="Feature",
+        title="Feature importance",
+        width=1000,
+        height=800,
+    )
 
-    if file_type == 'png':
-        plotly_fig.write_image(f'{given_name}/gini_feature_importance.png')
-    elif file_type == 'html':
-        plotly_fig.write_html(f'{given_name}/gini_feature_importance.html')
+    if file_type == "png":
+        plotly_fig.write_image(f"{given_name}/gini_feature_importance.png")
+    elif file_type == "html":
+        plotly_fig.write_html(f"{given_name}/gini_feature_importance.html")
 
-    logging.info('Gini feature importance plot saved')
+    logging.info("Gini feature importance plot saved")
+
 
 def postModelPlots(clf, given_name, file_type, logging):
     featureImportanceSave(clf, given_name, file_type, logging)

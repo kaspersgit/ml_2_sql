@@ -1,5 +1,6 @@
-# Handle the configuration file
+import pandas as pd
 
+# Handle the configuration file
 def config_handling(configuration, data, logging):
     """
     Handles the configuration file and extracts necessary information.
@@ -7,7 +8,7 @@ def config_handling(configuration, data, logging):
     Parameters:
     -----------
     configuration : dict
-        A dictionary containing configuration information such as target column, features columns, 
+        A dictionary containing configuration information such as target column, features columns,
         model related parameters, pre processing related parameters, and post modeling related parameters.
 
     logging : logger object
@@ -29,79 +30,151 @@ def config_handling(configuration, data, logging):
             A dictionary containing post modeling related parameters.
     """
     # target column
-    target_col = configuration['target']
+    target_col = configuration["target"]
 
     # features columns
-    if 'features' in configuration.keys():
-        feature_cols = configuration['features']
-        logging.info(f'{len(feature_cols)} features specified in file')
+    if "features" in configuration.keys():
+        feature_cols = configuration["features"]
+        logging.info(f"{len(feature_cols)} features specified in file")
     else:
         # treat all other columns as features
         feature_cols = list(data.columns)
         feature_cols.remove(target_col)
-        logging.info(f'Using {len(feature_cols)} features (all columns except target)')
+        logging.info(f"Using {len(feature_cols)} features (all columns except target)")
 
     # model related parameters
-    if 'model_params' in configuration.keys():
-        model_params = configuration['model_params']
+    if "model_params" in configuration.keys():
+        model_params = configuration["model_params"]
     else:
         model_params = {}
 
     # pre processing related parameters
-    if 'pre_params' in configuration.keys():
-        pre_params = configuration['pre_params']
+    if "pre_params" in configuration.keys():
+        pre_params = configuration["pre_params"]
     else:
         pre_params = {}
 
-    if not ('oot_set' in pre_params.keys()) & ('oot_rows' in pre_params.keys()):
-        pre_params['oot_set'] = 'false'
+    if not ("oot_set" in pre_params.keys()) & ("oot_rows" in pre_params.keys()):
+        pre_params["oot_set"] = "false"
 
     # Cross validation type to perform
-    if 'cv_type' not in pre_params.keys():
-        pre_params['cv_type'] = 'kfold_cv'
+    if "cv_type" not in pre_params.keys():
+        pre_params["cv_type"] = "kfold_cv"
 
     # If not present set upsamplling to false
-    if 'upsampling' not in pre_params.keys():
-        pre_params['upsampling'] = 'false'
+    if "upsampling" not in pre_params.keys():
+        pre_params["upsampling"] = "false"
 
     # post modeling related parameters
-    if 'post_params' in configuration.keys():
-        post_params = configuration['post_params']
+    if "post_params" in configuration.keys():
+        post_params = configuration["post_params"]
     else:
         post_params = {}
 
     # # unpack calibration from params
-    if 'calibrate' in post_params.keys():
-        if post_params['calibration'] in ['auto','sigmoid','isotonic','true']:
-            post_params['calibration'] = 'auto' if post_params['calibration'] == 'true' else post_params['calibration']
+    if "calibrate" in post_params.keys():
+        if post_params["calibration"] in ["auto", "sigmoid", "isotonic", "true"]:
+            post_params["calibration"] = (
+                "auto"
+                if post_params["calibration"] == "true"
+                else post_params["calibration"]
+            )
         else:
-            post_params['calibration'] = 'false'
+            post_params["calibration"] = "false"
     else:
-        post_params['calibration'] = 'false'
+        post_params["calibration"] = "false"
 
     # If not present set calibration check if we upsample
-    if 'calibration' not in post_params.keys():
-        if pre_params['upsampling'] == 'true':
-            post_params['calibration'] = 'auto'
+    if "calibration" not in post_params.keys():
+        if pre_params["upsampling"] == "true":
+            post_params["calibration"] = "auto"
         else:
-            post_params['calibration'] = 'false'
+            post_params["calibration"] = "false"
 
     # If not present set split to false
-    if 'sql_split' in post_params.keys():
-        if post_params['sql_split'] == 'true':
-            post_params['sql_split'] = True
+    if "sql_split" in post_params.keys():
+        if post_params["sql_split"] == "true":
+            post_params["sql_split"] = True
         else:
-            post_params['sql_split'] = False
+            post_params["sql_split"] = False
     else:
-        post_params['sql_split'] = False
+        post_params["sql_split"] = False
 
     # If not present set file type to png
-    if 'file_type' in post_params.keys():
-        if post_params['file_type'].lower() == 'html':
-            post_params['file_type'] = 'html'
+    if "file_type" in post_params.keys():
+        if post_params["file_type"].lower() == "html":
+            post_params["file_type"] = "html"
         else:
-            post_params['file_type'] = 'png'
+            post_params["file_type"] = "png"
     else:
-        post_params['file_type'] = 'png'
+        post_params["file_type"] = "png"
 
     return target_col, feature_cols, model_params, pre_params, post_params
+
+def _get_col_dtype(col):
+        """
+        Sourced: https://stackoverflow.com/questions/35003138/python-pandas-inferring-column-datatypes
+        Infer datatype of a pandas column, process only if the column dtype is object. 
+        input:   col: a pandas Series representing a df column. 
+        """
+
+        if col.dtype == "object":
+            # try numeric
+            try:
+                col_new = pd.to_datetime(col.dropna().unique())
+                return col_new.dtype
+            except:
+                try:
+                    col_new = pd.to_numeric(col.dropna().unique())
+                    return col_new.dtype
+                except:
+                    try:
+                        col_new = pd.to_timedelta(col.dropna().unique())
+                        return col_new.dtype
+                    except:
+                        return "object"
+        else:
+            return col.dtype
+
+def select_ml_cols(df):
+    # Create a dictionary to store the features and their indices
+    features_set = set(df.columns)
+
+    print('Columns excluded for feature list:')
+
+    # Check uniqeness
+    for col in df.columns:
+        uniqueness_ratio = len(df[col].unique()) / len(df[col])
+        if uniqueness_ratio == 1:
+            features_set.discard(col)
+            print(f'"{col}" is an ID column')
+        
+        elif (uniqueness_ratio > 0.9) & (df[col].dtypes == 'int'):
+            features_set.discard(col)
+            print(f'"{col}" is int column with high cardinality')
+        
+        elif (uniqueness_ratio > 0.2) & (df[col].dtypes=='object'):
+            features_set.discard(col)
+            print(f'"{col}" is object column with high cardinality')
+        
+        elif (df[col].nunique() == 1):
+            features_set.discard(col)
+            print(f'"{col}" is column with only one value')
+
+    # Check column name
+    check_date_cols = ['date', 'dt']
+
+    for cdc in check_date_cols:
+        for col in df.columns:
+            if cdc in col.lower():
+                features_set.discard(col)
+                print(f'"{col}" is a date column')
+
+    for col in df.columns:
+        inferred_dtype = _get_col_dtype(df[col])
+        if all(ele not in str(inferred_dtype) for ele in ['object', 'string','int', 'float']):
+            features_set.discard(col)
+            print(f'"{col}" with datetype {inferred_dtype}')
+    
+    return features_set
+    
