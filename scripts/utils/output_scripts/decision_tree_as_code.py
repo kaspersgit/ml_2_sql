@@ -48,11 +48,20 @@ def tree_to_sql(tree):
                 samples = tree_.n_node_samples[node]
                 max_value = int(np.max(class_values))
                 predicted_class = tree.classes_[np.argmax(class_values)]
-                print(
-                    "{} {} -- train data precision: {:.2f} ({}/{})".format(
-                        indent, predicted_class, max_value / samples, max_value, samples
+
+                # Check if predicted class is an integer
+                if np.issubdtype(type(predicted_class), np.integer):
+                    print(
+                        "{} {} -- train data precision: {:.2f} ({}/{})".format(
+                            indent, predicted_class, max_value / samples, max_value, samples
+                        )
                     )
-                )
+                else:
+                    print(
+                        "{} '{}' -- train data precision: {:.2f} ({}/{})".format(
+                            indent, predicted_class, max_value / samples, max_value, samples
+                        )
+                    )
             else:
                 prediction = tree_.value[node][0, 0]
                 samples = tree_.n_node_samples[node]

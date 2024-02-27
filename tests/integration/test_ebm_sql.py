@@ -34,13 +34,12 @@ regr_regression = [
 ]
 
 # combine into 1 list to iterate over
-fixture_data = [clf_binary, regr_regression]
+fixture_data = [clf_binary, clf_multiclass, regr_regression]
 
 
 @pytest.fixture(params=fixture_data)
 def load_model_data(request):
     model_path = request.param[0]
-    print(model_path)
     model_type = os.path.basename(model_path).split("_")[
         0
     ]  # Binary, multiclass or regression
@@ -81,34 +80,33 @@ def test_model_processing(load_model_data, split, logging=logging.getLogger(__na
     # Run SQL against the DataFrame using DuckDB
 
     if model_type == "multiclass":
-        prob_column = "total_score"
+        prob_column = "probability_Z_Scratch"
     elif model_type == "binary":
         prob_column = "probability"
     elif model_type == "regression":
         prob_column = "prediction"
 
-    sql_prob = execute_sql_script(loaded_sql, data, prob_column)
+    sql_pred = execute_sql_script(loaded_sql, data, prob_column)
 
     # Add assertions to check if the results are as expected
-    assert sql_prob is not None
+    assert sql_pred is not None
 
     # Predict scores using pickled model
     if model_type == "multiclass":
-        score_pred = model.decision_function(data)
-        score_pred = score_pred if score_pred.ndim == 1 else np.sum(score_pred, axis=1)
+        model_pred = model.predict_proba(data)[:,-1]
     elif model_type == "binary":
-        score_pred = model.predict_proba(data)[:,1]
+        model_pred = model.predict_proba(data)[:,1]
     elif model_type == "regression":
-        score_pred = model.predict(data)
+        model_pred = model.predict(data)
 
     logging.info(
-        f"Max difference SQL - pickled model: {(abs(sql_prob - score_pred)).max()}"
+        f"Max difference SQL - pickled model: {(abs((sql_pred - model_pred)/model_pred)).max()}"
     )
 
     # Check if SQL model prediction is same as pickled model prediction
-    # use a tolerance of
+    # use a tolerance of 0.001%
     tolerance = 0.00001
-    assert (abs(sql_prob - score_pred) <= tolerance).all()
+    assert (abs((sql_pred - model_pred) / model_pred) <= tolerance).all()
 
     # Clean up: Delete the generated SQL file after the test
     import os

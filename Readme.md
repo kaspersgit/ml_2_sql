@@ -18,19 +18,12 @@ This project tries to make the process simple enough for any SQL user to train a
 
 ## Philosophy:
 - Automated and easy to use 
-- Model in SQL (avoid Data Science debt for a complex pipeline)
+- Model written in SQL (avoid Data Science debt for a complex pipeline)
 - Explainable Boosting Machine on par with other boosted methods
 
 ## Background
 An automated machine learning tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from interpretML) to train models which are explainable and transparent in how they come to their prediction. SQL infrastructure is the only requirement to put a model into production.
 This tool can be used by anybody, but is aimed for people who want to easily train a model and want to use it in their (company) SQL system. 
-
-## Current state
-- Only EBM is implemented (decision tree, logistic regression and rule set not yet)
-- Automated model training is working for binary classification and regression
-- SQL creation of model is working fully for binary clasification
-- SQL for regression and the whole process for multiclass classification is work in progress
-- Up/down sampling not fully implemented yet 
 
 </br>
 
@@ -65,7 +58,7 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
 1. In the terminal in the root of this folder run: 
   - `python3 run.py` (Mac/Linux)
   - `python run.py` (Windows)
-2. Follow the instructions on screen by selecting the example data and (similarly named) config file
+2. Follow the instructions on screen by selecting the example data and config file
 3. Check the output in the newly created folder
 
 ## Try it out using own data

@@ -596,12 +596,19 @@ def double_feature_2_sql(df, double_feature):
 
 
 def lookup_df_to_sql_multiclass(model_name, df, classes, split):
+    df_single = df["feature_single"]
+    intercepts = df["intercept"]
+    
     if split:
         # Add starting cte
         print("WITH feature_scores AS (")
 
     print("SELECT")
-    print(f"'{model_name}' AS model_name \n, ")
+    print(f"'{model_name}' AS model_name")
+    # Add intercepts
+    for i, c in enumerate(classes):
+        print(f", {intercepts[i]} AS intercept_{c}")
+
 
     class_nr = 0
     feature_list = {}
@@ -609,18 +616,11 @@ def lookup_df_to_sql_multiclass(model_name, df, classes, split):
         feature_nr = 0
         feature_list[c] = []
 
-        ## TODO add intercept
-        # print(df['intercept'])
+        ## Add intercept to feature list
+        feature_list[c].append(f"intercept_{c}")
 
-        for f in df["feature"].unique():
-            feature_df = df[df["feature"] == f].reset_index(drop=True)
-
-            if (feature_nr == 0) & (class_nr == 0):
-                print("CASE")
-            elif (feature_nr == 0) & (class_nr > 0):
-                print(", CASE")
-            else:
-                print(",\nCASE")
+        for f in df_single["feature"].unique():
+            feature_df = df_single[df_single["feature"] == f].reset_index(drop=True)
 
             single_feature_2_sql_multiclass(feature_df, f, class_nr)
 
@@ -675,6 +675,12 @@ def lookup_df_to_sql_multiclass(model_name, df, classes, split):
                 print(f" + EXP(score_{c})", end="")
         print(" AS total_score")
 
+        # Check class with highest score
+
+        #Get max score
+        print(f", GREATEST({', '.join([f'score_{i}' for i in classes])}) AS max_score")
+                                                           
+
         # Close CTE and create final SELECT statement
         print("FROM add_sum_scores")
         print(")")
@@ -684,15 +690,35 @@ def lookup_df_to_sql_multiclass(model_name, df, classes, split):
     if not split:
         for c in classes:
             print(f", EXP(score_{c}) / (total_score) AS probability_{c}", end="\n")
+
+        
+        print(f", GREATEST({', '.join([f'probability_{i}' for i in classes])}) AS max_probability")
+
+        print(", CASE")
+        for c in classes:
+            print(f"\t WHEN probability_{c} = max_probability THEN '{c}'")
+        print("END AS prediction")
+
         # Add placeholder for source table
         print("FROM <source_table> -- TODO replace with correct table")
     elif split:
         for c in classes:
             print(f", EXP(score_{c}) / (total_score) AS probability_{c}", end="\n")
+        
+        print(f", EXP(max_score) / (total_score) AS max_probability")
+
+        print(", CASE")
+        for c in classes:
+            print(f"\t WHEN score_{c} = max_score THEN '{c}'")
+        print("END AS prediction")
+
         print("FROM add_sum_all_scores")
 
 
 def single_feature_2_sql_multiclass(df, feature, class_nr):
+    # Start new case statement
+    print(",\nCASE")
+
     for index, row in df.iterrows():
         # check if string/category
         if row["feat_type"] == "categorical":
@@ -752,7 +778,7 @@ def single_feature_2_sql_multiclass(df, feature, class_nr):
 
 def ebm_to_sql(model_name, df, classes, split=True):
     if len(classes) > 2:
-        lookup_df_to_sql_multiclass(model_name, df["feature_single"], classes, split)
+        lookup_df_to_sql_multiclass(model_name, df, classes, split)
     elif len(classes) == 1:
         model_type = "regression"
         lookup_df_to_sql(model_name, df, model_type, split)

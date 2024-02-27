@@ -22,6 +22,12 @@ clf_binary = [
     "tests/model/binary_dt_classification.sav",
     "input/data/example_binary_titanic.csv",
 ]
+
+clf_multiclass = [
+    "tests/model/multiclass_dt_classification.sav",
+    "input/data/example_multiclass_faults.csv",
+]
+
 regr_regression = [
     "tests/model/regression_dt_regression.sav",
     "input/data/example_regression_used_cars.csv",

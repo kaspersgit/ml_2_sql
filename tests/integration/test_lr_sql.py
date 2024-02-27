@@ -21,13 +21,19 @@ clf_binary = [
     "tests/model/binary_lr_classification.sav",
     "input/data/example_binary_titanic.csv",
 ]
+
+clf_multiclass = [
+    "tests/model/multiclass_lr_classification.sav",
+    "input/data/example_multiclass_faults.csv",
+]
+
 regr_regression = [
     "tests/model/regression_lr_regression.sav",
     "input/data/example_regression_used_cars.csv",
 ]
 
 # combine into 1 list to iterate over
-fixture_data = [clf_binary, regr_regression]
+fixture_data = [clf_binary, clf_multiclass, regr_regression]
 
 
 @pytest.fixture(params=fixture_data)
@@ -74,9 +80,8 @@ def test_model_processing(load_model_data, split, logging=logging.getLogger(__na
         loaded_sql = sql_file.read()
 
     # Run SQL against the DataFrame using DuckDB
-
     if model_type == "multiclass":
-        pred_column = "prediction"
+        pred_column = "probability_Z_Scratch"
     elif model_type == "binary":
         pred_column = "probability"
     elif model_type == "regression":
@@ -89,7 +94,7 @@ def test_model_processing(load_model_data, split, logging=logging.getLogger(__na
 
     # Predict scores using pickled model
     if model_type == "multiclass":
-        model_pred = model.predict(data[model.feature_names_in_])
+        model_pred = model.predict_proba(data[model.feature_names_in_])[:,-1]
     elif model_type == "binary":
         model_pred = model.predict_proba(data[model.feature_names_in_])[:, 1]
     elif model_type == "regression":
