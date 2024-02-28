@@ -8,14 +8,24 @@ import pingouin
 from sklearn.calibration import calibration_curve
 from sklearn.metrics import brier_score_loss
 from sklearn.metrics import classification_report
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, mean_absolute_percentage_error, explained_variance_score, max_error, median_absolute_error, mean_squared_log_error, mean_poisson_deviance, mean_gamma_deviance
+from sklearn.metrics import (
+    mean_absolute_error,
+    mean_squared_error,
+    r2_score,
+    mean_absolute_percentage_error,
+    explained_variance_score,
+    max_error,
+    median_absolute_error,
+    mean_squared_log_error,
+)
 
 
 # The actual algorithms (grey as we refer to them dynamically)
-from utils.modelling.models import ebm
-from utils.modelling.models import decision_rule
-from utils.modelling.models import decision_tree
-from utils.modelling.models import l_regression
+from utils.modelling.models import ebm  # noqa: F401
+from utils.modelling.models import decision_rule  # noqa: F401
+from utils.modelling.models import decision_tree  # noqa: F401
+from utils.modelling.models import l_regression  # noqa: F401
+
 
 def plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging):
     """
@@ -44,82 +54,118 @@ def plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging):
 
     """
 
-    from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+    from sklearn.metrics import ConfusionMatrixDisplay
+
     fig, ax = plt.subplots(figsize=(10, 8))
 
-    disp = ConfusionMatrixDisplay.from_predictions(y_true, y_pred, ax=ax)
+    disp = ConfusionMatrixDisplay.from_predictions(y_true, y_pred, ax=ax)  # noqa: F841
     plt.xticks(rotation=90)
-    plt.savefig('{given_name}/performance/{data_type}_confusion_matrix.png'.format(given_name=given_name, data_type=data_type), bbox_inches='tight')
+    plt.savefig(
+        "{given_name}/performance/{data_type}_confusion_matrix.png".format(
+            given_name=given_name, data_type=data_type
+        ),
+        bbox_inches="tight",
+    )
 
-    print(f'Created and saved confusion matrix for {data_type} data')
-    logging.info(f'Created and saved confusion matrix for {data_type} data')
+    logging.info(f"Created and saved confusion matrix for {data_type} data")
+
 
 # Mainly meant for binary classification
 def plotConfusionMatrixSlider(given_name, y_true, y_prob, data_type, logging):
     conf_matrices = []
-    steps=[]
+    steps = []
 
     threshold_list = np.arange(0.0, 1.05, 0.05)
 
     for threshold in threshold_list:
         y_pred = [1 if x > threshold else 0 for x in y_prob]
-        
-        df = pd.DataFrame({'y_true': y_true, 'y_pred': y_pred})
+
+        df = pd.DataFrame({"y_true": y_true, "y_pred": y_pred})
 
         # confusion matrix
         cm = []
-        for p in [0,1]:
+        for p in [0, 1]:
             new_row = []
-            for a in [1,0]:
-                new_row.append(len(df[(df['y_pred'] == p) & (df['y_true'] == a)])/len(y_pred))
+            for a in [1, 0]:
+                new_row.append(
+                    len(df[(df["y_pred"] == p) & (df["y_true"] == a)]) / len(y_pred)
+                )
             cm.append(new_row)
 
         # Add to list of matrices
         conf_matrices.append(cm)
 
-        # Create sklearn summary report 
-        report = classification_report(y_true, y_pred, output_dict=True, zero_division=0)
+        # Create sklearn summary report
+        report = classification_report(
+            y_true, y_pred, output_dict=True, zero_division=0
+        )
 
         # Create a list of lists for the matrix
         metrics_matrix = []
 
         # Iterate over the keys and values in the summary report dictionary
         for key, value in report.items():
-            if key == 'accuracy':
-                metrics_matrix.append(['', '', '', '', ''])
-                metrics_matrix.append(['Accuracy', '', '', value, ''])
-            elif key.startswith(('macro', 'weighted')):
-                metrics_matrix.append([key.capitalize(), value['precision'], value['recall'], value['f1-score'], value['support']])
+            if key == "accuracy":
+                metrics_matrix.append(["", "", "", "", ""])
+                metrics_matrix.append(["Accuracy", "", "", value, ""])
+            elif key.startswith(("macro", "weighted")):
+                metrics_matrix.append(
+                    [
+                        key.capitalize(),
+                        value["precision"],
+                        value["recall"],
+                        value["f1-score"],
+                        value["support"],
+                    ]
+                )
             else:
-                row = [key, value['precision'], value['recall'], value['f1-score'], value['support']]
+                row = [
+                    key,
+                    value["precision"],
+                    value["recall"],
+                    value["f1-score"],
+                    value["support"],
+                ]
                 metrics_matrix.append(row)
 
         # Formatting options
-        precision_format = '{:.3f}'
-        integer_format = '{:d}'
-        empty_string_format = ''
+        precision_format = "{:.3f}"
+        integer_format = "{:d}"
+        empty_string_format = ""
 
         # Format the matrix elements
         formatted_matrix = []
         for row in metrics_matrix:
-            formatted_row = [precision_format.format(cell) if isinstance(cell, float)
-                            else integer_format.format(cell) if isinstance(cell, int)
-                            else empty_string_format if cell == ''
-                            else cell
-                            for cell in row]
+            formatted_row = [
+                precision_format.format(cell)
+                if isinstance(cell, float)
+                else integer_format.format(cell)
+                if isinstance(cell, int)
+                else empty_string_format
+                if cell == ""
+                else cell
+                for cell in row
+            ]
             formatted_matrix.append(formatted_row)
 
         # transpose matrix
         metrics = list(zip(*formatted_matrix))
 
         # Add values to the different steps
-        steps.append(dict(method = "restyle",
-                    args = [{'z': [ cm ], #in the initial fig update z and text
-                        'text': [cm],
-                        'cells.values':[metrics]}],
-                        label=round(threshold,2),
-                        ))
-        
+        steps.append(
+            dict(
+                method="restyle",
+                args=[
+                    {
+                        "z": [cm],  # in the initial fig update z and text
+                        "text": [cm],
+                        "cells.values": [metrics],
+                    }
+                ],
+                label=round(threshold, 2),
+            )
+        )
+
         if threshold == 0.5:
             conf_matrix = cm
             table_metrics = metrics
@@ -130,68 +176,81 @@ def plotConfusionMatrixSlider(given_name, y_true, y_prob, data_type, logging):
     labels_r.reverse()
 
     # Make subplots top table bottom heatmap
-    fig = make_subplots(rows=1, cols=2,
-                        specs=[[{'type': 'table'},
-                            {'type': 'heatmap'}]])
+    fig = make_subplots(
+        rows=1, cols=2, specs=[[{"type": "table"}, {"type": "heatmap"}]]
+    )
 
-    # Create heatmap 
-    heatmap = go.Heatmap(x=labels, y=labels_r,
-                        z=conf_matrix,
-                        text=conf_matrix,
-                        texttemplate="%{text:.3f}",
-                        hovertemplate="<br>".join([
-                            "Predicted: %{y}",
-                            "Actual: %{x}",
-                            "Share of total cases: %{z}",
-                            "<extra></extra>"
-                        ])
+    # Create heatmap
+    heatmap = go.Heatmap(
+        x=labels,
+        y=labels_r,
+        z=conf_matrix,
+        text=conf_matrix,
+        texttemplate="%{text:.3f}",
+        hovertemplate="<br>".join(
+            [
+                "Predicted: %{y}",
+                "Actual: %{x}",
+                "Share of total cases: %{z}",
+                "<extra></extra>",
+            ]
+        ),
     )
 
     # Create table
-    metrics_table = go.Table(header=dict(values=['          ', 'Precision', 'Recall', 'F1-Score', 'Support']),
-                    cells=dict(values=table_metrics) 
-                    )
+    metrics_table = go.Table(
+        header=dict(
+            values=["          ", "Precision", "Recall", "F1-Score", "Support"]
+        ),
+        cells=dict(values=table_metrics),
+    )
 
-    # Add table and heatmap to figure 
+    # Add table and heatmap to figure
     fig.add_trace(metrics_table, row=1, col=1)
     fig.add_trace(heatmap, row=1, col=2)
 
+    fig.update_layout(
+        width=1000,
+        height=600,
+        xaxis_title="Actual",
+        yaxis_title="Predicted",
+        xaxis_type="category",
+        yaxis_type="category",
+        xaxis_side="top",
+        title_text="Normalized confusion matrix",
+        title_x=0.5,
+    )
 
-
-    fig.update_layout(width=1000, height=600,
-                    xaxis_title="Actual",
-                    yaxis_title="Predicted",
-                    xaxis_type="category", 
-                    yaxis_type="category", 
-                    xaxis_side="top",
-                    title_text= "Normalized confusion matrix", 
-                    title_x=0.5,
-                    )
-
-    sliders = [dict(
-        active=10,
-        currentvalue={"prefix": "Threshold: "},
-        pad={"t": 50}, #sort it out later
-        steps=steps
-    )]
+    sliders = [
+        dict(
+            active=10,
+            currentvalue={"prefix": "Threshold: "},
+            pad={"t": 50},  # sort it out later
+            steps=steps,
+        )
+    ]
 
     fig.update_layout(sliders=sliders)
 
-    fig.write_html(f'{given_name}/performance/{data_type}_confusion_matrix.html', auto_play=False)
+    fig.write_html(
+        f"{given_name}/performance/{data_type}_confusion_matrix.html", auto_play=False
+    )
 
-    print(f'Created and saved confusion matrix for {data_type} data')
-    logging.info(f'Created and saved confusion matrix for {data_type} data')
+    logging.info(f"Created and saved confusion matrix for {data_type} data")
 
 
-def plotConfusionMatrix(given_name, y_true, y_prob, y_pred, file_type, data_type, logging):
+def plotConfusionMatrix(
+    given_name, y_true, y_prob, y_pred, file_type, data_type, logging
+):
     # If html is wanted and binary classification
     # Make confusion matrix plot with slider
-    if (file_type=='html') & (len(set(y_true))==2):
+    if (file_type == "html") & (len(set(y_true)) == 2):
         plotConfusionMatrixSlider(given_name, y_true, y_prob, data_type, logging)
-    
+
     # Otherwise make 'simple' static confusion matrix plot
     else:
         plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging)
+
 
 def classificationReportSave(given_name, y_true, y_pred, data_type, logging):
     """
@@ -221,10 +280,14 @@ def classificationReportSave(given_name, y_true, y_pred, data_type, logging):
 
     report = classification_report(y_true, y_pred, output_dict=True)
     report_df = pd.DataFrame(report).transpose()
-    report_df.to_csv('{given_name}/performance/{data_type}_classification_report.csv'.format(given_name=given_name, data_type=data_type))
+    report_df.to_csv(
+        "{given_name}/performance/{data_type}_classification_report.csv".format(
+            given_name=given_name, data_type=data_type
+        )
+    )
 
-    print('Classification report saved')
-    logging.info('Classification report saved')
+    logging.info("Classification report saved")
+
 
 def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type, logging):
     """
@@ -251,52 +314,64 @@ def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type, l
         Mean area under the curve (AUC) value for all folds or for the fitted model.
     """
     from sklearn.metrics import roc_curve, precision_recall_curve, auc
+
     curve_type = curve_type.lower()
 
-    if curve_type == 'roc':
-        title = 'ROC curve - {data_type} data'.format(data_type=data_type)
-        xlabel = 'False Positive Rate'
-        ylabel = 'True Positive Rate (Recall)'
+    if curve_type == "roc":
+        title = "ROC curve - {data_type} data".format(data_type=data_type)
+        xlabel = "False Positive Rate"
+        ylabel = "True Positive Rate (Recall)"
         diagCor1 = [0, 1]
         diagCor2 = [0, 1]
 
-        curve_ = 'roc'
+        curve_ = "roc"
 
-    elif ('recall' in curve_type and 'precision' in curve_type) or curve_type == 'pr':
-        title = 'Precision-Recall curve - {data_type}'.format(data_type=data_type)
-        xlabel = 'True Positive Rate (Recall)'
-        ylabel = 'Precision'
+    elif ("recall" in curve_type and "precision" in curve_type) or curve_type == "pr":
+        title = "Precision-Recall curve - {data_type}".format(data_type=data_type)
+        xlabel = "True Positive Rate (Recall)"
+        ylabel = "Precision"
 
         # add the random line (= share of positives in sample)
         if isinstance(y_true, list):
-            pos_share = sum([sum(el) for el in y_true]) / sum([len(el) for el in y_true])
+            pos_share = sum([sum(el) for el in y_true]) / sum(
+                [len(el) for el in y_true]
+            )
         else:
-            pos_share = sum(y_true)/len(y_true)
+            pos_share = sum(y_true) / len(y_true)
 
         diagCor1 = [0, 1]
         diagCor2 = [pos_share, pos_share]
 
-        curve_ = 'pr'
+        curve_ = "pr"
 
     # Create plot
     fig = go.Figure()
 
     # set axis range to 0 - 1
-    fig.update_layout(xaxis_range=[0, 1], yaxis_range=[0, 1],
-                      xaxis_title=xlabel, yaxis_title=ylabel,
-                      title=title,
-                      width=1000,
-                      height=800)
+    fig.update_layout(
+        xaxis_range=[0, 1],
+        yaxis_range=[0, 1],
+        xaxis_title=xlabel,
+        yaxis_title=ylabel,
+        title=title,
+        width=1000,
+        height=800,
+    )
 
     # Add diagonal reference line
-    fig.add_shape(type="line",
-                  xref="paper", yref="paper",
-                  x0=diagCor1[0], x1=diagCor1[1], y0=diagCor2[0], y1=diagCor2[1],
-                  line=dict(
-                      color="black",
-                      width=2,
-                      dash="dot",
-                  )
+    fig.add_shape(
+        type="line",
+        xref="paper",
+        yref="paper",
+        x0=diagCor1[0],
+        x1=diagCor1[1],
+        y0=diagCor2[0],
+        y1=diagCor2[1],
+        line=dict(
+            color="black",
+            width=2,
+            dash="dot",
+        ),
     )
 
     # Save the auc(s)
@@ -304,38 +379,39 @@ def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type, l
 
     if isinstance(y_prob, list):
         for fold_id in range(len(y_prob)):
-
-            if curve_ == 'roc':
+            if curve_ == "roc":
                 xVar, yVar, thresholds = roc_curve(y_true[fold_id], y_prob[fold_id])
-            elif curve_ == 'pr':
-                yVar, xVar, thresholds = precision_recall_curve(y_true[fold_id], y_prob[fold_id])
+            elif curve_ == "pr":
+                yVar, xVar, thresholds = precision_recall_curve(
+                    y_true[fold_id], y_prob[fold_id]
+                )
 
             # Calculate area under curve (AUC)
             auc_list.append(auc(xVar, yVar))
-            fig.add_trace(go.Scatter(x=xVar, y=yVar, mode='lines', name=f'Fold {fold_id}'))
+            fig.add_trace(
+                go.Scatter(x=xVar, y=yVar, mode="lines", name=f"Fold {fold_id}")
+            )
     else:
-
-        if curve_ == 'roc':
+        if curve_ == "roc":
             xVar, yVar, thresholds = roc_curve(y_true, y_prob)
-        elif curve_ == 'pr':
+        elif curve_ == "pr":
             yVar, xVar, thresholds = precision_recall_curve(y_true, y_prob)
 
         # Calculate area under curve (AUC)
         auc_list.append(auc(xVar, yVar))
-        fig.add_trace(go.Scatter(x=xVar, y=yVar, mode='lines', name=f'Fitted model'))
+        fig.add_trace(go.Scatter(x=xVar, y=yVar, mode="lines", name="Fitted model"))
 
     # add (average) auc in image
-    fig.add_annotation(x=0.5, y=0,
-                       text=f"Mean AUC: {np.mean(auc_list)}",
-                       showarrow=False,
-                       yshift=10)
+    fig.add_annotation(
+        x=0.5, y=0, text=f"Mean AUC: {np.mean(auc_list)}", showarrow=False, yshift=10
+    )
 
-    fig.write_image(f'{given_name}/performance/{data_type}_{curve_type}_plot.png')
+    fig.write_image(f"{given_name}/performance/{data_type}_{curve_type}_plot.png")
 
-    print(f'Created and saved {curve_type} plot for {data_type} data')
-    logging.info(f'Created and saved {curve_type} plot for {data_type} data')
+    logging.info(f"Created and saved {curve_type} plot for {data_type} data")
 
     return np.mean(auc_list)
+
 
 def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
     """
@@ -384,21 +460,30 @@ def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
     fig = go.Figure()
 
     # set axis range to 0 - 1
-    fig.update_layout(xaxis_range=[0, 1], yaxis_range=[0, 1],
-                      xaxis_title='Predicted probability', yaxis_title='Share being positive',
-                      title=f'Calibration plot (reliability curve) - {data_type} data',
-                      width=1000,
-                      height=800)
+    fig.update_layout(
+        xaxis_range=[0, 1],
+        yaxis_range=[0, 1],
+        xaxis_title="Predicted probability",
+        yaxis_title="Share being positive",
+        title=f"Calibration plot (reliability curve) - {data_type} data",
+        width=1000,
+        height=800,
+    )
 
     # Add diagonal reference line
-    fig.add_shape(type="line",
-                  xref="paper", yref="paper",
-                  x0=0, x1=1, y0=0, y1=1,
-                  line=dict(
-                      color="black",
-                      width=2,
-                      dash="dot",
-                  )
+    fig.add_shape(
+        type="line",
+        xref="paper",
+        yref="paper",
+        x0=0,
+        x1=1,
+        y0=0,
+        y1=1,
+        line=dict(
+            color="black",
+            width=2,
+            dash="dot",
+        ),
     )
 
     # Save the brier score loss
@@ -407,33 +492,52 @@ def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
     if isinstance(y_prob, list):
         for fold_id in range(len(y_prob)):
             # summaries actuals and predicted probs to (bins) number of points
-            fraction_of_positives, mean_predicted_value = \
-                calibration_curve(y_true[fold_id], y_prob[fold_id], n_bins=10, strategy='quantile')
+            fraction_of_positives, mean_predicted_value = calibration_curve(
+                y_true[fold_id], y_prob[fold_id], n_bins=10, strategy="quantile"
+            )
 
             # Calculate area under curve (AUC)
             bsl_list.append(brier_score_loss(y_true[fold_id], y_prob[fold_id]))
-            fig.add_trace(go.Scatter(x=mean_predicted_value, y=fraction_of_positives, mode='markers+lines', name=f'Fold {fold_id}'))
+            fig.add_trace(
+                go.Scatter(
+                    x=mean_predicted_value,
+                    y=fraction_of_positives,
+                    mode="markers+lines",
+                    name=f"Fold {fold_id}",
+                )
+            )
     else:
         # summaries actuals and predicted probs to (bins) number of points
-        fraction_of_positives, mean_predicted_value = \
-            calibration_curve(y_true, y_prob, n_bins=10, strategy='quantile')
+        fraction_of_positives, mean_predicted_value = calibration_curve(
+            y_true, y_prob, n_bins=10, strategy="quantile"
+        )
 
         # Calculate area under curve (AUC)
         bsl_list.append(brier_score_loss(y_true, y_prob))
-        fig.add_trace(go.Scatter(x=mean_predicted_value, y=fraction_of_positives, mode='markers+lines', name=f'Fitted model'))
+        fig.add_trace(
+            go.Scatter(
+                x=mean_predicted_value,
+                y=fraction_of_positives,
+                mode="markers+lines",
+                name="Fitted model",
+            )
+        )
 
     # add (average) auc in image
-    fig.add_annotation(x=0.5, y=0,
-                       text=f"Mean Brier Score Loss: {np.mean(bsl_list)}",
-                       showarrow=False,
-                       yshift=10)
+    fig.add_annotation(
+        x=0.5,
+        y=0,
+        text=f"Mean Brier Score Loss: {np.mean(bsl_list)}",
+        showarrow=False,
+        yshift=10,
+    )
 
-    fig.write_image(f'{given_name}/performance/{data_type}_calibration_plot.png')
+    fig.write_image(f"{given_name}/performance/{data_type}_calibration_plot.png")
 
-    print(f'Created and saved calibration plot for {data_type} data')
-    logging.info(f'Created and saved calibration plot for {data_type} data')
+    logging.info(f"Created and saved calibration plot for {data_type} data")
 
     return
+
 
 # for multiclass classification WIP
 def multiClassPlotCalibrationCurvePlotly(given_name, actuals, probs, title, bins=10):
@@ -447,7 +551,9 @@ def multiClassPlotCalibrationCurvePlotly(given_name, actuals, probs, title, bins
     :param saveFileName: str path to which to save the plot
     :return: calibration plot
     """
-    calibration_df = pd.DataFrame(columns=['classification','fraction_of_positives','mean_predicted_value'])
+    calibration_df = pd.DataFrame(
+        columns=["classification", "fraction_of_positives", "mean_predicted_value"]
+    )
 
     # loop through different classes
     for cl in probs.columns:
@@ -455,34 +561,57 @@ def multiClassPlotCalibrationCurvePlotly(given_name, actuals, probs, title, bins
         y_prob = probs[cl]
 
         # summarise actuals and predicted probs to (bins) number of points
-        fraction_of_positives, mean_predicted_value = \
-            calibration_curve(y_true, y_prob, n_bins=bins, strategy='quantile')
+        fraction_of_positives, mean_predicted_value = calibration_curve(
+            y_true, y_prob, n_bins=bins, strategy="quantile"
+        )
 
-        calibration_df = calibration_df.append(pd.DataFrame({'classification':cl, 'fraction_of_positives':fraction_of_positives, 'mean_predicted_value':mean_predicted_value}), ignore_index=True)
+        calibration_df = calibration_df.append(
+            pd.DataFrame(
+                {
+                    "classification": cl,
+                    "fraction_of_positives": fraction_of_positives,
+                    "mean_predicted_value": mean_predicted_value,
+                }
+            ),
+            ignore_index=True,
+        )
 
     # Create scatter plot
-    fig = px.scatter(calibration_df, x='mean_predicted_value', y='fraction_of_positives', title='Calibration plot (reliability curve)', color='classification',width=1200, height=800)
-
+    fig = px.scatter(
+        calibration_df,
+        x="mean_predicted_value",
+        y="fraction_of_positives",
+        title="Calibration plot (reliability curve)",
+        color="classification",
+        width=1200,
+        height=800,
+    )
 
     # Make trace be line plus dots
-    for l in range(len(fig.data)):
-        fig.data[l].update(mode='markers+lines')
+    for ld in range(len(fig.data)):
+        fig.data[ld].update(mode="markers+lines")
 
     # set axis range to 0 - 1
     # fig.update_layout(xaxis_range=[-0.1,1.1], yaxis_range=[-0.1,1.1], xaxis_title='Predicted probability', yaxis_title='Fraction of positives')
 
     # Add diagonal reference line
-    fig.add_shape(type="line",
-                  xref="paper", yref="paper",
-                  x0=0, x1=1, y0=0, y1=1,
-                  line=dict(
-                      color="black",
-                      width=2,
-                      dash="dot",
-                  )
+    fig.add_shape(
+        type="line",
+        xref="paper",
+        yref="paper",
+        x0=0,
+        x1=1,
+        y0=0,
+        y1=1,
+        line=dict(
+            color="black",
+            width=2,
+            dash="dot",
+        ),
     )
 
-    fig.show(renderer='browser')
+    fig.show(renderer="browser")
+
 
 def plotProbabilityDistribution(given_name, y_true, y_prob, data_type, logging):
     """
@@ -506,33 +635,38 @@ def plotProbabilityDistribution(given_name, y_true, y_prob, data_type, logging):
     None
     """
     import plotly.figure_factory as ff
-    df = pd.DataFrame({'actuals': y_true, 'prob': y_prob})
-    do = df[df['actuals']==1]['prob']
-    dont = df[df['actuals']==0]['prob']
+
+    df = pd.DataFrame({"actuals": y_true, "prob": y_prob})
+    do = df[df["actuals"] == 1]["prob"]
+    dont = df[df["actuals"] == 0]["prob"]
 
     # Catching any kind of exception
     try:
         # Create distplot with custom bin_size
-        fig = ff.create_distplot([do,dont], ['1','0'], colors=['green','red'], bin_size=.01)
+        fig = ff.create_distplot(
+            [do, dont], ["1", "0"], colors=["green", "red"], bin_size=0.01
+        )
     except Exception as e:
-        print(f'Could not create distribution plot because of \n{e}')
-        logging.info(f'Could not create distribution plot because of \n{e}')
+        logging.info(f"Could not create distribution plot because of \n{e}")
         return
 
     # Update size of figure
-    fig.update_layout(xaxis_title='Predicted probability', yaxis_title='Frequency',
-                      title=f'Distribution plot - {data_type} data',
-                      width=1000,
-                      height=800)
+    fig.update_layout(
+        xaxis_title="Predicted probability",
+        yaxis_title="Frequency",
+        title=f"Distribution plot - {data_type} data",
+        width=1000,
+        height=800,
+    )
 
     # fig.show(renderer='browser')
 
-    fig.write_image(f'{given_name}/performance/{data_type}_distribution_plot.png')
+    fig.write_image(f"{given_name}/performance/{data_type}_distribution_plot.png")
 
-    print(f'Created and saved probability distribution plot')
-    logging.info(f'Created and saved probability distribution plot')
+    logging.info("Created and saved probability distribution plot")
 
     return
+
 
 def plotDistribution(given_name, groups, values, data_type, logging):
     """
@@ -565,57 +699,57 @@ def plotDistribution(given_name, groups, values, data_type, logging):
     >>> values = [1, 2, 2, 3, 3, 3]
     >>> plotDistribution("myplot", groups, values, "training", logging.getLogger())
     """
-    df = pd.DataFrame({'groups': groups, 'values': values})
-    
+    df = pd.DataFrame({"groups": groups, "values": values})
+
     min_value = min(values)
     max_value = max(values)
     bin_size = (max_value - min_value) / 50
-    
-    colors = ['red','green','blue','purple','orange']
+
+    colors = ["red", "green", "blue", "purple", "orange"]
 
     # Catching any kind of exception
     try:
-        # Create distplot 
+        # Create distplot
         fig = go.Figure()
         for g in range(len(set(groups))):
-            X = df[df['groups']==g]['values']
-            fig.add_trace(go.Histogram(
-                x=X,
-                histnorm='probability density',
-                name=str(g), # name used in legend and hover labels
-                xbins=dict( # bins used for histogram
-                    start=min_value,
-                    end=max_value,
-                    size=bin_size
-                ),
-                marker_color=colors[g],
-                opacity=0.75
-            ))
+            X = df[df["groups"] == g]["values"]
+            fig.add_trace(
+                go.Histogram(
+                    x=X,
+                    histnorm="probability density",
+                    name=str(g),  # name used in legend and hover labels
+                    xbins=dict(  # bins used for histogram
+                        start=min_value, end=max_value, size=bin_size
+                    ),
+                    marker_color=colors[g],
+                    opacity=0.75,
+                )
+            )
     except Exception as e:
-        print(f'Could not create distribution plot because of \n{e}')
-        logging.info(f'Could not create distribution plot because of \n{e}')
+        logging.info(f"Could not create distribution plot because of \n{e}")
         return
 
     fig.update_layout(
-        xaxis_title='Predicted probability',
-        yaxis_title='Probability density',
-        title=f'Distribution plot - {data_type} data',
+        xaxis_title="Predicted probability",
+        yaxis_title="Probability density",
+        title=f"Distribution plot - {data_type} data",
         width=1000,
         height=800,
-        bargap=0.2, # gap between bars of adjacent location coordinates
-        bargroupgap=0.1 # gap between bars of the same location coordinates
+        bargap=0.2,  # gap between bars of adjacent location coordinates
+        bargroupgap=0.1,  # gap between bars of the same location coordinates
     )
 
-    fig.write_image(f'{given_name}/performance/{data_type}_distribution_plot.png')
+    fig.write_image(f"{given_name}/performance/{data_type}_distribution_plot.png")
 
-    print(f'Created and saved probability distribution plot')
-    logging.info(f'Created and saved probability distribution plot')
+    logging.info("Created and saved probability distribution plot")
 
     return
+
 
 """
 Metrics and plot which are related to regression
 """
+
 
 def plotYhatVsYSave(given_name, y_true, y_pred, data_type, logging):
     """
@@ -640,38 +774,47 @@ def plotYhatVsYSave(given_name, y_true, y_pred, data_type, logging):
     None
     """
 
-    plot_df = pd.DataFrame({'y_true':y_true, 'y_pred':y_pred})
-    fig = px.scatter(plot_df, 'y_true', 'y_pred')
-    fig.write_image('{given_name}/performance/{data_type}_scatter_yhat_vs_y.png'.format(given_name=given_name, data_type=data_type))
-
-    print(f'Scatter plot of yhat vs y saved for {data_type}')
-    logging.info(f'Scatter plot of yhat vs y saved for {data_type}')
-
-def plotQuantileError(given_name, y_true, y_pred, data_type, logging):
-
-    # Add prediction error
-    plot_df = pd.DataFrame({'y_true':y_true, 'y_pred':y_pred, 'y_diff':y_pred - y_true})
-
-    # Make 20 quantiles
-    plot_df['quantile'] = pd.qcut(plot_df['y_true'], 20, duplicates='drop')
-
-    # Sort by quantile and make quantile colunn a string for plotting
-    plot_df = plot_df.iloc[plot_df['quantile'].cat.codes.argsort()]
-    plot_df['quantile'] = plot_df['quantile'].astype(str)
-
-    fig = px.box(plot_df, 'quantile', 'y_diff')
-    fig.update_layout(
-        xaxis_title='Actual',
-        yaxis_title='Prediction - actual',
-        title=f'Quantile error plot - {data_type} data',
-        width=1000,
-        height=800
+    plot_df = pd.DataFrame({"y_true": y_true, "y_pred": y_pred})
+    fig = px.scatter(plot_df, "y_true", "y_pred")
+    fig.write_image(
+        "{given_name}/performance/{data_type}_scatter_yhat_vs_y.png".format(
+            given_name=given_name, data_type=data_type
+        )
     )
 
-    fig.write_image('{given_name}/performance/{data_type}_quantile_error_plot.png'.format(given_name=given_name, data_type=data_type))
+    logging.info(f"Scatter plot of yhat vs y saved for {data_type}")
 
-    print(f'Quantile error plot saved for {data_type}')
-    logging.info(f'Quantile error plot saved for {data_type}')
+
+def plotQuantileError(given_name, y_true, y_pred, data_type, logging):
+    # Add prediction error
+    plot_df = pd.DataFrame(
+        {"y_true": y_true, "y_pred": y_pred, "y_diff": y_pred - y_true}
+    )
+
+    # Make 20 quantiles
+    plot_df["quantile"] = pd.qcut(plot_df["y_true"], 20, duplicates="drop")
+
+    # Sort by quantile and make quantile colunn a string for plotting
+    plot_df = plot_df.iloc[plot_df["quantile"].cat.codes.argsort()]
+    plot_df["quantile"] = plot_df["quantile"].astype(str)
+
+    fig = px.box(plot_df, "quantile", "y_diff")
+    fig.update_layout(
+        xaxis_title="Actual",
+        yaxis_title="Prediction - actual",
+        title=f"Quantile error plot - {data_type} data",
+        width=1000,
+        height=800,
+    )
+
+    fig.write_image(
+        "{given_name}/performance/{data_type}_quantile_error_plot.png".format(
+            given_name=given_name, data_type=data_type
+        )
+    )
+
+    logging.info(f"Quantile error plot saved for {data_type}")
+
 
 def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type, logging):
     y_true_pos = np.clip(y_true, 0, None)
@@ -680,7 +823,7 @@ def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type, logging
     # Calculate metrics
     mae = mean_absolute_error(y_true, y_pred)
     mse = mean_squared_error(y_true, y_pred)
-    rmse = mse ** 0.5
+    rmse = mse**0.5
     r2 = r2_score(y_true, y_pred)
     adj_r2 = 1 - (1 - r2) * (len(y_true) - 1) / (len(y_true) - X_all.shape[1] - 1)
     mape = mean_absolute_percentage_error(y_true, y_pred)
@@ -688,7 +831,7 @@ def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type, logging
     me = max_error(y_true, y_pred)
     medae = median_absolute_error(y_true, y_pred)
     msle = mean_squared_log_error(y_true_pos, y_pred_pos)
-    rmsle_value = msle ** 0.5
+    rmsle_value = msle**0.5
 
     header = ["Metric"]
 
@@ -704,11 +847,13 @@ def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type, logging
         ["Max Error"],
         ["Median Absolute Error (MedAE)"],
         ["Mean Squared Log Error (MSLE)"],
-        ["Root Mean Squared Log Error (RMSLE)"]
+        ["Root Mean Squared Log Error (RMSLE)"],
     ]
 
     # Create the table
-    fig = go.Figure(data=[go.Table(header=dict(values=header), cells=dict(values=rows))])
+    fig = go.Figure(
+        data=[go.Table(header=dict(values=header), cells=dict(values=rows))]
+    )
 
     # Add metrics data
     metric_values = [
@@ -722,7 +867,7 @@ def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type, logging
         [me],
         [medae],
         [msle],
-        [rmsle_value]
+        [rmsle_value],
     ]
 
     metric_names = [row for row in rows]
@@ -731,10 +876,12 @@ def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type, logging
     cells_values = [metric_names, metric_values]
     column_names = ["Metric", "Value"]
 
-    fig.add_trace(go.Table(
-        header=dict(values=column_names),
-        cells=dict(values=cells_values, format=["",".3"])
-    ))
+    fig.add_trace(
+        go.Table(
+            header=dict(values=column_names),
+            cells=dict(values=cells_values, format=["", ".3"]),
+        )
+    )
 
     # Update table layout
     fig.update_layout(
@@ -743,16 +890,17 @@ def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type, logging
     )
 
     # Save table
-    fig.write_image(f'{given_name}/performance/{data_type}_regression_metrics.png')
+    fig.write_image(f"{given_name}/performance/{data_type}_regression_metrics.png")
 
-    print(f'Created and saved regression metrics table')
-    logging.info(f'Created and saved regression metrics table')
+    logging.info("Created and saved regression metrics table")
 
     return
-    
+
 
 # To be used for feature exploration (TODO add more colors)
-def plotDistributionViolin(given_name, groups, values, data_type, logging):
+def plotDistributionViolin(
+    given_name, feature_name, groups, values, data_type, logging
+):
     """
     Plot violin plot of distribution of values across different groups.
 
@@ -786,61 +934,62 @@ def plotDistributionViolin(given_name, groups, values, data_type, logging):
     --------
     >>> plotDistributionViolin('my_figure', [0, 1, 0, 1], [2.5, 3.7, 4.2, 5.3], 'continuous', logging)
     """
-    df = pd.DataFrame({'groups': groups, 'values': values})
-    
-    colors = ['red','green','blue','purple','orange']
+    df = pd.DataFrame({"groups": groups, "values": values})
+
+    colors = ["red", "green", "blue", "purple", "orange"]
 
     # Catching any kind of exception
     try:
-        # Create Violin plot 
+        # Create Violin plot
         fig = go.Figure()
         for g in range(len(set(groups))):
-            X = df[df['groups']==g]['values']
-            fig.add_trace(go.Violin(
-                x=X,
-                name=str(g), # name used in legend and hover labels
-                marker_color=colors[g],
-                opacity=0.75
-            ))
+            X = df[df["groups"] == g]["values"]
+            fig.add_trace(
+                go.Violin(
+                    x=X,
+                    name=str(g),  # name used in legend and hover labels
+                    marker_color=colors[g],
+                    opacity=0.75,
+                )
+            )
     except Exception as e:
-        print(f'Could not create distribution plot because of \n{e}')
-        logging.info(f'Could not create distribution plot because of \n{e}')
+        logging.info(f"Could not create distribution plot because of \n{e}")
         return
 
     fig.update_layout(
-        xaxis_title='Value',
-        yaxis_title='Group',
-        title=f'Distribution plot - {data_type} data',
+        xaxis_title="Value",
+        yaxis_title="Group",
+        title=f"Distribution plot - {data_type} data",
         width=1000,
-        height=800
+        height=800,
     )
 
-    fig.write_image(f'{given_name}/feature_info/{feature_name}_class_distributions.png')
+    fig.write_image(f"{given_name}/feature_info/{feature_name}_distributions.png")
 
-    print(f'Created and saved feature distribution plot')
-    logging.info(f'Created and saved feature distribution plot')
+    logging.info("Created and saved feature distribution plot")
 
     return
 
+
 # TODO below function would need to have the test models available and make the calucations using those
-# So that the X_test is actually not seen yet by the model 
+# So that the X_test is actually not seen yet by the model
 # Currently the clf['final'] is the model trained over all data
 def scorePartialCorrelation(given_name, clf, post_datasets):
-    for fold_id in range(len(post_datasets['X_test_list'])):
-        clf_fold = clf['test'][fold_id]
+    for fold_id in range(len(post_datasets["X_test_list"])):
+        clf_fold = clf["test"][fold_id]
 
-        X_test = post_datasets['X_test_list'][fold_id]
-        X_train = post_datasets['X_train_list'][fold_id]
-        y_test = post_datasets['y_test_list'][fold_id]
-        y_train = post_datasets['y_train_list'][fold_id]
+        X_test = post_datasets["X_test_list"][fold_id]
+        X_train = post_datasets["X_train_list"][fold_id]
+        y_test = post_datasets["y_test_list"][fold_id]
+        y_train = post_datasets["y_train_list"][fold_id]
 
-        sl_test = clf_fold.predict_and_contrib(X_test, output='labels')
+        sl_test = clf_fold.predict_and_contrib(X_test, output="labels")
         X_test_scores = pd.DataFrame(sl_test[1], columns=clf_fold.feature_names)
-        y_test_label = pd.Series(y_test, name='target')
+        y_test_label = pd.Series(y_test, name="target")
 
-        sl_train = clf_fold.predict_and_contrib(X_train, output='labels')
+        sl_train = clf_fold.predict_and_contrib(X_train, output="labels")
         X_train_scores = pd.DataFrame(sl_train[1], columns=clf_fold.feature_names)
-        y_train_label = pd.Series(y_train, name='target')
+        y_train_label = pd.Series(y_train, name="target")
 
     # Define function for partial correlation
     def partial_correlation(X, y):
@@ -850,56 +999,103 @@ def scorePartialCorrelation(given_name, clf, post_datasets):
                 data=pd.concat([X, y], axis=1).astype(float),
                 x=feature_name,
                 y=y.name,
-                x_covar=[f for f in X.columns if f != feature_name]
-            ).loc['pearson', 'r']
+                x_covar=[f for f in X.columns if f != feature_name],
+            ).loc["pearson", "r"]
         return out
 
     parscore_test = partial_correlation(X_test_scores, y_test_label)
     parscore_train = partial_correlation(X_train_scores, y_train_label)
-    parscore_diff = pd.Series(parscore_test - parscore_train, name = 'parscore_diff')
+    # parscore_diff = pd.Series(parscore_test - parscore_train, name = 'parscore_diff')
 
     # Plot parshap
-    plotmin, plotmax = min(parscore_train.min(), parscore_test.min()), max(parscore_train.max(), parscore_test.max())
-    plotbuffer = .05 * (plotmax - plotmin)
+    plotmin, plotmax = (
+        min(parscore_train.min(), parscore_test.min()),
+        max(parscore_train.max(), parscore_test.max()),
+    )
+    plotbuffer = 0.05 * (plotmax - plotmin)
     fig, ax = plt.subplots()
     if plotmin < 0:
-        ax.vlines(0, plotmin - plotbuffer, plotmax + plotbuffer, color='darkgrey', zorder=0)
-        ax.hlines(0, plotmin - plotbuffer, plotmax + plotbuffer, color='darkgrey', zorder=0)
+        ax.vlines(
+            0, plotmin - plotbuffer, plotmax + plotbuffer, color="darkgrey", zorder=0
+        )
+        ax.hlines(
+            0, plotmin - plotbuffer, plotmax + plotbuffer, color="darkgrey", zorder=0
+        )
     ax.plot(
-        [plotmin - plotbuffer, plotmax + plotbuffer], [plotmin - plotbuffer, plotmax + plotbuffer],
-        color='darkgrey', zorder=0
+        [plotmin - plotbuffer, plotmax + plotbuffer],
+        [plotmin - plotbuffer, plotmax + plotbuffer],
+        color="darkgrey",
+        zorder=0,
     )
     sc = ax.scatter(
-        parscore_train, parscore_test,
-        edgecolor='grey',
-        #   c=[5]*16, 
-          s=50, 
-          cmap=plt.cm.get_cmap('Reds'))
-    ax.set(title='Partial correlation bw Score and target...', xlabel='... on Train data', ylabel='... on Test data')
+        parscore_train,
+        parscore_test,
+        edgecolor="grey",
+        #   c=[5]*16,
+        s=50,
+        cmap=plt.cm.get_cmap("Reds"),
+    )
+    ax.set(
+        title="Partial correlation bw Score and target...",
+        xlabel="... on Train data",
+        ylabel="... on Test data",
+    )
     cbar = fig.colorbar(sc)
     cbar.set_ticks([])
     for txt in parscore_train.index:
-        ax.annotate(txt, (parscore_train[txt], parscore_test[txt] + plotbuffer / 2), ha='center', va='bottom')
-    fig.savefig(f'{given_name}/performance/PartialCorrelation.png', dpi=300, bbox_inches="tight")
+        ax.annotate(
+            txt,
+            (parscore_train[txt], parscore_test[txt] + plotbuffer / 2),
+            ha="center",
+            va="bottom",
+        )
+    fig.savefig(
+        f"{given_name}/performance/PartialCorrelation.png", dpi=300, bbox_inches="tight"
+    )
 
 
-def postModellingPlots(clf, model_name, model_type, given_name, post_datasets, post_params, logging):
+def postModellingPlots(
+    clf, model_name, model_type, given_name, post_datasets, post_params, logging
+):
     # Performance and other post modeling plots
     # unpack dict
-    X_all = post_datasets['X_all']
-    y_all, y_all_pred = post_datasets['y_all'], post_datasets['y_all_pred']
-    y_test_concat, y_test_pred = post_datasets['y_test_concat'], post_datasets['y_test_pred']
-    y_test_list = post_datasets['y_test_list']
+    X_all = post_datasets["X_all"]
+    y_all, y_all_pred = post_datasets["y_all"], post_datasets["y_all_pred"]
+    y_test_concat, y_test_pred = (
+        post_datasets["y_test_concat"],
+        post_datasets["y_test_pred"],
+    )
+    y_test_list = post_datasets["y_test_list"]
 
-    if model_type == 'classification':
+    if model_type == "classification":
         # probabilities only for classifications
-        y_test_prob, y_all_prob, y_test_prob_list = post_datasets['y_test_prob'], post_datasets['y_all_prob'], post_datasets['y_test_prob_list']
+        y_test_prob, y_all_prob, y_test_prob_list = (
+            post_datasets["y_test_prob"],
+            post_datasets["y_all_prob"],
+            post_datasets["y_test_prob_list"],
+        )
 
         # Threshold dependant
-        plotConfusionMatrix(given_name, y_all, y_all_prob, y_all_pred, post_params['file_type'], data_type='final_train', logging=logging)
-        plotConfusionMatrix(given_name, y_test_concat, y_test_prob, y_test_pred, post_params['file_type'], data_type='test', logging=logging)
+        plotConfusionMatrix(
+            given_name,
+            y_all,
+            y_all_prob,
+            y_all_pred,
+            post_params["file_type"],
+            data_type="final_train",
+            logging=logging,
+        )
+        plotConfusionMatrix(
+            given_name,
+            y_test_concat,
+            y_test_prob,
+            y_test_pred,
+            post_params["file_type"],
+            data_type="test",
+            logging=logging,
+        )
 
-        if len(clf['final'].classes_) == 2:
+        if len(clf["final"].classes_) == 2:
             # Also create pr curve for class 0
             y_all_neg = np.array([1 - j for j in list(y_all)])
             y_all_prob_neg = np.array([1 - j for j in list(y_all_prob)])
@@ -908,74 +1104,187 @@ def postModellingPlots(clf, model_name, model_type, given_name, post_datasets, p
             y_test_prob_list_neg = [[1 - j for j in i] for i in y_test_prob_list]
 
             # Threshold independant
-            plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='roc', data_type='final_train', logging=logging)
-            plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='roc', data_type='test', logging=logging)
+            plotClassificationCurve(
+                given_name,
+                y_all,
+                y_all_prob,
+                curve_type="roc",
+                data_type="final_train",
+                logging=logging,
+            )
+            plotClassificationCurve(
+                given_name,
+                y_test_list,
+                y_test_prob_list,
+                curve_type="roc",
+                data_type="test",
+                logging=logging,
+            )
 
-            plotClassificationCurve(given_name, y_all, y_all_prob, curve_type='pr', data_type='final_train_class1', logging=logging)
-            plotClassificationCurve(given_name, y_all_neg, y_all_prob_neg, curve_type='pr', data_type='final_train_class0', logging=logging)
+            plotClassificationCurve(
+                given_name,
+                y_all,
+                y_all_prob,
+                curve_type="pr",
+                data_type="final_train_class1",
+                logging=logging,
+            )
+            plotClassificationCurve(
+                given_name,
+                y_all_neg,
+                y_all_prob_neg,
+                curve_type="pr",
+                data_type="final_train_class0",
+                logging=logging,
+            )
 
-            plotClassificationCurve(given_name, y_test_list, y_test_prob_list, curve_type='pr', data_type='test_data_class1', logging=logging)
-            plotClassificationCurve(given_name, y_test_list_neg, y_test_prob_list_neg, curve_type='pr', data_type='test_data_class0', logging=logging)
+            plotClassificationCurve(
+                given_name,
+                y_test_list,
+                y_test_prob_list,
+                curve_type="pr",
+                data_type="test_data_class1",
+                logging=logging,
+            )
+            plotClassificationCurve(
+                given_name,
+                y_test_list_neg,
+                y_test_prob_list_neg,
+                curve_type="pr",
+                data_type="test_data_class0",
+                logging=logging,
+            )
 
-            plotCalibrationCurve(given_name, y_all, y_all_prob, data_type='final_train', logging=logging)
-            plotCalibrationCurve(given_name, y_test_list, y_test_prob_list, data_type='test', logging=logging)
+            plotCalibrationCurve(
+                given_name, y_all, y_all_prob, data_type="final_train", logging=logging
+            )
+            plotCalibrationCurve(
+                given_name,
+                y_test_list,
+                y_test_prob_list,
+                data_type="test",
+                logging=logging,
+            )
 
-            plotProbabilityDistribution(given_name, y_all, y_all_prob, data_type='final_train', logging=logging)
-            plotProbabilityDistribution(given_name, y_test_concat, y_test_prob, data_type='test', logging=logging)
+            plotProbabilityDistribution(
+                given_name, y_all, y_all_prob, data_type="final_train", logging=logging
+            )
+            plotProbabilityDistribution(
+                given_name,
+                y_test_concat,
+                y_test_prob,
+                data_type="test",
+                logging=logging,
+            )
 
             # TODO fix this
             # scorePartialCorrelation(given_name, clf, post_datasets)
 
         # If multiclass classification
-        elif len(clf['final'].classes_) > 2:
+        elif len(clf["final"].classes_) > 2:
             # loop through classes
-            for c in clf['final'].classes_:
-
+            for c in clf["final"].classes_:
                 # stating the class
-                print(f'\nFor class {c}:')
-                logging.info(f'\nFor class {c}:')
+                logging.info(f"\nFor class {c}:")
 
                 # creating a list of all the classes except the current class
-                other_class = [x for x in clf['final'].classes_ if x != c]
+                other_class = [x for x in clf["final"].classes_ if x != c]
 
                 # Get index of selected class in clf['final'].classes_
-                class_index = list(clf['final'].classes_).index(c)
+                class_index = list(clf["final"].classes_).index(c)
 
                 # marking the current class as 1 and all other classes as 0
-                y_test_list_ova = [[0 if x in other_class else 1 for x in fold_] for fold_ in y_test_list]
-                y_test_prob_list_ova = [[x[class_index] for x in fold_] for fold_ in y_test_prob_list]
+                y_test_list_ova = [
+                    [0 if x in other_class else 1 for x in fold_]
+                    for fold_ in y_test_list
+                ]
+                y_test_prob_list_ova = [
+                    [x[class_index] for x in fold_] for fold_ in y_test_prob_list
+                ]
 
                 # concatonate probs together to one list for distribution plot
                 y_test_ova = np.concatenate(y_test_list_ova, axis=0)
                 y_test_prob_ova = np.concatenate(y_test_prob_list_ova, axis=0)
 
-                y_all_ova = [0 if x in other_class else 1 for x in y_all]
-                y_all_prob_ova = [x[class_index] for x in y_all_prob]
-
+                # y_all_ova = [0 if x in other_class else 1 for x in y_all]
+                # y_all_prob_ova = [x[class_index] for x in y_all_prob]
 
                 # Threshold independant
                 # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='roc', data_type=f'final_train_class_{c}', logging=logging)
-                plotClassificationCurve(given_name, y_test_list_ova, y_test_prob_list_ova, curve_type='roc', data_type=f'test_class_{c}', logging=logging)
+                plotClassificationCurve(
+                    given_name,
+                    y_test_list_ova,
+                    y_test_prob_list_ova,
+                    curve_type="roc",
+                    data_type=f"test_class_{c}",
+                    logging=logging,
+                )
 
                 # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='pr', data_type='final_train_class1', logging=logging)
-                plotClassificationCurve(given_name, y_test_list_ova, y_test_prob_list_ova, curve_type='pr', data_type=f'test_class_{c}', logging=logging)
+                plotClassificationCurve(
+                    given_name,
+                    y_test_list_ova,
+                    y_test_prob_list_ova,
+                    curve_type="pr",
+                    data_type=f"test_class_{c}",
+                    logging=logging,
+                )
 
                 # multiClassPlotCalibrationCurvePlotly(given_name, y_all, pd.DataFrame(y_all_prob, columns=clf['final'].classes_), title='fun')
-                plotCalibrationCurve(given_name, y_test_list_ova, y_test_prob_list_ova, data_type=f'test_class_{c}', logging=logging)
+                plotCalibrationCurve(
+                    given_name,
+                    y_test_list_ova,
+                    y_test_prob_list_ova,
+                    data_type=f"test_class_{c}",
+                    logging=logging,
+                )
 
                 # plotProbabilityDistribution(given_name, y_all_ova, y_all_prob_ova, data_type='final_train', logging=logging)
-                plotProbabilityDistribution(given_name, y_test_ova, y_test_prob_ova, data_type=f'test_class_{c}', logging=logging)
+                plotProbabilityDistribution(
+                    given_name,
+                    y_test_ova,
+                    y_test_prob_ova,
+                    data_type=f"test_class_{c}",
+                    logging=logging,
+                )
 
     # if regression
-    elif model_type == 'regression':
-        plotYhatVsYSave(given_name, y_test_concat, y_test_pred, data_type='test', logging=logging)
-        plotYhatVsYSave(given_name, y_all, y_all_pred, data_type='final_train', logging=logging)
+    elif model_type == "regression":
+        plotYhatVsYSave(
+            given_name, y_test_concat, y_test_pred, data_type="test", logging=logging
+        )
+        plotYhatVsYSave(
+            given_name, y_all, y_all_pred, data_type="final_train", logging=logging
+        )
 
-        plotQuantileError(given_name, y_test_concat, y_test_pred, data_type='test', logging=logging)
-        plotQuantileError(given_name, y_all, y_all_pred, data_type='final_train', logging=logging)
+        plotQuantileError(
+            given_name, y_test_concat, y_test_pred, data_type="test", logging=logging
+        )
+        plotQuantileError(
+            given_name, y_all, y_all_pred, data_type="final_train", logging=logging
+        )
 
-        regressionMetricsTable(given_name, y_test_concat, y_test_pred, X_all, data_type='test', logging=logging)
-        regressionMetricsTable(given_name, y_all, y_all_pred, X_all, data_type='final_train', logging=logging)
+        regressionMetricsTable(
+            given_name,
+            y_test_concat,
+            y_test_pred,
+            X_all,
+            data_type="test",
+            logging=logging,
+        )
+        regressionMetricsTable(
+            given_name,
+            y_all,
+            y_all_pred,
+            X_all,
+            data_type="final_train",
+            logging=logging,
+        )
 
     # Post modeling plots, specific per model but includes feature importance among others
-    globals()[model_name].postModelPlots(clf['final'], given_name + '/feature_importance', post_params['file_type'], logging)
+    globals()[model_name].postModelPlots(
+        clf["final"],
+        given_name + "/feature_importance",
+        post_params["file_type"],
+        logging,
+    )

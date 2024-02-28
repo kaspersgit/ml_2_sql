@@ -1,11 +1,9 @@
 # files and data
 input/data/*.csv
-!input/data/example_binary_titanic.csv
-!input/data/example_multiclass_faults.csv
+!input/data/example_*.csv
 
 input/configuration/*.json
-!input/configuration/example_binary_titanic.json
-!input/configuration/example_multiclass_faults.json
+!input/configuration/example_*.json
 
 trained_models/*
 !trained_models/example_titanic/

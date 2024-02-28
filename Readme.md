@@ -18,19 +18,12 @@ This project tries to make the process simple enough for any SQL user to train a
 
 ## Philosophy:
 - Automated and easy to use 
-- Model in SQL (avoid Data Science debt for a complex pipeline)
+- Model written in SQL (avoid Data Science debt for a complex pipeline)
 - Explainable Boosting Machine on par with other boosted methods
 
 ## Background
 An automated machine learning tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from interpretML) to train models which are explainable and transparent in how they come to their prediction. SQL infrastructure is the only requirement to put a model into production.
 This tool can be used by anybody, but is aimed for people who want to easily train a model and want to use it in their (company) SQL system. 
-
-## Current state
-- Only EBM is implemented (decision tree, logistic regression and rule set not yet)
-- Automated model training is working for binary classification and regression
-- SQL creation of model is working fully for binary clasification
-- SQL for regression and the whole process for multiclass classification is work in progress
-- Up/down sampling not fully implemented yet 
 
 </br>
 
@@ -59,18 +52,18 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
    
     Mac/Linux:
    `source .ml2sql/bin/activate` or `deactivate`
-4. For usage of this tool the virtual environment can be deactivated.
+4. For usage of this tool the virtual environment does not need to be activated.
 
 ## Try it out demo
 1. In the terminal in the root of this folder run: 
   - `python3 run.py` (Mac/Linux)
   - `python run.py` (Windows)
-2. Follow the instructions on screen by selecting the demo data and (similarly named) config file
+2. Follow the instructions on screen by selecting the example data and config file
 3. Check the output in the newly created folder
 
 ## Try it out using own data
 1. Save csv file containing target and all features in the `input/data/` folder (more on input data at [input data](#data))
-2. Save a settings json file in the `input/configuration/` (explained below at [configuration json](#configuration-json))
+2. Save a configuration json file in the `input/configuration/` (explained below at [configuration json](#configuration-json))
 3. In the terminal in the root of this folder run: 
   - `python3 run.py` (Mac/Linux)
   - `python run.py` (Windows)
@@ -79,11 +72,11 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
 6. The `.sql` file in the `model` folder will contain a SQL written model  
 
 ## Testing already trained model on a new dataset
-1. Make sure new dataset is exactly the same format as the dataset the model was trained on
+1. Make sure new dataset has the same features as the dataset the model was trained on (same features)
 2. Save dataset in the `input/data/` folder (more on input data at [input data](#data))
 3. In the terminal in the root of this folder run: 
-  - `python3 test_model.py` (Mac/Linux)
-  - `python test_model.py` (Windows)
+  - `python3 check_model.py` (Mac/Linux)
+  - `python check_model.py` (Windows)
 4. Follow the instructions on screen
 5. The output will be saved in the folder `trained_models/<selected_model>/tested_datasets/<selected_dataset>/`
 
@@ -102,6 +95,7 @@ List with names of the columns which should be used as feature (optional)
 ### model_params
 Dictionary of parameters that can be used with model of choice (optional). Check the model's documentation:
 - EBM ([model documentation](https://interpret.ml/docs/ebm.html))
+- Linear/Logistic regression ([model documentation](https://interpret.ml/docs/lr.html))
 - Decision tree ([model documentation](https://interpret.ml/docs/dt.html))
 - Decision rule ([model documentation](https://interpret.ml/docs/dr.html))
 
@@ -150,13 +144,12 @@ Name of target column (required)
 
 ## TODO list
 - EBM
-  - SQL interaction terms first term with least values
-  - SQL interaction terms group by to merge similar score bounds
   - Make multi class classification EBM work fully
   - Make regression EBM work fully
 
 - Checks and config
   - Add check if variables and target are finite 
+  - Add check such that variables have (enough different values)
   - Add variables being NULL checked
   - Add random seed to config file
   - Implement null handling (there is an implementation mentioned [here](https://github.com/interpretml/interpret/issues/18))
@@ -170,8 +163,11 @@ Name of target column (required)
   - Add calibration (platt scaling/isotonic regression)
   - Add changelog and versioning
   - Extend logging granularity 
+  - Add package versions to logging
   - Add SQL translation for decision rule
-  - Make a proper testing procedure
-  - Add more example files (binary/regression/multiclass)
+  - Add testing for multiclass
+  - Add pass through columns
+  - Add create config option when needing to select config
+  - Add quick config maker (only specify target, should remove dates and ID columns)
 
 # Troubleshooting

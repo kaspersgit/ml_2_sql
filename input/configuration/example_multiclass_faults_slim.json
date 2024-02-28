@@ -1,18 +1,16 @@
 {
   "features": [
-    "Pclass",
-    "Sex",
-    "Age",
-    "Siblings_Spouses_Aboard",
-    "Parents_Children_Aboard",
-    "Fare"
+    "X_Minimum",
+    "X_Maximum",
+    "Y_Minimum",
+    "Y_Maximum"
   ],
   "model_params": {
   },
   "post_params": {
     "calibration": "false",
     "sql_split": "true",
-    "file_type": "html"
+    "file_type": "png"
   },
   "pre_params": {
     "cv_type": "notimeseriesplit",
@@ -20,5 +18,5 @@
     "time_sensitive_column": "date_column",
     "upsampling": "false"
   },
-  "target": "Survived"
+  "target": "target"
 }
