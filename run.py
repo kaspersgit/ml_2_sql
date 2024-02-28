@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 from datetime import datetime
 import time
@@ -43,6 +44,8 @@ while csv_path is None:
 
 print(f"CSV file {csv_path} will be used for modelling")
 
+# Function to create a new config file
+def create_new_config(csv_path):
 
 # Function to create a new config file
 def create_new_config(csv_path):
