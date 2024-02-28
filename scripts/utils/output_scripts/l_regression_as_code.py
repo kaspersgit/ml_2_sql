@@ -17,19 +17,18 @@ def extract_parameters(model):
     try:
         # Extract model type
         if model.__class__.__name__ == "LinearRegression":
-            model_type = 'regression'
+            model_type = "regression"
             pclasses = None
         elif len(model.classes_) > 2:
-            model_type = 'multiclass'
+            model_type = "multiclass"
             pclasses = model.classes_
         elif len(model.classes_) == 2:
-            model_type = 'binary'
+            model_type = "binary"
             pclasses = model.classes_
 
         # Extract features
         features = model.feature_names_in_
 
-        
         if model_type == "binary":
             coefficients = model.sk_model_.coef_[0]
         else:
@@ -49,21 +48,19 @@ def extract_parameters(model):
         return None, None, None, None, None
 
 
-def format_sql(model_name, model_type, pclasses, features, coefficients, intercept, split):
+def format_sql(
+    model_name, model_type, pclasses, features, coefficients, intercept, split
+):
     # List of column aliases of the scores of the different features
-    if model_type == 'multiclass':
+    if model_type == "multiclass":
         score_cols = {}
         for i, c in enumerate(pclasses):
-            score_cols[c] = " + ".join(
-                [f"{feature}_score_{c}" for feature in features]
-            )    
+            score_cols[c] = " + ".join([f"{feature}_score_{c}" for feature in features])
     else:
-        score_cols = " + ".join(
-            [f"{feature}_score" for feature in features]
-        )
+        score_cols = " + ".join([f"{feature}_score" for feature in features])
 
     # Include the individual score per feature in the SELECT clause
-    if model_type == 'multiclass':
+    if model_type == "multiclass":
         feature_scores = {}
         for i, c in enumerate(pclasses):
             feature_scores[c] = "\t, ".join(
@@ -71,7 +68,7 @@ def format_sql(model_name, model_type, pclasses, features, coefficients, interce
                     f"({coef} * {feature}) AS {feature}_score_{c}\n"
                     for coef, feature in zip(coefficients[i], features)
                 ]
-            ) 
+            )
     else:
         feature_scores = "\t, ".join(
             [
@@ -89,36 +86,27 @@ def format_sql(model_name, model_type, pclasses, features, coefficients, interce
             print(f"\t, {intercept} AS intercept")
             print(f"\t, {feature_scores}", end="")
             print(f"\t, {score_cols} + intercept AS prediction")
-        elif model_type == 'binary':
+        elif model_type == "binary":
             print(f"\t, {intercept} AS intercept")
             print(f"\t, {feature_scores}", end="")
-            print(
-                f"\t, {score_cols} + {intercept} AS score"
-            )
-            print(
-                f"\t, 1 / (1 + EXP(-(score))) AS probability"
-            )
-        elif model_type == 'multiclass':
+            print(f"\t, {score_cols} + {intercept} AS score")
+            print("\t, 1 / (1 + EXP(-(score))) AS probability")
+        elif model_type == "multiclass":
             for i, c in zip(intercept, pclasses):
                 print(f"\t, {i} AS intercept_{c}")
-            
+
             for c in pclasses:
                 print(f"\t, {feature_scores[c]}", end="")
-            
-            for c in pclasses:
-                print(
-                    f"\t, {score_cols[c]} + intercept_{c} AS score_{c}"
-                )
 
-            print('\t, (EXP(', end="")
+            for c in pclasses:
+                print(f"\t, {score_cols[c]} + intercept_{c} AS score_{c}")
+
+            print("\t, (EXP(", end="")
             class_score_list = [f"score_{c}" for c in pclasses]
             print(*class_score_list, sep=") + EXP(", end=")) AS total_score\n")
 
-
-            for c in pclasses:    
-                print(
-                    f"\t, EXP(score_{c}) / total_score AS probability_{c}"
-                )
+            for c in pclasses:
+                print(f"\t, EXP(score_{c}) / total_score AS probability_{c}")
 
         print("FROM <source_table>;  -- TODO replace with correct table")
 
@@ -127,20 +115,18 @@ def format_sql(model_name, model_type, pclasses, features, coefficients, interce
         print("WITH feature_scores AS (\nSELECT")
         print(f"\t'{model_name}' AS model_name")
 
-
         if model_type == "regression":
             print(f"\t, {intercept} AS intercept")
             print(f"\t, {feature_scores}", end="")
-        elif model_type == 'binary':
+        elif model_type == "binary":
             print(f"\t, {intercept} AS intercept")
             print(f"\t, {feature_scores}", end="")
-        elif model_type == 'multiclass':
+        elif model_type == "multiclass":
             for i, c in zip(intercept, pclasses):
                 print(f"\t, {i} AS intercept_{c}")
-            
+
             for c in pclasses:
                 print(f"\t, {feature_scores[c]}", end="")
-            
 
         # Add placeholder for source table
         print("FROM <source_table> -- TODO replace with correct table")
@@ -149,21 +135,16 @@ def format_sql(model_name, model_type, pclasses, features, coefficients, interce
         print("), add_sum_scores AS (")
         print("SELECT *")
 
-
         if model_type == "regression":
             print(f"\t, {score_cols} + intercept AS prediction")
-        elif model_type == 'binary':
-            print(
-                f"\t, {score_cols} + intercept AS score"
-            )
-        elif model_type == 'multiclass':
+        elif model_type == "binary":
+            print(f"\t, {score_cols} + intercept AS score")
+        elif model_type == "multiclass":
             # scores per class
             for c in pclasses:
-                print(
-                    f"\t, {score_cols[c]} + intercept_{c} AS score_{c}"
-                )
+                print(f"\t, {score_cols[c]} + intercept_{c} AS score_{c}")
             class_score_list = [f"score_{c}" for c in pclasses]
-            print('\t, (EXP(', end="")
+            print("\t, (EXP(", end="")
             print(*class_score_list, sep=") + EXP(", end=")) AS total_score\n")
 
         print("FROM feature_scores")
@@ -172,15 +153,13 @@ def format_sql(model_name, model_type, pclasses, features, coefficients, interce
         print(")")
         print("SELECT *")
 
-        if model_type == 'binary':
+        if model_type == "binary":
             # TODO adjust accordingly for multiclass
             # Applying softmax
             print(", 1 / (1 + EXP(-score)) AS probability")
-        elif model_type == 'multiclass':
+        elif model_type == "multiclass":
             for c in pclasses:
-                print(
-                    f"\t, EXP(score_{c})/total_score AS probability_{c}"
-                ) 
+                print(f"\t, EXP(score_{c})/total_score AS probability_{c}")
 
         print("FROM add_sum_scores")
     return
@@ -195,6 +174,12 @@ def save_model_and_extras(clf, model_name, sql_split, logging):
         with redirect_stdout(f):
             model_name = model_name.split("/")[-1]
             format_sql(
-                model_name, model_type, pclasses, features, coefficients, intercept, sql_split
+                model_name,
+                model_type,
+                pclasses,
+                features,
+                coefficients,
+                intercept,
+                sql_split,
             )
     logging.info("SQL version of logistic/linear regression saved")

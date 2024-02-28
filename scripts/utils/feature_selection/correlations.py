@@ -162,7 +162,9 @@ def plotPearsonCorrelation(df, given_name, file_type, logging):
         logging.info("No numerical variables found")
         return
     elif data_.shape[1] == 1:
-        logging.info("Skip Pearson correlation matrix due to fewer than 2 numerical variables found")
+        logging.info(
+            "Skip Pearson correlation matrix due to fewer than 2 numerical variables found"
+        )
         return
 
     data_corr = data_.corr()

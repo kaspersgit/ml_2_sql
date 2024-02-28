@@ -1,5 +1,4 @@
 import os
-import subprocess
 import sys
 from datetime import datetime
 import time
@@ -22,7 +21,7 @@ print("\n\n")
 
 # List files in input/data/ directory
 data_dir = "input/data/"
-files=[]
+files = []
 for f in os.listdir(data_dir):
     if f.endswith(".csv"):
         files.append(f)
@@ -44,9 +43,9 @@ while csv_path is None:
 
 print(f"CSV file {csv_path} will be used for modelling")
 
+
 # Function to create a new config file
 def create_new_config(csv_path):
-
     if sys.platform == "win32":
         command = f".ml2sql\Scripts\python.exe scripts/create_config.py --data_path {csv_path}"
     else:
@@ -55,6 +54,7 @@ def create_new_config(csv_path):
     print(command)
 
     os.system(command)
+
 
 # Ask for JSONPATH
 json_path = None
@@ -74,7 +74,7 @@ while json_path is None:
     print(f"\n\nFiles in {configuration_dir}:")
     for i, file in enumerate(files, 1):
         if file != "Create New Config File":
-            last_mod_ts = os.path.getmtime(configuration_dir+file)
+            last_mod_ts = os.path.getmtime(configuration_dir + file)
         else:
             last_mod_ts = 0
 
@@ -82,8 +82,6 @@ while json_path is None:
             print(f"{i}. {file} (New)")
         else:
             print(f"{i}. {file}")
-
-        
 
     # prompt user to select config file
     json_file_index = input("\nSelect JSON file for training configuration: ")

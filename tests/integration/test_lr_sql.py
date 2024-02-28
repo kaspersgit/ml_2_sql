@@ -94,7 +94,7 @@ def test_model_processing(load_model_data, split, logging=logging.getLogger(__na
 
     # Predict scores using pickled model
     if model_type == "multiclass":
-        model_pred = model.predict_proba(data[model.feature_names_in_])[:,-1]
+        model_pred = model.predict_proba(data[model.feature_names_in_])[:, -1]
     elif model_type == "binary":
         model_pred = model.predict_proba(data[model.feature_names_in_])[:, 1]
     elif model_type == "regression":

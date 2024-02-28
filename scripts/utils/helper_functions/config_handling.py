@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 # Handle the configuration file
 def config_handling(configuration, data, logging):
     """
@@ -111,36 +112,38 @@ def config_handling(configuration, data, logging):
 
     return target_col, feature_cols, model_params, pre_params, post_params
 
-def _get_col_dtype(col):
-        """
-        Sourced: https://stackoverflow.com/questions/35003138/python-pandas-inferring-column-datatypes
-        Infer datatype of a pandas column, process only if the column dtype is object. 
-        input:   col: a pandas Series representing a df column. 
-        """
 
-        if col.dtype == "object":
-            # try numeric
+def _get_col_dtype(col):
+    """
+    Sourced: https://stackoverflow.com/questions/35003138/python-pandas-inferring-column-datatypes
+    Infer datatype of a pandas column, process only if the column dtype is object.
+    input:   col: a pandas Series representing a df column.
+    """
+
+    if col.dtype == "object":
+        # try numeric
+        try:
+            col_new = pd.to_datetime(col.dropna().unique())
+            return col_new.dtype
+        except ValueError:
             try:
-                col_new = pd.to_datetime(col.dropna().unique())
+                col_new = pd.to_numeric(col.dropna().unique())
                 return col_new.dtype
-            except:
+            except ValueError:
                 try:
-                    col_new = pd.to_numeric(col.dropna().unique())
+                    col_new = pd.to_timedelta(col.dropna().unique())
                     return col_new.dtype
-                except:
-                    try:
-                        col_new = pd.to_timedelta(col.dropna().unique())
-                        return col_new.dtype
-                    except:
-                        return "object"
-        else:
-            return col.dtype
+                except ValueError:
+                    return "object"
+    else:
+        return col.dtype
+
 
 def select_ml_cols(df):
     # Create a dictionary to store the features and their indices
     features_set = set(df.columns)
 
-    print('Columns excluded for feature list:')
+    print("Columns excluded for feature list:")
 
     # Check uniqeness
     for col in df.columns:
@@ -148,21 +151,21 @@ def select_ml_cols(df):
         if uniqueness_ratio == 1:
             features_set.discard(col)
             print(f'"{col}" is an ID column')
-        
-        elif (uniqueness_ratio > 0.9) & (df[col].dtypes == 'int'):
+
+        elif (uniqueness_ratio > 0.9) & (df[col].dtypes == "int"):
             features_set.discard(col)
             print(f'"{col}" is int column with high cardinality')
-        
-        elif (uniqueness_ratio > 0.2) & (df[col].dtypes=='object'):
+
+        elif (uniqueness_ratio > 0.2) & (df[col].dtypes == "object"):
             features_set.discard(col)
             print(f'"{col}" is object column with high cardinality')
-        
-        elif (df[col].nunique() == 1):
+
+        elif df[col].nunique() == 1:
             features_set.discard(col)
             print(f'"{col}" is column with only one value')
 
     # Check column name
-    check_date_cols = ['date', 'dt']
+    check_date_cols = ["date", "dt"]
 
     for cdc in check_date_cols:
         for col in df.columns:
@@ -172,9 +175,11 @@ def select_ml_cols(df):
 
     for col in df.columns:
         inferred_dtype = _get_col_dtype(df[col])
-        if all(ele not in str(inferred_dtype) for ele in ['object', 'string','int', 'float']):
+        if all(
+            ele not in str(inferred_dtype)
+            for ele in ["object", "string", "int", "float"]
+        ):
             features_set.discard(col)
             print(f'"{col}" with datetype {inferred_dtype}')
-    
+
     return features_set
-    
