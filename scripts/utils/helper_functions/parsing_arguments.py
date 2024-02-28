@@ -89,8 +89,7 @@ def GetArgs(script, argv):
             "--model_name", type=str, help="Enter model type", nargs="?", const="full"
         )
 
-    elif script == 'create_config':
-
+    elif script == "create_config":
         parser.add_argument(
             "--data_path",
             type=str,
@@ -98,7 +97,7 @@ def GetArgs(script, argv):
             nargs="?",
             const="no_data",
         )
-        
+
     elif script == "test_model":
         parser.add_argument(
             "--model_path",

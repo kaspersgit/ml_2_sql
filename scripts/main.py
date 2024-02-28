@@ -108,7 +108,7 @@ def main(args):
     )
 
     # Exit with code 0 for success
-    sys.exit(0)  
+    sys.exit(0)
 
 
 # Run function

@@ -14,12 +14,12 @@
 
 
 # In short
-This project tries to make the process simple enough for any SQL user to train a model, check the performance and deploy that model in SQL.
+This project tries to make the process simple enough for anyone to train a model, check the performance and deploy that model in SQL.
 
 ## Philosophy:
-- Automated and easy to use 
+- Automated training, easy to use and clear performance metrics
 - Model written in SQL (avoid Data Science debt for a complex pipeline)
-- Explainable Boosting Machine on par with other boosted methods
+- Explainable Boosting Machine on par with other boosted methods while fully explainable
 
 ## Background
 An automated machine learning tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from interpretML) to train models which are explainable and transparent in how they come to their prediction. SQL infrastructure is the only requirement to put a model into production.
@@ -87,10 +87,15 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
 The csv file containing the data has to fulfill some basic assumptions:
 - No empty values (e.g. NULL, Na, NaN, etc.)
 - Target columns should have more than 1 unique value
+- For binary classification (target with 2 unique values) these values should be 0 and 1
 
 ## Configuration json
+This file will inform the script which column is the target, which are the features and several other parameters for pre and post training.
+You can copy and edit a config file from the already existing example in `input/configuration/` or select `Create a new config` file in the second step 
+when running the `run.py` file.
+
 ### features
-List with names of the columns which should be used as feature (optional)
+List with names of the columns which should be used as features
 
 ### model_params
 Dictionary of parameters that can be used with model of choice (optional). Check the model's documentation:
@@ -140,13 +145,8 @@ Name of target column (required)
 ## Notes
 - Any NULL values should be imputed before using this script
 - Data imbalance treatments (e.g. oversampling + model calibration) not fully implemented
-- Multiclass and regression are experimental
 
 ## TODO list
-- EBM
-  - Make multi class classification EBM work fully
-  - Make regression EBM work fully
-
 - Checks and config
   - Add check if variables and target are finite 
   - Add check such that variables have (enough different values)
@@ -165,9 +165,6 @@ Name of target column (required)
   - Extend logging granularity 
   - Add package versions to logging
   - Add SQL translation for decision rule
-  - Add testing for multiclass
   - Add pass through columns
-  - Add create config option when needing to select config
-  - Add quick config maker (only specify target, should remove dates and ID columns)
 
 # Troubleshooting

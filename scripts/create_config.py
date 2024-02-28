@@ -1,9 +1,5 @@
-import csv
 import pandas as pd
-from pandas.api.types import is_numeric_dtype
-from pandas.api.types import is_object_dtype
 import json
-import os
 from utils.helper_functions.config_handling import select_ml_cols
 from utils.helper_functions.parsing_arguments import GetArgs
 
@@ -20,6 +16,7 @@ def get_input(options, message):
         except (ValueError, IndexError):
             print("Invalid option, try again.")
     return choice
+
 
 def create_config(args):
     # Load in data
@@ -43,7 +40,8 @@ def create_config(args):
     target_column = features_dict.pop(target)
 
     config_creation = get_input(
-        ["Manual", "Automatic"], "Do you want to create config manually or automatically?"
+        ["Manual", "Automatic"],
+        "Do you want to create config manually or automatically?",
     )
     print(config_creation)
 
@@ -70,8 +68,8 @@ def create_config(args):
             "target": target_column,
         }
 
-        csv_file_name = csv_path.split('/')[-1].split('.')[0]
-        config_name = f'{csv_file_name}_auto_config'
+        csv_file_name = csv_path.split("/")[-1].split(".")[0]
+        config_name = f"{csv_file_name}_auto_config"
 
     elif config_creation == "Manual":
         ## Original way of creating config
@@ -97,11 +95,15 @@ def create_config(args):
 
             # Check the user's choice
             if choice == "1":
-                index = int(input("Enter the index of the feature you want to select: "))
+                index = int(
+                    input("Enter the index of the feature you want to select: ")
+                )
                 if index in features_dict.keys() and index not in selected_features:
                     selected_features.append(index)
             elif choice == "2":
-                index = int(input("Enter the index of the feature you want to deselect: "))
+                index = int(
+                    input("Enter the index of the feature you want to deselect: ")
+                )
                 if index in selected_features:
                     selected_features.remove(index)
             elif choice == "3":
@@ -156,9 +158,9 @@ def create_config(args):
                         "Enter the value for each model parameter, separated by comma: "
                     ).split(",")
                     for i in range(len(model_params_keys)):
-                        model_params[model_params_keys[i].strip()] = model_params_values[
-                            i
-                        ].strip()
+                        model_params[
+                            model_params_keys[i].strip()
+                        ] = model_params_values[i].strip()
                     input_params[key] = model_params
                 else:
                     print("No model parameters were set.\n")
@@ -184,7 +186,10 @@ def create_config(args):
                         elif key2 == "max_rows":
                             input_value = int(input("\nMax rows (number): "))
                         elif key2 == "time_sensitive_column":
-                            if input_params["pre_params"]["cv_type"] == "timeseriessplit":
+                            if (
+                                input_params["pre_params"]["cv_type"]
+                                == "timeseriessplit"
+                            ):
                                 if len(features_dict) == 0:
                                     print(
                                         "No columns to select as time sensitive, switching to kfold"
@@ -196,7 +201,9 @@ def create_config(args):
                                 for i, header in features_dict.items():
                                     print(f"{i}. {header}")
                                 date_col_index = int(
-                                    input("Enter the index of the time sensitive column: ")
+                                    input(
+                                        "Enter the index of the time sensitive column: "
+                                    )
                                 )
                                 input_value = features_dict[date_col_index]
                             else:
@@ -226,11 +233,12 @@ def create_config(args):
     print(json_string)
 
     # print path
-    print(f'Config saved in: {config_path}')
+    print(f"Config saved in: {config_path}")
 
     return config_path
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # Get arguments from the CLI
     args = GetArgs("create_config", None)
 

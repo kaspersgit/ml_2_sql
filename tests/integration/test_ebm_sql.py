@@ -9,7 +9,6 @@ import os
 import joblib
 import logging
 import pandas as pd
-import numpy as np
 import pytest
 from utils.test_helpers.sql_model import execute_sql_script
 from utils.output_scripts.ebm_as_code import save_model_and_extras

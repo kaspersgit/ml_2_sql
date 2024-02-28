@@ -598,7 +598,7 @@ def double_feature_2_sql(df, double_feature):
 def lookup_df_to_sql_multiclass(model_name, df, classes, split):
     df_single = df["feature_single"]
     intercepts = df["intercept"]
-    
+
     if split:
         # Add starting cte
         print("WITH feature_scores AS (")
@@ -608,7 +608,6 @@ def lookup_df_to_sql_multiclass(model_name, df, classes, split):
     # Add intercepts
     for i, c in enumerate(classes):
         print(f", {intercepts[i]} AS intercept_{c}")
-
 
     class_nr = 0
     feature_list = {}
@@ -677,9 +676,8 @@ def lookup_df_to_sql_multiclass(model_name, df, classes, split):
 
         # Check class with highest score
 
-        #Get max score
+        # Get max score
         print(f", GREATEST({', '.join([f'score_{i}' for i in classes])}) AS max_score")
-                                                           
 
         # Close CTE and create final SELECT statement
         print("FROM add_sum_scores")
@@ -691,8 +689,9 @@ def lookup_df_to_sql_multiclass(model_name, df, classes, split):
         for c in classes:
             print(f", EXP(score_{c}) / (total_score) AS probability_{c}", end="\n")
 
-        
-        print(f", GREATEST({', '.join([f'probability_{i}' for i in classes])}) AS max_probability")
+        print(
+            f", GREATEST({', '.join([f'probability_{i}' for i in classes])}) AS max_probability"
+        )
 
         print(", CASE")
         for c in classes:
@@ -704,8 +703,8 @@ def lookup_df_to_sql_multiclass(model_name, df, classes, split):
     elif split:
         for c in classes:
             print(f", EXP(score_{c}) / (total_score) AS probability_{c}", end="\n")
-        
-        print(f", EXP(max_score) / (total_score) AS max_probability")
+
+        print(", EXP(max_score) / (total_score) AS max_probability")
 
         print(", CASE")
         for c in classes:

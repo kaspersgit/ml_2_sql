@@ -53,13 +53,21 @@ def tree_to_sql(tree):
                 if np.issubdtype(type(predicted_class), np.integer):
                     print(
                         "{} {} -- train data precision: {:.2f} ({}/{})".format(
-                            indent, predicted_class, max_value / samples, max_value, samples
+                            indent,
+                            predicted_class,
+                            max_value / samples,
+                            max_value,
+                            samples,
                         )
                     )
                 else:
                     print(
                         "{} '{}' -- train data precision: {:.2f} ({}/{})".format(
-                            indent, predicted_class, max_value / samples, max_value, samples
+                            indent,
+                            predicted_class,
+                            max_value / samples,
+                            max_value,
+                            samples,
                         )
                     )
             else:

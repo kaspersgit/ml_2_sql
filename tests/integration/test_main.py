@@ -6,8 +6,9 @@ import os
 import shutil
 import subprocess
 
+
 def test_cli_exit_code():
-    OUTPUT_PATH = 'trained_models/test_tool'
+    OUTPUT_PATH = "trained_models/test_tool"
 
     # Make directory with current data and model name
     try:
@@ -19,7 +20,23 @@ def test_cli_exit_code():
     except FileExistsError:
         sys.exit("Error: Model directory already exists")
 
-    result = subprocess.run(['.ml2sql/bin/python', 'scripts/main.py', '--name', OUTPUT_PATH, '--data_path', 'input/data/example_binary_titanic.csv', '--configuration', 'input/configuration/example_binary_titanic.json', '--model', 'ebm'], stdout=subprocess.PIPE, text=True, check=False)
+    result = subprocess.run(
+        [
+            ".ml2sql/bin/python",
+            "scripts/main.py",
+            "--name",
+            OUTPUT_PATH,
+            "--data_path",
+            "input/data/example_binary_titanic.csv",
+            "--configuration",
+            "input/configuration/example_binary_titanic.json",
+            "--model",
+            "ebm",
+        ],
+        stdout=subprocess.PIPE,
+        text=True,
+        check=False,
+    )
     assert result.returncode == 0
 
     # Remove the folder and its contents
