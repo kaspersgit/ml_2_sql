@@ -57,6 +57,7 @@ def create_config(args):
             "post_params": {
                 "calibration": "false",
                 "sql_split": "true",
+                "sql_decimals": 15,
                 "file_type": "html",
             },
             "pre_params": {

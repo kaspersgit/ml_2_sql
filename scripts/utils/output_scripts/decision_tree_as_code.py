@@ -83,11 +83,11 @@ def tree_to_sql(tree):
     print("FROM <source_table> -- change to your table name")
 
 
-def save_model_and_extras(clf, model_name, sql_split, logging):
+def save_model_and_extras(clf, model_name, post_params, logging):
     # Write printed output to file
     with open(
         "{model_name}/model/tree_in_sql.sql".format(model_name=model_name), "w"
     ) as f:
         with redirect_stdout(f):
             tree_to_sql(clf)
-    print("SQL version of decision tree saved")
+    logging.info("SQL version of decision tree saved")

@@ -62,8 +62,8 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
 3. Check the output in the newly created folder
 
 ## Try it out using own data
-1. Save csv file containing target and all features in the `input/data/` folder (more on input data at [input data](#data))
-2. Save a configuration json file in the `input/configuration/` (explained below at [configuration json](#configuration-json))
+1. Save csv file containing target and all features in the `input/data/` folder (more info on [input data](#data))
+2. Save a configuration json file in the `input/configuration/` (or create one during the next step) (more info on [config json](#configuration-json))
 3. In the terminal in the root of this folder run: 
   - `python3 run.py` (Mac/Linux)
   - `python run.py` (Windows)
@@ -73,7 +73,7 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
 
 ## Testing already trained model on a new dataset
 1. Make sure new dataset has the same features as the dataset the model was trained on (same features)
-2. Save dataset in the `input/data/` folder (more on input data at [input data](#data))
+2. Save dataset in the `input/data/` folder (more info on [input data](#data))
 3. In the terminal in the root of this folder run: 
   - `python3 check_model.py` (Mac/Linux)
   - `python check_model.py` (Windows)
@@ -85,7 +85,6 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
 # Input
 ## Data
 The csv file containing the data has to fulfill some basic assumptions:
-- No empty values (e.g. NULL, Na, NaN, etc.)
 - Target columns should have more than 1 unique value
 - For binary classification (target with 2 unique values) these values should be 0 and 1
 
@@ -114,6 +113,9 @@ Dictionary of parameters that can be used with model of choice (optional). Check
 `sql_split` options:
 - `false`, outputs the SQL model as one SELECT statement, using column aliases within the same select statement
 - `true`, outputs the SQL model as several CTEs, this can be used if column aliases can't be referenced within the same SELECT statement
+
+`sql_decimals` options:
+- Any whole positive number, rounds the 'scores' in the SQL file to X decimal places. Can be lowered to avoid any data type overflow problems, but will decrease precision.
 
 `file_type` options (optional):
 - `png`, output of features importance graphs will be static .png (smaller file).
@@ -150,9 +152,7 @@ Name of target column (required)
 - Checks and config
   - Add check if variables and target are finite 
   - Add check such that variables have (enough different values)
-  - Add variables being NULL checked
   - Add random seed to config file
-  - Implement null handling (there is an implementation mentioned [here](https://github.com/interpretml/interpret/issues/18))
 
 - Performance monitoring
   - Add performance summary for easy and quick comparison (including label count, auc pr & roc, best f1-score, etc)

@@ -101,6 +101,10 @@ def config_handling(configuration, data, logging):
     else:
         post_params["sql_split"] = False
 
+    # If not present set sql decimals to 15
+    if "sql_decimals" not in post_params.keys():
+        post_params["sql_decimals"] = 15
+
     # If not present set file type to png
     if "file_type" in post_params.keys():
         if post_params["file_type"].lower() == "html":
@@ -145,16 +149,30 @@ def select_ml_cols(df):
 
     print("Columns excluded for feature list:")
 
+    # Check certain column name
+    check_date_cols = ["date", "dt"]
+    
     # Check uniqeness
     for col in df.columns:
+        # Check share of unq values in the columns
         uniqueness_ratio = len(df[col].unique()) / len(df[col])
+        
+        # Check if all elements in the column have the same length
+        all_same_length = df[col].apply(lambda x: len(str(x))).nunique() == 1
+
         if uniqueness_ratio == 1:
             features_set.discard(col)
-            print(f'"{col}" is an ID column')
+            print(f'"{col}" only has unique values')
 
-        elif (uniqueness_ratio > 0.9) & (df[col].dtypes == "int"):
+        elif (uniqueness_ratio > 0.9) & (df[col].dtypes == "int") & (all_same_length):
             features_set.discard(col)
             print(f'"{col}" is int column with high cardinality')
+
+        elif any([cdc in col.lower() for cdc in check_date_cols]):
+            for cdc in check_date_cols:
+                if cdc in col.lower():
+                    features_set.discard(col)
+                    print(f'"{col}" is a date column')
 
         elif (uniqueness_ratio > 0.2) & (df[col].dtypes == "object"):
             features_set.discard(col)
@@ -163,23 +181,14 @@ def select_ml_cols(df):
         elif df[col].nunique() == 1:
             features_set.discard(col)
             print(f'"{col}" is column with only one value')
-
-    # Check column name
-    check_date_cols = ["date", "dt"]
-
-    for cdc in check_date_cols:
-        for col in df.columns:
-            if cdc in col.lower():
+        
+        else:
+            inferred_dtype = _get_col_dtype(df[col])
+            if all(
+                ele not in str(inferred_dtype)
+                for ele in ["object", "string", "int", "float"]
+            ):
                 features_set.discard(col)
-                print(f'"{col}" is a date column')
-
-    for col in df.columns:
-        inferred_dtype = _get_col_dtype(df[col])
-        if all(
-            ele not in str(inferred_dtype)
-            for ele in ["object", "string", "int", "float"]
-        ):
-            features_set.discard(col)
-            print(f'"{col}" with datetype {inferred_dtype}')
+                print(f'"{col}" with datetype {inferred_dtype}')
 
     return features_set
