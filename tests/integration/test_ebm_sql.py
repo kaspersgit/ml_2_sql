@@ -7,6 +7,7 @@ sys.path.append("scripts")
 
 import os
 import joblib
+import json
 import logging
 import pandas as pd
 import pytest
@@ -18,17 +19,17 @@ SQL_OUTPUT_PATH = "tests/model/ebm_in_sql.sql"
 
 # Define a list of models - datasets to test
 clf_binary = [
-    "tests/model/binary_ebm_classification.sav",
+    "tests/model/binary_ebm_classification_v051.sav",
     "input/data/example_binary_titanic.csv",
 ]
 
 clf_multiclass = [
-    "tests/model/multiclass_ebm_classification.sav",
+    "tests/model/multiclass_ebm_classification_v051.sav",
     "input/data/example_multiclass_faults.csv",
 ]
 
 regr_regression = [
-    "tests/model/regression_ebm_regression.sav",
+    "tests/model/regression_ebm_regression_v051.sav",
     "input/data/example_regression_used_cars.csv",
 ]
 
@@ -58,26 +59,33 @@ def load_model_data(request):
     if model_type == data_type:
         return data, model, model_type
 
-
+# paths to config files, one with and one without sql split
+config_path = ["tests/configs/config_split.json", "tests/configs/config_no_split.json"]
 # Define a fixture for split parameter
-@pytest.fixture(params=[True, False])
-def split(request):
-    return request.param
+@pytest.fixture(params=config_path)
+def post_params(request):
+    config_path = request.param
+
+    with open(config_path, "rb") as f:
+        config = json.load(f)
+    return config['post_params']
 
 
-def test_model_processing(load_model_data, split, logging=logging.getLogger(__name__)):
+def test_model_processing(load_model_data, post_params, logging=logging.getLogger(__name__)):
     # unpack data and model
     data, model, model_type = load_model_data
 
     # Generate SQL from the loaded model
-    save_model_and_extras(ebm=model, model_name="tests", split=split, logging=logging)
+    save_model_and_extras(ebm=model, model_name="tests", post_params=post_params, logging=logging)
 
     # Load the SQL version
     with open(SQL_OUTPUT_PATH, "r") as sql_file:
         loaded_sql = sql_file.read()
 
-    # Run SQL against the DataFrame using DuckDB
+    # logg type of model
+    logging.info(f"Type: {model_type} \nSplit: {post_params['sql_split']}")   
 
+    # Run SQL against the DataFrame using DuckDB
     if model_type == "multiclass":
         prob_column = "probability_Z_Scratch"
     elif model_type == "binary":

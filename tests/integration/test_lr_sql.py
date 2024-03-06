@@ -7,6 +7,7 @@ sys.path.append("scripts")
 
 import os
 import joblib
+import json
 import logging
 import pandas as pd
 import pytest
@@ -18,17 +19,17 @@ SQL_OUTPUT_PATH = "tests/model/lregression_in_sql.sql"
 
 # Define a list of models - datasets to test
 clf_binary = [
-    "tests/model/binary_lr_classification.sav",
+    "tests/model/binary_lr_classification_v051.sav",
     "input/data/example_binary_titanic.csv",
 ]
 
 clf_multiclass = [
-    "tests/model/multiclass_lr_classification.sav",
+    "tests/model/multiclass_lr_classification_v051.sav",
     "input/data/example_multiclass_faults.csv",
 ]
 
 regr_regression = [
-    "tests/model/regression_lr_regression.sav",
+    "tests/model/regression_lr_regression_v051.sav",
     "input/data/example_regression_used_cars.csv",
 ]
 
@@ -59,20 +60,25 @@ def load_model_data(request):
     if model_type == data_type:
         return data, model, model_type
 
-
+# paths to config files, one with and one without sql split
+config_path = ["tests/configs/config_split.json", "tests/configs/config_no_split.json"]
 # Define a fixture for split parameter
-@pytest.fixture(params=[True, False])
-def split(request):
-    return request.param
+@pytest.fixture(params=config_path)
+def post_params(request):
+    config_path = request.param
+
+    with open(config_path, "rb") as f:
+        config = json.load(f)
+    return config['post_params']
 
 
-def test_model_processing(load_model_data, split, logging=logging.getLogger(__name__)):
+def test_model_processing(load_model_data, post_params, logging=logging.getLogger(__name__)):
     # unpack data and model
     data, model, model_type = load_model_data
 
     # Generate SQL from the loaded model
     save_model_and_extras(
-        clf=model, model_name="tests", sql_split=split, logging=logging
+        clf=model, model_name="tests", post_params=post_params, logging=logging
     )
 
     # Load the SQL version
@@ -104,7 +110,8 @@ def test_model_processing(load_model_data, split, logging=logging.getLogger(__na
         f"Max difference SQL - pickled model: {(abs((sql_pred - model_pred)/model_pred)).max()}"
     )
 
-    # Check if SQL model prediction is same as pickled model prediction
+    # Check if SQL model predic
+    # tion is same as pickled model prediction
     # use a tolerance of 0.001%
     tolerance = 0.00001
     assert (abs((sql_pred - model_pred) / model_pred) <= tolerance).all()

@@ -7,6 +7,7 @@ sys.path.append("scripts")
 
 import os
 import joblib
+import json
 import logging
 import pandas as pd
 import numpy as np
@@ -19,17 +20,17 @@ SQL_OUTPUT_PATH = "tests/model/tree_in_sql.sql"
 
 # Define a list of models - datasets to test
 clf_binary = [
-    "tests/model/binary_dt_classification.sav",
+    "tests/model/binary_dt_classification_v051.sav",
     "input/data/example_binary_titanic.csv",
 ]
 
 clf_multiclass = [
-    "tests/model/multiclass_dt_classification.sav",
+    "tests/model/multiclass_dt_classification_v051.sav",
     "input/data/example_multiclass_faults.csv",
 ]
 
 regr_regression = [
-    "tests/model/regression_dt_regression.sav",
+    "tests/model/regression_dt_regression_v051.sav",
     "input/data/example_regression_used_cars.csv",
 ]
 
@@ -60,16 +61,26 @@ def load_model_data(request):
     if model_type == data_type:
         return data, model, model_type
 
+# path to config file (split is not applicable here so only one config file is enough)
+config_path = ["tests/configs/config_split.json"]
+# Define a fixture for split parameter
+@pytest.fixture(params=config_path)
+def post_params(request):
+    config_path = request.param
+
+    with open(config_path, "rb") as f:
+        config = json.load(f)
+    return config['post_params']
 
 def test_model_processing(
-    load_model_data, sql_split=None, logging=logging.getLogger(__name__)
+    load_model_data, post_params, logging=logging.getLogger(__name__)
 ):
     # unpack data and model
     data, model, model_type = load_model_data
 
     # Generate SQL from the loaded model
     save_model_and_extras(
-        clf=model, model_name="tests", sql_split=sql_split, logging=logging
+        clf=model, model_name="tests", post_params=post_params, logging=logging
     )
 
     # Load the SQL version

@@ -1,17 +1,12 @@
 {
   "features": [
-    "Pclass",
-    "Sex",
-    "Age",
-    "Siblings_Spouses_Aboard",
-    "Parents_Children_Aboard",
-    "Fare"
   ],
   "model_params": {
   },
   "post_params": {
     "calibration": "false",
     "sql_split": "true",
+    "sql_decimals": 15,
     "file_type": "png"
   },
   "pre_params": {
@@ -20,5 +15,5 @@
     "time_sensitive_column": "date_column",
     "upsampling": "false"
   },
-  "target": "Survived"
+  "target": "target"
 }

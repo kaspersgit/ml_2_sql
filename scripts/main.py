@@ -59,7 +59,7 @@ def main(args):
     logging.info(f"Configuration file content: \n{configuration}")
 
     # Perform some basic checks
-    checkInputDataHard(data, configuration)
+    checkInputDataHard(data, configuration, logging)
 
     # set model type based on target value
     if (data[target_col].dtype == "float") | (
@@ -104,7 +104,7 @@ def main(args):
 
     # Create SQL version of model and save it
     globals()[model_name + "_as_code"].save_model_and_extras(
-        clf, given_name, post_params["sql_split"], logging
+        clf, given_name, post_params, logging
     )
 
     # Exit with code 0 for success
