@@ -1,15 +1,12 @@
 {
   "features": [
-    "X_Minimum",
-    "X_Maximum",
-    "Y_Minimum",
-    "Y_Maximum"
   ],
   "model_params": {
   },
   "post_params": {
     "calibration": "false",
-    "sql_split": "true",
+    "sql_split": "false",
+    "sql_decimals": 15,
     "file_type": "png"
   },
   "pre_params": {

@@ -1,24 +1,24 @@
 import numpy as np
 
 
-def checkTargetHard(target):
+def checkTargetHard(target, logging):
     if target.nunique() == 1:
         raise Exception("Target column needs more than 1 unique value")
 
 
-def checkFeaturesHard(features):
+def checkFeatures(features, logging):
     featNullCount = features.isnull().sum()
     nullf = featNullCount[featNullCount > 0]
     if len(nullf) > 0:
-        raise Exception(f"NULL values not allowed, found the following: \n{nullf}")
+        logging.info(f"NULL values found in the data, for the following: \n{nullf}")
 
 
-def checkInputDataHard(data, config):
+def checkInputDataHard(data, config, logging):
     """
     Checks at start ensuring target and feature columns are good to go
     """
-    checkTargetHard(data[config["target"]])
-    checkFeaturesHard(data[config["features"]])
+    checkTargetHard(data[config["target"]], logging)
+    checkFeatures(data[config["features"]], logging)
 
 
 def checkAllClassesHaveLeafNode(clf):

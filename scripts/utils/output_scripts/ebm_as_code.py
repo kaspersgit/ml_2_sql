@@ -202,7 +202,7 @@ def RestructureReduceInteractions(df_):
     return lookup_df_group_feat2
 
 
-def extractLookupTable(ebm):
+def extractLookupTable(ebm, post_params):
     """Provides reformatted structure of EBM
 
     Args:
@@ -223,9 +223,9 @@ def extractLookupTable(ebm):
         errors = ebm.standard_deviations_[feature_group_index]
 
         if len(feature_indexes) == 1:
-            # hack. remove the 0th index which is for missing values
-            model_graph = model_graph[1:-1]
-            errors = errors[1:-1]
+            # hack. remove the last index which is for unknown values
+            model_graph = model_graph[0:-1]
+            errors = errors[0:-1]
 
             feature_bins = ebm.bins_[feature_group_index][0]
 
@@ -236,10 +236,12 @@ def extractLookupTable(ebm):
             if isinstance(feature_bins, dict):
                 # categorical
                 feat_bound = list(feature_bins.keys())
+                feat_bound.insert(0, None)
                 feat_type = "categorical"
 
             else:
                 feat_bound = np.append(feature_bins, np.PINF)
+                feat_bound = np.append(None, feat_bound)
                 feat_type = "numeric"
 
             score = scores
@@ -250,7 +252,7 @@ def extractLookupTable(ebm):
                 "nr_features": 1,
                 "feature": ebm.feature_names[feature_indexes[0]],
                 "feat_bound": feat_bound,
-                "score": score,
+                "score": list(np.round(score, post_params['sql_decimals'])), ## To avoid data type overflow
                 "score_lower_bound": score_lower_bound,
                 "score_upper_bound": score_upper_bound,
                 "feat_type": feat_type,
@@ -259,8 +261,8 @@ def extractLookupTable(ebm):
             lookup_dicts.append(lookup_dict)
 
         elif len(feature_indexes) == 2:
-            # hack. remove the 0th index which is for missing values and remove last value which is just zeros
-            model_graph = model_graph[1:-1, 1:-1]
+            # hack. remove the last index which is for unknown values and just zeros
+            model_graph = model_graph[0:-1, 0:-1]
 
             score = model_graph
 
@@ -277,9 +279,11 @@ def extractLookupTable(ebm):
 
                 if isinstance(feature_bins, dict):
                     feat_bound[b] = list(feature_bins.keys())
+                    feat_bound[b].insert(0, None)
                     feat_type[b] = "categorical"
                 else:
                     feat_bound[b] = np.append(feature_bins, np.PINF)
+                    feat_bound[b] = np.append(None, feat_bound[b])
                     feat_type[b] = "numeric"
 
             lookup_dict = {
@@ -289,7 +293,7 @@ def extractLookupTable(ebm):
                     ebm.feature_names[feature_indexes[1]],
                 ],
                 "feat_bound": feat_bound,
-                "score": score,
+                "score": np.round(score, post_params['sql_decimals']),
                 "feat_type": feat_type,
                 # not implemented for interaction terms
                 # , 'score_lower_bound': score_lower_bound
@@ -420,8 +424,21 @@ def single_feature_handling(df):
 
 def single_feature_2_sql(df, feature):
     for index, row in df.iterrows():
+        # Check if bound is for missing values (=None)
+        if row["feat_bound"] == None:
+            print(
+                " WHEN {feature} IS NULL THEN {score}".format(
+                    feature=feature,
+                    score=row["score"],
+                )
+            )
+            # Add ELSE 0.0 as last entry
+            if index == df.index[-1]:
+                print(" ELSE 0.0")
+
+
         # check if string/category
-        if row["feat_type"] == "categorical":
+        elif row["feat_type"] == "categorical":
             # check for manual imputed null values
             print(
                 " WHEN {feature} = '{lb}' THEN {score}".format(
@@ -447,8 +464,8 @@ def single_feature_2_sql(df, feature):
 
         # otherwise it should be a float
         elif isinstance(row["feat_bound"], float):
-            # First bound
-            if index == 0:
+            # First bound (skipping the missing values)
+            if index <= 1:
                 print(
                     " WHEN {feature} <= {ub} THEN {score}".format(
                         feature=feature, ub=row["feat_bound"], score=row["score"]
@@ -496,8 +513,16 @@ def double_feature_sql_handling(df):
 
 def double_feature_2_sql(df, double_feature):
     for index, row in df.iterrows():
+        # Check if bound is for missing values (=None)
+        if row["feat_bound_1"] == None:
+            print(
+                " WHEN {feature} IS NULL THEN \n      CASE".format(
+                    feature=row["feat_1"]
+                )
+            )
+
         # check if string/category
-        if row["feat_type_1"] == "categorical":
+        elif row["feat_type_1"] == "categorical":
             print(
                 " WHEN {feature} = '{lb}' THEN \n     CASE".format(
                     feature=row["feat_1"], lb=row["feat_bound_1"]
@@ -514,8 +539,8 @@ def double_feature_2_sql(df, double_feature):
 
         # otherwise it should be a float
         elif isinstance(row["feat_bound_1"], float):
-            # First bound
-            if index == 0:
+            # First bound (skipping the missing values)
+            if index <= 1:
                 print(
                     " WHEN {feature} <= {ub} THEN \n      CASE".format(
                         feature=row["feat_1"], ub=row["feat_bound_1"]
@@ -539,8 +564,17 @@ def double_feature_2_sql(df, double_feature):
 
         # Looping over the bound values for the second feature
         for sf_index in range(nr_bounds):
+            # Check if bound is for missing values (=None)
+            if row["feat_bound_2"][sf_index] == None:
+                print(
+                    "         WHEN {feature} IS NULL THEN {score}".format(
+                        feature=row["feat_2"],
+                        score=row["score"][sf_index],
+                    )
+                )
+
             # check if string/category
-            if row["feat_type_2"] == "categorical":
+            elif row["feat_type_2"] == "categorical":
                 # check for manual imputed null values
                 print(
                     "         WHEN {feature} = '{lb}' THEN {score}".format(
@@ -562,8 +596,8 @@ def double_feature_2_sql(df, double_feature):
 
             # otherwise it should be a float
             elif isinstance(row["feat_bound_2"][sf_index], float):
-                # First bound
-                if sf_index == 0:
+                # First bound (skipping the missing values)
+                if sf_index <= 1:
                     print(
                         "         WHEN {feature} <= {ub} THEN {score}".format(
                             feature=row["feat_2"],
@@ -719,8 +753,20 @@ def single_feature_2_sql_multiclass(df, feature, class_nr):
     print(",\nCASE")
 
     for index, row in df.iterrows():
+        # Check if bound is for missing values (=None)
+        if row["feat_bound"] == None:
+            print(
+                " WHEN {feature} IS NULL THEN {score}".format(
+                    feature=feature,
+                    score=row["score"][class_nr],
+                )
+            )
+            # Add ELSE 0.0 as last entry
+            if index == df.index[-1]:
+                print(" ELSE 0.0")
+
         # check if string/category
-        if row["feat_type"] == "categorical":
+        elif row["feat_type"] == "categorical":
             # check for manual imputed null values
             print(
                 " WHEN {feature} = '{lb}' THEN {score}".format(
@@ -746,8 +792,8 @@ def single_feature_2_sql_multiclass(df, feature, class_nr):
 
         # otherwise it should be a float
         elif isinstance(row["feat_bound"], float):
-            # First bound
-            if index == 0:
+            # First bound (skipping the missing values)
+            if index <= 1:
                 print(
                     " WHEN {feature} <= {ub} THEN {score}".format(
                         feature=feature,
@@ -786,9 +832,9 @@ def ebm_to_sql(model_name, df, classes, split=True):
         lookup_df_to_sql(model_name, df, model_type, split)
 
 
-def save_model_and_extras(ebm, model_name, split, logging):
+def save_model_and_extras(ebm, model_name, post_params, logging):
     # extract lookup table from EBM
-    lookup_df = extractLookupTable(ebm)
+    lookup_df = extractLookupTable(ebm, post_params)
 
     # In case of regression
     if not hasattr(ebm, "classes_"):
@@ -799,5 +845,5 @@ def save_model_and_extras(ebm, model_name, split, logging):
     with open(f"{model_name}/model/ebm_in_sql.sql", "w") as f:
         with redirect_stdout(f):
             model_name = model_name.split("/")[-1]
-            ebm_to_sql(model_name, lookup_df, ebm.classes_, split)
+            ebm_to_sql(model_name, lookup_df, ebm.classes_, post_params['sql_split'])
     logging.info("SQL version of EBM saved")

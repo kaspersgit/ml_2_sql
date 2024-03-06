@@ -1,0 +1,19 @@
+{
+  "features": [
+  ],
+  "model_params": {
+  },
+  "post_params": {
+    "calibration": "false",
+    "sql_split": "true",
+    "sql_decimals": 15,
+    "file_type": "png"
+  },
+  "pre_params": {
+    "cv_type": "notimeseriesplit",
+    "max_rows": 100000,
+    "time_sensitive_column": "date_column",
+    "upsampling": "false"
+  },
+  "target": "target"
+}

@@ -1,3 +1,5 @@
+import numpy as np
+import pandas as pd
 from contextlib import redirect_stdout
 
 
@@ -49,8 +51,11 @@ def extract_parameters(model):
 
 
 def format_sql(
-    model_name, model_type, pclasses, features, coefficients, intercept, split
+    model_name, model_type, pclasses, features, coefficients, intercept, post_params
 ):
+    # round coefficients if needed
+    coefficients = list(np.round(coefficients, post_params['sql_decimals']))
+
     # List of column aliases of the scores of the different features
     if model_type == "multiclass":
         score_cols = {}
@@ -78,7 +83,7 @@ def format_sql(
         )
 
     # Create the SQL query with the logistic regression formula and feature scores
-    if not split:
+    if not post_params['sql_split']:
         print("SELECT")
         print(f"\t'{model_name}' AS model_name")
 
@@ -110,7 +115,7 @@ def format_sql(
 
         print("FROM <source_table>;  -- TODO replace with correct table")
 
-    elif split:
+    elif post_params['sql_split']:
         # Creating CTE to create table aliases
         print("WITH feature_scores AS (\nSELECT")
         print(f"\t'{model_name}' AS model_name")
@@ -165,7 +170,7 @@ def format_sql(
     return
 
 
-def save_model_and_extras(clf, model_name, sql_split, logging):
+def save_model_and_extras(clf, model_name, post_params, logging):
     model_type, pclasses, features, coefficients, intercept = extract_parameters(clf)
     # Write printed output to file
     with open(
@@ -180,6 +185,6 @@ def save_model_and_extras(clf, model_name, sql_split, logging):
                 features,
                 coefficients,
                 intercept,
-                sql_split,
+                post_params,
             )
     logging.info("SQL version of logistic/linear regression saved")

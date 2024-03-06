@@ -46,9 +46,6 @@ print(f"CSV file {csv_path} will be used for modelling")
 
 # Function to create a new config file
 def create_new_config(csv_path):
-
-# Function to create a new config file
-def create_new_config(csv_path):
     if sys.platform == "win32":
         command = f".ml2sql\Scripts\python.exe scripts/create_config.py --data_path {csv_path}"
     else:
