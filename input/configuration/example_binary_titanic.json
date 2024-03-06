@@ -12,7 +12,7 @@
   "post_params": {
     "calibration": "false",
     "sql_split": "true",
-    "file_type": "html"
+    "file_type": "png"
   },
   "pre_params": {
     "cv_type": "notimeseriesplit",
