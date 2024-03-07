@@ -20,9 +20,15 @@ def test_cli_exit_code():
     except FileExistsError:
         sys.exit("Error: Model directory already exists")
 
+    # Check platform, windows is different from linux/mac
+    if sys.platform == "win32":
+        executable = ".ml2sql\\Scripts\\python.exe"
+    else:
+        executable = ".ml2sql/bin/python"
+
     result = subprocess.run(
         [
-            ".ml2sql/bin/python",
+            executable,
             "scripts/main.py",
             "--name",
             OUTPUT_PATH,

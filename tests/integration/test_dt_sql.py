@@ -35,13 +35,12 @@ regr_regression = [
 ]
 
 # combine into 1 list to iterate over
-fixture_data = [clf_binary, regr_regression]
+fixture_data = [clf_binary, clf_multiclass, regr_regression]
 
 
 @pytest.fixture(params=fixture_data)
 def load_model_data(request):
     model_path = request.param[0]
-    print(model_path)
     model_type = os.path.basename(model_path).split("_")[
         0
     ]  # Binary, multiclass or regression
@@ -104,23 +103,25 @@ def test_model_processing(
     # Predict scores using pickled model
     if model_type == "multiclass":
         model_pred = model.predict(data[model.feature_names_in_])
-    elif model_type == "binary":
-        model_pred = model.predict(data[model.feature_names_in_])
-    elif model_type == "regression":
+
+        # Check if SQL model prediction is same as pickled model prediction
+        # use a tolerance of
+        tolerance = 0.00001
+        print(sum(model_pred != sql_pred))
+        print(len(model_pred))
+        assert (sum(model_pred != sql_pred) / len(model_pred) <= tolerance)
+    else:
         model_pred = model.predict(data[model.feature_names_in_])
 
-    model_pred = model_pred if model_pred.ndim == 1 else np.sum(model_pred, axis=1)
-    logging.info(
-        f"Max difference SQL - pickled model: {(abs(sql_pred - model_pred)).max()}"
-    )
-    print(sql_pred)
-    print(model_pred)
-    # Check if SQL model prediction is same as pickled model prediction
-    # use a tolerance of
-    tolerance = 0.00001
-    assert (abs(sql_pred - model_pred) <= tolerance).all()
+        logging.info(
+            f"Max difference SQL - pickled model: {(abs(sql_pred - model_pred)).max()}"
+        )
+
+        # Check if SQL model prediction is same as pickled model prediction
+        # use a tolerance of
+        tolerance = 0.00001
+        assert (abs(sql_pred - model_pred)/model_pred <= tolerance).all()
 
     # Clean up: Optionally, you can delete the generated SQL file after the test
     import os
-
     os.remove(SQL_OUTPUT_PATH)

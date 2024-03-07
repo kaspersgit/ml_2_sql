@@ -6,9 +6,10 @@ import os
 import shutil
 import subprocess
 
-def get_package_version(package_name, venv):
+def get_package_version(package_name, pip_path):
     try:
-        output = subprocess.check_output([f'{venv}/bin/pip', 'show', package_name], universal_newlines=True)
+        venv_name = '.ml2sql'
+        output = subprocess.check_output([pip_path, 'show', package_name], universal_newlines=True)
         version_line = next((line for line in output.splitlines() if 'Version:' in line), None)
         if version_line:
             version = version_line.split('Version:')[1].strip()
@@ -37,9 +38,15 @@ def get_package_version_from_requirements(package_name, requirements_file):
 def test_interpret_model_version():
     package_name = 'interpret'
     print(f"Checking for package: {package_name}")
-    venv_name = '.ml2sql'
-    installed_package_version = get_package_version(package_name, venv=venv_name)
-    print(f"The version in virt env {venv_name} is: {installed_package_version}")
+
+    # Check platform, windows is different from linux/mac
+    if sys.platform == "win32":
+        pip_path = ".ml2sql\\Scripts\\pip"
+    else:
+        pip_path = '.ml2sql/bin/pip'
+
+    installed_package_version = get_package_version(package_name, pip_path)
+    print(f"The version in virt env {pip_path} is: {installed_package_version}")
 
     # Get version from requirements.txt
     requirements_file = "requirements.txt"
