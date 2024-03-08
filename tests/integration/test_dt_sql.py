@@ -107,12 +107,9 @@ def test_model_processing(
         # Check if SQL model prediction is same as pickled model prediction
         # use a tolerance of
         tolerance = 0.00001
-        print(sum(model_pred != sql_pred))
-        print(len(model_pred))
         assert (sum(model_pred != sql_pred) / len(model_pred) <= tolerance)
     else:
         model_pred = model.predict(data[model.feature_names_in_])
-
         logging.info(
             f"Max difference SQL - pickled model: {(abs(sql_pred - model_pred)).max()}"
         )
@@ -120,7 +117,7 @@ def test_model_processing(
         # Check if SQL model prediction is same as pickled model prediction
         # use a tolerance of
         tolerance = 0.00001
-        assert (abs(sql_pred - model_pred)/model_pred <= tolerance).all()
+        assert (abs(sql_pred - model_pred) <= tolerance).all()
 
     # Clean up: Optionally, you can delete the generated SQL file after the test
     import os

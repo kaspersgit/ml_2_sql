@@ -130,7 +130,7 @@ Dictionary of parameters that can be used with model of choice (optional). Check
 - Any kind of whole positive number, will limit the data set in order to train faster (as simple as that)
 
 `time_sensitive_column` options (optional):
-- Name of date column
+- Name of date column to do the time serie split over
   - used when `cv_type = timeseriesplit`  
 
 `upsampling` options (optional, should not be used without calibration):
@@ -145,8 +145,8 @@ Name of target column (required)
 # Remarks
 
 ## Notes
-- Any NULL values should be imputed before using this script
 - Data imbalance treatments (e.g. oversampling + model calibration) not fully implemented
+- Decision rule not implemented yet
 
 ## TODO list
 - Checks and config
