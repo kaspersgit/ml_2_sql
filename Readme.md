@@ -85,7 +85,7 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
 # Input
 ## Data
 The csv file containing the data has to fulfill some basic assumptions:
-- Target columns should have more than 1 unique value
+- Target column should have more than 1 unique value
 - For binary classification (target with 2 unique values) these values should be 0 and 1
 
 ## Configuration json
@@ -102,13 +102,6 @@ Dictionary of parameters that can be used with model of choice (optional). Check
 - Linear/Logistic regression ([model documentation](https://interpret.ml/docs/lr.html))
 - Decision tree ([model documentation](https://interpret.ml/docs/dt.html))
 - Decision rule ([model documentation](https://interpret.ml/docs/dr.html))
-
-### post_params
-`calibration` options (optional, not fully implemented):
-- `sigmoid`, platt scaling applied
-- `isotonic`, isotonic regression applied
-- `auto`/`true`, either platt scaling or isotonic regression applied based on datasize
-- any other value, no calibration applied
 
 `sql_split` options:
 - `false`, outputs the SQL model as one SELECT statement, using column aliases within the same select statement
@@ -133,10 +126,6 @@ Dictionary of parameters that can be used with model of choice (optional). Check
 - Name of date column to do the time serie split over
   - used when `cv_type = timeseriesplit`  
 
-`upsampling` options (optional, should not be used without calibration):
-- `true`, applying the SMOTE(NC) algorithm on the minority class to balance the data
-- `false`, not applying any resampling technique
-
 ### target
 Name of target column (required)
 
@@ -149,22 +138,7 @@ Name of target column (required)
 - Decision rule not implemented yet
 
 ## TODO list
-- Checks and config
-  - Add check if variables and target are finite 
-  - Add check such that variables have (enough different values)
-  - Add random seed to config file
-
-- Performance monitoring
-  - Add performance summary for easy and quick comparison (including label count, auc pr & roc, best f1-score, etc)
-  - Add feature over/under fitting plot (https://towardsdatascience.com/which-of-your-features-are-overfitting-c46d0762e769)
-  - Make distribution plot grouped instead of overlaid or stacked (maybe switch to plotly histogram)
-
-- Other 
-  - Add calibration (platt scaling/isotonic regression)
-  - Add changelog and versioning
-  - Extend logging granularity 
-  - Add package versions to logging
-  - Add SQL translation for decision rule
-  - Add pass through columns
+Check docs/TODO.md for an extensive list.
 
 # Troubleshooting
+If error message is not clear and instructions above are followed, feel free to create an Issue.
