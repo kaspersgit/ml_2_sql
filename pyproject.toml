@@ -28,8 +28,15 @@ dependencies = [
     "interpret == 0.5.1",
     "imblearn",
     "kaleido",
-    "pytest",
-    "pip-tools",
     'pywin32 ; platform_system == "Windows"',
 ]
+
+[project.optional-dependencies]
+dev = [
+    "duckdb",
+    "pytest",
+    "pip-tools",
+    "ruff",
+]
+
 keywords = ["SQL", "ML", "automl", "interpret", "ML 2 SQL", "EBM", "Explainable Boosting Machine", "ML to SQL"]

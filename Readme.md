@@ -1,7 +1,9 @@
 # Machine learning to SQL
 
-![GitHub last commit](https://img.shields.io/github/last-commit/kaspersgit/ml_2_sql?style=flat-square)
 ![GitHub Repo stars](https://img.shields.io/github/stars/kaspersgit/ml_2_sql?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/kaspersgit/ml_2_sql?style=flat-square)
+![interpret](https://img.shields.io/badge/interpret-v0.5.1-blue)
+![Python Version](https://img.shields.io/pypi/pyversions/interpret.svg?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/kaspersgit/ml_2_sql?style=flat-square)
 
 
@@ -23,7 +25,7 @@ This project tries to make the process simple enough for anyone to train a model
 
 ## Background
 An automated machine learning tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from interpretML) to train models which are explainable and transparent in how they come to their prediction. SQL infrastructure is the only requirement to put a model into production.
-This tool can be used by anybody, but is aimed for people who want to easily train a model and want to use it in their (company) SQL system. 
+This tool can be used by anybody, but is aimed for people who want to easily train a model and want to use it in their SQL system. 
 
 </br>
 
@@ -34,7 +36,7 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
     Windows:
    ```
    python -m venv .ml2sql
-   .ml2sql/Scripts/activate
+   . .ml2sql/Scripts/activate
    pip install -r requirements.txt
    ```
    
@@ -48,7 +50,7 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
 3. Activate or deactivate the created virtual environment by running:
    
     Windows:
-   `.ml2sql/Scripts/activate` or `deactivate`
+   `. .ml2sql/Scripts/activate` or `deactivate`
    
     Mac/Linux:
    `source .ml2sql/bin/activate` or `deactivate`
@@ -136,6 +138,8 @@ Name of target column (required)
 ## Notes
 - Data imbalance treatments (e.g. oversampling + model calibration) not fully implemented
 - Decision rule not implemented yet
+- Only accepts CSV files
+- Interactions with >2 variables not supported
 
 ## TODO list
 Check docs/TODO.md for an extensive list.

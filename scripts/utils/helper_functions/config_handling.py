@@ -160,7 +160,7 @@ def select_ml_cols(df):
         # Check if all elements in the column have the same length
         all_same_length = df[col].apply(lambda x: len(str(x))).nunique() == 1
 
-        if uniqueness_ratio == 1:
+        if (uniqueness_ratio == 1) & (df[col].dtypes != "float"):
             features_set.discard(col)
             print(f'"{col}" only has unique values')
 

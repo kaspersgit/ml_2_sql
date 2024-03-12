@@ -40,7 +40,7 @@ def create_config(args):
     target_column = features_dict.pop(target)
 
     config_creation = get_input(
-        ["Manual", "Automatic"],
+        ["Automatic", "Manual"],
         "Do you want to create config manually or automatically?",
     )
     print(config_creation)
@@ -51,6 +51,7 @@ def create_config(args):
         features_set = select_ml_cols(data)
         features_set.discard(target_column)
 
+        print('\nFinal config:')
         input_params = {
             "features": list(features_set),
             "model_params": {},
@@ -58,7 +59,7 @@ def create_config(args):
                 "calibration": "false",
                 "sql_split": "true",
                 "sql_decimals": 15,
-                "file_type": "html",
+                "file_type": "png",
             },
             "pre_params": {
                 "cv_type": "notimeseriesplit",

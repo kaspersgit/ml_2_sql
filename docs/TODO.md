@@ -1,5 +1,4 @@
 ## TODO list of improvements
-- Allow for other data file types (apart from csv)
 
 Checks and config
   - Add check if variables and target are finite 
@@ -13,6 +12,8 @@ Checks and config
   - Make distribution plot grouped instead of overlaid or stacked (maybe switch to plotly histogram)
 
 - Other 
+  - Allow for other data file types (apart from csv)
+  - Switch decision tree from sklearn to interpret for coherence
   - Add calibration (platt scaling/isotonic regression)
   - Add changelog and versioning
   - Improve logging (exclude unwanted info and include usable info) 

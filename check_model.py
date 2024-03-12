@@ -6,6 +6,9 @@ import sys
 # List files in input/data/ directory
 data_dir = "input/data/"
 files = os.listdir(data_dir)
+for f in os.listdir(data_dir):
+    if f.endswith(".csv"):
+        files.append(f)
 files.sort()
 
 print("Files in input/data/:")
