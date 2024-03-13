@@ -49,7 +49,7 @@ def test_interpret_model_version():
     print(f"The version in virt env {pip_path} is: {installed_package_version}")
 
     # Get version from requirements.txt
-    requirements_file = "requirements.txt"
+    requirements_file = "docs/requirements.txt"
     req_package_version = get_package_version_from_requirements(package_name, requirements_file)
     print(f"The version in {requirements_file} is: {req_package_version}")
 

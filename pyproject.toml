@@ -31,6 +31,8 @@ dependencies = [
     'pywin32 ; platform_system == "Windows"',
 ]
 
+keywords = ["SQL", "ML", "automl", "interpret", "ML 2 SQL", "EBM", "Explainable Boosting Machine", "ML to SQL"]
+
 [project.optional-dependencies]
 dev = [
     "duckdb",
@@ -38,5 +40,3 @@ dev = [
     "pip-tools",
     "ruff",
 ]
-
-keywords = ["SQL", "ML", "automl", "interpret", "ML 2 SQL", "EBM", "Explainable Boosting Machine", "ML to SQL"]
