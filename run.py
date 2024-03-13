@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 from datetime import datetime
 import time
 
@@ -130,7 +131,12 @@ model_type = model_type.lower().replace(" ", "_")
 # Model name
 unique_name = False
 while not unique_name:
+    # ask user to give model run a name
     model_name = input("\nGive it a name: ")
+
+    # Make sure model name only has letters numbers and underscores
+    model_name = model_name.lower().replace(" ", "_")
+    model_name = re.sub("[^0-9a-zA-Z_]+", "", model_name)
 
     # Current date
     current_date = datetime.today().strftime("%Y%m%d")

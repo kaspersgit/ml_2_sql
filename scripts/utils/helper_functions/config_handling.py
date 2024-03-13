@@ -1,4 +1,7 @@
 import pandas as pd
+import warnings
+
+warnings.simplefilter("ignore", UserWarning)
 
 
 # Handle the configuration file
@@ -125,11 +128,12 @@ def _get_col_dtype(col):
     """
 
     if col.dtype == "object":
-        # try numeric
+        # try datetime
         try:
             col_new = pd.to_datetime(col.dropna().unique())
             return col_new.dtype
         except ValueError:
+            # try numeric
             try:
                 col_new = pd.to_numeric(col.dropna().unique())
                 return col_new.dtype
