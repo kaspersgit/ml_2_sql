@@ -185,6 +185,7 @@ def apply_model(args):
     # Exit with code 0 for success
     sys.exit(0)
 
+
 if __name__ == "__main__":
     set_env = "prod"  # either prod or dev
 

@@ -151,12 +151,12 @@ def select_ml_cols(df):
 
     # Check certain column name
     check_date_cols = ["date", "dt"]
-    
+
     # Check uniqeness
     for col in df.columns:
         # Check share of unq values in the columns
         uniqueness_ratio = len(df[col].unique()) / len(df[col])
-        
+
         # Check if all elements in the column have the same length
         all_same_length = df[col].apply(lambda x: len(str(x))).nunique() == 1
 
@@ -181,7 +181,7 @@ def select_ml_cols(df):
         elif df[col].nunique() == 1:
             features_set.discard(col)
             print(f'"{col}" is column with only one value')
-        
+
         else:
             inferred_dtype = _get_col_dtype(df[col])
             if all(

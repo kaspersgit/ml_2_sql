@@ -51,7 +51,7 @@ def create_config(args):
         features_set = select_ml_cols(data)
         features_set.discard(target_column)
 
-        print('\nFinal config:')
+        print("\nFinal config:")
         input_params = {
             "features": list(features_set),
             "model_params": {},
@@ -160,9 +160,9 @@ def create_config(args):
                         "Enter the value for each model parameter, separated by comma: "
                     ).split(",")
                     for i in range(len(model_params_keys)):
-                        model_params[
-                            model_params_keys[i].strip()
-                        ] = model_params_values[i].strip()
+                        model_params[model_params_keys[i].strip()] = (
+                            model_params_values[i].strip()
+                        )
                     input_params[key] = model_params
                 else:
                     print("No model parameters were set.\n")

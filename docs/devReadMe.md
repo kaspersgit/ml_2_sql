@@ -1,14 +1,15 @@
 ## Developing
 ### Setup venv
-- `python3 -m venv .ml2sql`
-- `source .ml2sql/bin/activate`
-- `pip install requirements-dev.txt`
+```
+python3 -m venv .ml2sql
+.ml2sql/bin/pip install --index-url https://pypi.org/simple -r docs/requirements-dev.txt
+```
 
 ### Testing
 - Activate `.ml2sql` venv
 - Run `pytest`
 
-### Package management
+### Package management (pinning)
 With the virtual env activated
 - Compile user requirements.txt file: `python -m piptools compile -o docs/requirements.txt pyproject.toml`
 - Compile dev requirements-dev.txt file: `python -m piptools compile --extra dev -o docs/requirements-dev.txt -c docs/requirements.txt pyproject.toml`

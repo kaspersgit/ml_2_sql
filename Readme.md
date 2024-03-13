@@ -14,8 +14,10 @@
 4. [Remarks](#remarks)
 5. [Troubleshooting](#troubleshooting)
 
+<br>
 
-# In short
+# What is it?
+## In short
 This project tries to make the process simple enough for anyone to train a model, check the performance and deploy that model in SQL.
 
 ## Philosophy:
@@ -38,25 +40,16 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
     Windows:
    ```
    python -m venv .ml2sql
-   . .ml2sql/Scripts/activate
-   pip install -r docs/requirements.txt
+   .ml2sql/Scripts/pip install -r docs/requirements.txt
    ```
    
     Mac/Linux:
    ```
    python3 -m venv .ml2sql
-   source .ml2sql/bin/activate
-   pip install -r docs/requirements.txt
+   .ml2sql/bin/pip install -r docs/requirements.txt
    ```
 3. Wait until all packages are installed (could take a few minutes)
-4. Activate or deactivate the created virtual environment by running:
-   
-    Windows:
-   `. .ml2sql/Scripts/activate` or `deactivate`
-   
-    Mac/Linux:
-   `source .ml2sql/bin/activate` or `deactivate`
-5. For usage of this tool the virtual environment does not need to be activated.
+4. You are ready to go (the virtual env does not need to be activated to use this tool)
 
 ## Try it out demo
 1. In the terminal in the root of this folder run: 

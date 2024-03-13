@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from contextlib import redirect_stdout
 
 
@@ -54,7 +53,7 @@ def format_sql(
     model_name, model_type, pclasses, features, coefficients, intercept, post_params
 ):
     # round coefficients if needed
-    coefficients = list(np.round(coefficients, post_params['sql_decimals']))
+    coefficients = list(np.round(coefficients, post_params["sql_decimals"]))
 
     # List of column aliases of the scores of the different features
     if model_type == "multiclass":
@@ -83,7 +82,7 @@ def format_sql(
         )
 
     # Create the SQL query with the logistic regression formula and feature scores
-    if not post_params['sql_split']:
+    if not post_params["sql_split"]:
         print("SELECT")
         print(f"\t'{model_name}' AS model_name")
 
@@ -115,7 +114,7 @@ def format_sql(
 
         print("FROM <source_table>;  -- TODO replace with correct table")
 
-    elif post_params['sql_split']:
+    elif post_params["sql_split"]:
         # Creating CTE to create table aliases
         print("WITH feature_scores AS (\nSELECT")
         print(f"\t'{model_name}' AS model_name")

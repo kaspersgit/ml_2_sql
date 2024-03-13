@@ -252,7 +252,9 @@ def extractLookupTable(ebm, post_params):
                 "nr_features": 1,
                 "feature": ebm.feature_names[feature_indexes[0]],
                 "feat_bound": feat_bound,
-                "score": list(np.round(score, post_params['sql_decimals'])), ## To avoid data type overflow
+                "score": list(
+                    np.round(score, post_params["sql_decimals"])
+                ),  ## To avoid data type overflow
                 "score_lower_bound": score_lower_bound,
                 "score_upper_bound": score_upper_bound,
                 "feat_type": feat_type,
@@ -293,7 +295,7 @@ def extractLookupTable(ebm, post_params):
                     ebm.feature_names[feature_indexes[1]],
                 ],
                 "feat_bound": feat_bound,
-                "score": np.round(score, post_params['sql_decimals']),
+                "score": np.round(score, post_params["sql_decimals"]),
                 "feat_type": feat_type,
                 # not implemented for interaction terms
                 # , 'score_lower_bound': score_lower_bound
@@ -425,7 +427,7 @@ def single_feature_handling(df):
 def single_feature_2_sql(df, feature):
     for index, row in df.iterrows():
         # Check if bound is for missing values (=None)
-        if row["feat_bound"] == None:
+        if row["feat_bound"] is None:
             print(
                 " WHEN {feature} IS NULL THEN {score}".format(
                     feature=feature,
@@ -435,7 +437,6 @@ def single_feature_2_sql(df, feature):
             # Add ELSE 0.0 as last entry
             if index == df.index[-1]:
                 print(" ELSE 0.0")
-
 
         # check if string/category
         elif row["feat_type"] == "categorical":
@@ -514,7 +515,7 @@ def double_feature_sql_handling(df):
 def double_feature_2_sql(df, double_feature):
     for index, row in df.iterrows():
         # Check if bound is for missing values (=None)
-        if row["feat_bound_1"] == None:
+        if row["feat_bound_1"] is None:
             print(
                 " WHEN {feature} IS NULL THEN \n      CASE".format(
                     feature=row["feat_1"]
@@ -565,7 +566,7 @@ def double_feature_2_sql(df, double_feature):
         # Looping over the bound values for the second feature
         for sf_index in range(nr_bounds):
             # Check if bound is for missing values (=None)
-            if row["feat_bound_2"][sf_index] == None:
+            if row["feat_bound_2"][sf_index] is None:
                 print(
                     "         WHEN {feature} IS NULL THEN {score}".format(
                         feature=row["feat_2"],
@@ -754,7 +755,7 @@ def single_feature_2_sql_multiclass(df, feature, class_nr):
 
     for index, row in df.iterrows():
         # Check if bound is for missing values (=None)
-        if row["feat_bound"] == None:
+        if row["feat_bound"] is None:
             print(
                 " WHEN {feature} IS NULL THEN {score}".format(
                     feature=feature,
@@ -845,5 +846,5 @@ def save_model_and_extras(ebm, model_name, post_params, logging):
     with open(f"{model_name}/model/ebm_in_sql.sql", "w") as f:
         with redirect_stdout(f):
             model_name = model_name.split("/")[-1]
-            ebm_to_sql(model_name, lookup_df, ebm.classes_, post_params['sql_split'])
+            ebm_to_sql(model_name, lookup_df, ebm.classes_, post_params["sql_split"])
     logging.info("SQL version of EBM saved")

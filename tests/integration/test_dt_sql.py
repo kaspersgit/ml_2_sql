@@ -10,7 +10,6 @@ import joblib
 import json
 import logging
 import pandas as pd
-import numpy as np
 import pytest
 from utils.test_helpers.sql_model import execute_sql_script
 from utils.output_scripts.decision_tree_as_code import save_model_and_extras
@@ -60,8 +59,11 @@ def load_model_data(request):
     if model_type == data_type:
         return data, model, model_type
 
+
 # path to config file (split is not applicable here so only one config file is enough)
 config_path = ["tests/configs/config_split.json"]
+
+
 # Define a fixture for split parameter
 @pytest.fixture(params=config_path)
 def post_params(request):
@@ -69,7 +71,8 @@ def post_params(request):
 
     with open(config_path, "rb") as f:
         config = json.load(f)
-    return config['post_params']
+    return config["post_params"]
+
 
 def test_model_processing(
     load_model_data, post_params, logging=logging.getLogger(__name__)
@@ -107,7 +110,7 @@ def test_model_processing(
         # Check if SQL model prediction is same as pickled model prediction
         # use a tolerance of
         tolerance = 0.00001
-        assert (sum(model_pred != sql_pred) / len(model_pred) <= tolerance)
+        assert sum(model_pred != sql_pred) / len(model_pred) <= tolerance
     else:
         model_pred = model.predict(data[model.feature_names_in_])
         logging.info(
@@ -121,4 +124,5 @@ def test_model_processing(
 
     # Clean up: Optionally, you can delete the generated SQL file after the test
     import os
+
     os.remove(SQL_OUTPUT_PATH)

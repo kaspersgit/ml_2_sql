@@ -53,7 +53,7 @@ while model_path is None:
         model_file_index = int(model_file_index) - 1
         model_path = os.path.join(model_dir, files[model_file_index])
         model_path = files[model_file_index]
-        model_path = model_path.replace(os.sep, '/')
+        model_path = model_path.replace(os.sep, "/")
 
     except (ValueError, IndexError):
         print("Invalid option, try again.")
@@ -74,9 +74,7 @@ try:
     os.makedirs(f"{destination_path}/performance")
 
 except FileExistsError:
-    sys.exit(
-        f"Error: Dataset is already tested on this model: {destination_path}"
-    )
+    sys.exit(f"Error: Dataset is already tested on this model: {destination_path}")
 
 # Trigger python script to do the actual work
 print("\nRunning command:")

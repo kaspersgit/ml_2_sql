@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import pytest
 
+
 @pytest.fixture(scope="module")
 def setup_file_structure():
     OUTPUT_PATH = "trained_models/test_tool"
@@ -22,7 +23,7 @@ def setup_file_structure():
         os.makedirs(f"{OUTPUT_PATH}/model")
 
         # For modeltester
-        csv_name = DATA_PATH.split("/")[-1].split('.')[0]
+        csv_name = DATA_PATH.split("/")[-1].split(".")[0]
 
         destination_path = f"{OUTPUT_PATH}/tested_datasets/{csv_name}"
         os.makedirs(destination_path)
@@ -36,8 +37,8 @@ def setup_file_structure():
     # Remove the folder and its contents
     shutil.rmtree(OUTPUT_PATH)
 
-def test_main_script(setup_file_structure):
 
+def test_main_script(setup_file_structure):
     OUTPUT_PATH, DATA_PATH = setup_file_structure
 
     # Check platform, windows is different from linux/mac
@@ -65,11 +66,11 @@ def test_main_script(setup_file_structure):
     )
     assert result.returncode == 0
 
-def test_modeltester_script(setup_file_structure):
 
+def test_modeltester_script(setup_file_structure):
     OUTPUT_PATH, DATA_PATH = setup_file_structure
     MODEL_PATH = f"{OUTPUT_PATH}/model/ebm_classification.sav"
-    DATASET_NAME = DATA_PATH.split('/')[-1].split('.')[0]
+    DATASET_NAME = DATA_PATH.split("/")[-1].split(".")[0]
     DESTINATION_PATH = f"{OUTPUT_PATH}/tested_datasets/{DATASET_NAME}"
 
     # Check platform, windows is different from linux/mac
@@ -87,8 +88,7 @@ def test_modeltester_script(setup_file_structure):
             "--data_path",
             DATA_PATH,
             "--destination_path",
-            DESTINATION_PATH
-
+            DESTINATION_PATH,
         ],
         stdout=subprocess.PIPE,
         text=True,

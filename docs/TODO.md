@@ -17,5 +17,6 @@ Checks and config
   - Add calibration (platt scaling/isotonic regression)
   - Add changelog and versioning
   - Improve logging (exclude unwanted info and include usable info) 
-  - Add package versions to logging
+  - Add dependancy package versions to logging
   - Add SQL translation for decision rule
+  - Creat a package out of ml2sql
