@@ -1,8 +1,15 @@
 ## Developing
 ### Setup venv
+Mac/Linux:
 ```
 python3 -m venv .ml2sql
-.ml2sql/bin/pip install --index-url https://pypi.org/simple -r docs/requirements-dev.txt
+.ml2sql/bin/python -m pip install --index-url https://pypi.org/simple -r docs/requirements-dev.txt
+```
+
+Windows 
+```
+python -m venv .ml2sql
+.ml2sql/Scripts/python -m pip install --index-url https://pypi.org/simple -r docs/requirements-dev.txt
 ```
 
 ### Testing

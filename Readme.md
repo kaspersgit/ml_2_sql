@@ -33,20 +33,23 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
 
 # Getting started
 ## Pre requisites
-1. Clone Github repo to your local machine
-   `git clone `
+1. Clone Github repo to your local machine and cd into folder
+   ```
+   git clone git@github.com:kaspersgit/ml_2_sql.git`
+   cd ml_2_sql
+   ```
 2. Create virtual environment and install packages, run:
    
     Windows:
    ```
    python -m venv .ml2sql
-   .ml2sql/Scripts/pip install -r docs/requirements.txt
+   .ml2sql/Scripts/python -m pip install -r docs/requirements.txt
    ```
    
     Mac/Linux:
    ```
    python3 -m venv .ml2sql
-   .ml2sql/bin/pip install -r docs/requirements.txt
+   .ml2sql/bin/python -m pip install -r docs/requirements.txt
    ```
 3. Wait until all packages are installed (could take a few minutes)
 4. You are ready to go (the virtual env does not need to be activated to use this tool)
@@ -84,6 +87,7 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
 The csv file containing the data has to fulfill some basic assumptions:
 - Target column should have more than 1 unique value
 - For binary classification (target with 2 unique values) these values should be 0 and 1
+- File name should be .csv and not consist of any spaces
 
 ## Configuration json
 This file will inform the script which column is the target, which are the features and several other parameters for pre and post training.
