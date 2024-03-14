@@ -117,7 +117,6 @@ if __name__ == "__main__":
 
     # Check if this script is run from terminal
     if set_env == "prod":
-        print("from terminal")
         # (Prod) script is being run through the terminal
         argvals = None
     else:

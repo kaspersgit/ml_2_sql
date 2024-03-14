@@ -20,3 +20,4 @@ Checks and config
   - Add dependancy package versions to logging
   - Add SQL translation for decision rule
   - Creat a package out of ml2sql
+  - Improve feature importance logistic/linear regression for multiclass classification
