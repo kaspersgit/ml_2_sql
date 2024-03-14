@@ -59,8 +59,11 @@ def load_model_data(request):
     if model_type == data_type:
         return data, model, model_type
 
+
 # paths to config files, one with and one without sql split
 config_path = ["tests/configs/config_split.json", "tests/configs/config_no_split.json"]
+
+
 # Define a fixture for split parameter
 @pytest.fixture(params=config_path)
 def post_params(request):
@@ -68,22 +71,26 @@ def post_params(request):
 
     with open(config_path, "rb") as f:
         config = json.load(f)
-    return config['post_params']
+    return config["post_params"]
 
 
-def test_model_processing(load_model_data, post_params, logging=logging.getLogger(__name__)):
+def test_model_processing(
+    load_model_data, post_params, logging=logging.getLogger(__name__)
+):
     # unpack data and model
     data, model, model_type = load_model_data
 
     # Generate SQL from the loaded model
-    save_model_and_extras(ebm=model, model_name="tests", post_params=post_params, logging=logging)
+    save_model_and_extras(
+        ebm=model, model_name="tests", post_params=post_params, logging=logging
+    )
 
     # Load the SQL version
     with open(SQL_OUTPUT_PATH, "r") as sql_file:
         loaded_sql = sql_file.read()
 
     # logg type of model
-    logging.info(f"Type: {model_type} \nSplit: {post_params['sql_split']}")   
+    logging.info(f"Type: {model_type} \nSplit: {post_params['sql_split']}")
 
     # Run SQL against the DataFrame using DuckDB
     if model_type == "multiclass":
@@ -100,9 +107,9 @@ def test_model_processing(load_model_data, post_params, logging=logging.getLogge
 
     # Predict scores using pickled model
     if model_type == "multiclass":
-        model_pred = model.predict_proba(data)[:,-1]
+        model_pred = model.predict_proba(data)[:, -1]
     elif model_type == "binary":
-        model_pred = model.predict_proba(data)[:,1]
+        model_pred = model.predict_proba(data)[:, 1]
     elif model_type == "regression":
         model_pred = model.predict(data)
 

@@ -10,7 +10,6 @@ import joblib
 import json
 import logging
 import pandas as pd
-import numpy as np
 import pytest
 from utils.test_helpers.sql_model import execute_sql_script
 from utils.output_scripts.decision_tree_as_code import save_model_and_extras
@@ -35,13 +34,12 @@ regr_regression = [
 ]
 
 # combine into 1 list to iterate over
-fixture_data = [clf_binary, regr_regression]
+fixture_data = [clf_binary, clf_multiclass, regr_regression]
 
 
 @pytest.fixture(params=fixture_data)
 def load_model_data(request):
     model_path = request.param[0]
-    print(model_path)
     model_type = os.path.basename(model_path).split("_")[
         0
     ]  # Binary, multiclass or regression
@@ -61,8 +59,11 @@ def load_model_data(request):
     if model_type == data_type:
         return data, model, model_type
 
+
 # path to config file (split is not applicable here so only one config file is enough)
 config_path = ["tests/configs/config_split.json"]
+
+
 # Define a fixture for split parameter
 @pytest.fixture(params=config_path)
 def post_params(request):
@@ -70,7 +71,8 @@ def post_params(request):
 
     with open(config_path, "rb") as f:
         config = json.load(f)
-    return config['post_params']
+    return config["post_params"]
+
 
 def test_model_processing(
     load_model_data, post_params, logging=logging.getLogger(__name__)
@@ -104,21 +106,21 @@ def test_model_processing(
     # Predict scores using pickled model
     if model_type == "multiclass":
         model_pred = model.predict(data[model.feature_names_in_])
-    elif model_type == "binary":
-        model_pred = model.predict(data[model.feature_names_in_])
-    elif model_type == "regression":
-        model_pred = model.predict(data[model.feature_names_in_])
 
-    model_pred = model_pred if model_pred.ndim == 1 else np.sum(model_pred, axis=1)
-    logging.info(
-        f"Max difference SQL - pickled model: {(abs(sql_pred - model_pred)).max()}"
-    )
-    print(sql_pred)
-    print(model_pred)
-    # Check if SQL model prediction is same as pickled model prediction
-    # use a tolerance of
-    tolerance = 0.00001
-    assert (abs(sql_pred - model_pred) <= tolerance).all()
+        # Check if SQL model prediction is same as pickled model prediction
+        # use a tolerance of
+        tolerance = 0.00001
+        assert sum(model_pred != sql_pred) / len(model_pred) <= tolerance
+    else:
+        model_pred = model.predict(data[model.feature_names_in_])
+        logging.info(
+            f"Max difference SQL - pickled model: {(abs(sql_pred - model_pred)).max()}"
+        )
+
+        # Check if SQL model prediction is same as pickled model prediction
+        # use a tolerance of
+        tolerance = 0.00001
+        assert (abs(sql_pred - model_pred) <= tolerance).all()
 
     # Clean up: Optionally, you can delete the generated SQL file after the test
     import os

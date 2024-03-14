@@ -1,7 +1,9 @@
 # Machine learning to SQL
 
-![GitHub last commit](https://img.shields.io/github/last-commit/kaspersgit/ml_2_sql?style=flat-square)
 ![GitHub Repo stars](https://img.shields.io/github/stars/kaspersgit/ml_2_sql?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/kaspersgit/ml_2_sql?style=flat-square)
+![interpret](https://img.shields.io/badge/interpret-v0.5.1-blue)
+![Python Version](https://img.shields.io/pypi/pyversions/interpret.svg?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/kaspersgit/ml_2_sql?style=flat-square)
 
 
@@ -12,8 +14,10 @@
 4. [Remarks](#remarks)
 5. [Troubleshooting](#troubleshooting)
 
+<br>
 
-# In short
+# What is it?
+## In short
 This project tries to make the process simple enough for anyone to train a model, check the performance and deploy that model in SQL.
 
 ## Philosophy:
@@ -23,36 +27,32 @@ This project tries to make the process simple enough for anyone to train a model
 
 ## Background
 An automated machine learning tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from interpretML) to train models which are explainable and transparent in how they come to their prediction. SQL infrastructure is the only requirement to put a model into production.
-This tool can be used by anybody, but is aimed for people who want to easily train a model and want to use it in their (company) SQL system. 
+This tool can be used by anybody, but is aimed for people who want to easily train a model and want to use it in their SQL system. 
 
 </br>
 
 # Getting started
 ## Pre requisites
-1. Create virtual environment and install packages, run:
+1. Clone Github repo to your local machine and cd into folder
+   ```
+   git clone git@github.com:kaspersgit/ml_2_sql.git`
+   cd ml_2_sql
+   ```
+2. Create virtual environment and install packages, run:
    
     Windows:
    ```
    python -m venv .ml2sql
-   .ml2sql/Scripts/activate
-   pip install -r requirements.txt
+   .ml2sql/Scripts/python -m pip install -r docs/requirements.txt
    ```
    
     Mac/Linux:
    ```
    python3 -m venv .ml2sql
-   source .ml2sql/bin/activate
-   pip install -r requirements.txt
+   .ml2sql/bin/python -m pip install -r docs/requirements.txt
    ```
-2. Wait until all packages are installed (could take a few minutes)
-3. Activate or deactivate the created virtual environment by running:
-   
-    Windows:
-   `.ml2sql/Scripts/activate` or `deactivate`
-   
-    Mac/Linux:
-   `source .ml2sql/bin/activate` or `deactivate`
-4. For usage of this tool the virtual environment does not need to be activated.
+3. Wait until all packages are installed (could take a few minutes)
+4. You are ready to go (the virtual env does not need to be activated to use this tool)
 
 ## Try it out demo
 1. In the terminal in the root of this folder run: 
@@ -85,8 +85,9 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
 # Input
 ## Data
 The csv file containing the data has to fulfill some basic assumptions:
-- Target columns should have more than 1 unique value
+- Target column should have more than 1 unique value
 - For binary classification (target with 2 unique values) these values should be 0 and 1
+- File name should be .csv and not consist of any spaces
 
 ## Configuration json
 This file will inform the script which column is the target, which are the features and several other parameters for pre and post training.
@@ -102,13 +103,6 @@ Dictionary of parameters that can be used with model of choice (optional). Check
 - Linear/Logistic regression ([model documentation](https://interpret.ml/docs/lr.html))
 - Decision tree ([model documentation](https://interpret.ml/docs/dt.html))
 - Decision rule ([model documentation](https://interpret.ml/docs/dr.html))
-
-### post_params
-`calibration` options (optional, not fully implemented):
-- `sigmoid`, platt scaling applied
-- `isotonic`, isotonic regression applied
-- `auto`/`true`, either platt scaling or isotonic regression applied based on datasize
-- any other value, no calibration applied
 
 `sql_split` options:
 - `false`, outputs the SQL model as one SELECT statement, using column aliases within the same select statement
@@ -130,12 +124,8 @@ Dictionary of parameters that can be used with model of choice (optional). Check
 - Any kind of whole positive number, will limit the data set in order to train faster (as simple as that)
 
 `time_sensitive_column` options (optional):
-- Name of date column
+- Name of date column to do the time serie split over
   - used when `cv_type = timeseriesplit`  
-
-`upsampling` options (optional, should not be used without calibration):
-- `true`, applying the SMOTE(NC) algorithm on the minority class to balance the data
-- `false`, not applying any resampling technique
 
 ### target
 Name of target column (required)
@@ -145,26 +135,13 @@ Name of target column (required)
 # Remarks
 
 ## Notes
-- Any NULL values should be imputed before using this script
 - Data imbalance treatments (e.g. oversampling + model calibration) not fully implemented
+- Decision rule not implemented yet
+- Only accepts CSV files
+- Interactions with >2 variables not supported
 
 ## TODO list
-- Checks and config
-  - Add check if variables and target are finite 
-  - Add check such that variables have (enough different values)
-  - Add random seed to config file
-
-- Performance monitoring
-  - Add performance summary for easy and quick comparison (including label count, auc pr & roc, best f1-score, etc)
-  - Add feature over/under fitting plot (https://towardsdatascience.com/which-of-your-features-are-overfitting-c46d0762e769)
-  - Make distribution plot grouped instead of overlaid or stacked (maybe switch to plotly histogram)
-
-- Other 
-  - Add calibration (platt scaling/isotonic regression)
-  - Add changelog and versioning
-  - Extend logging granularity 
-  - Add package versions to logging
-  - Add SQL translation for decision rule
-  - Add pass through columns
+Check docs/TODO.md for an extensive list.
 
 # Troubleshooting
+If error message is not clear and instructions above are followed, feel free to create an Issue.

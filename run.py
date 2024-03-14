@@ -1,6 +1,6 @@
 import os
-import subprocess
 import sys
+import re
 from datetime import datetime
 import time
 
@@ -44,10 +44,11 @@ while csv_path is None:
 
 print(f"CSV file {csv_path} will be used for modelling")
 
+
 # Function to create a new config file
 def create_new_config(csv_path):
     if sys.platform == "win32":
-        command = f".ml2sql\Scripts\python.exe scripts/create_config.py --data_path {csv_path}"
+        command = f".ml2sql\\Scripts\\python.exe scripts/create_config.py --data_path {csv_path}"
     else:
         command = f".ml2sql/bin/python scripts/create_config.py --data_path {csv_path}"
 
@@ -130,7 +131,12 @@ model_type = model_type.lower().replace(" ", "_")
 # Model name
 unique_name = False
 while not unique_name:
+    # ask user to give model run a name
     model_name = input("\nGive it a name: ")
+
+    # Make sure model name only has letters numbers and underscores
+    model_name = model_name.lower().replace(" ", "_")
+    model_name = re.sub("[^0-9a-zA-Z_]+", "", model_name)
 
     # Current date
     current_date = datetime.today().strftime("%Y%m%d")

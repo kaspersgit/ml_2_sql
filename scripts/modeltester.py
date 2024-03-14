@@ -1,6 +1,7 @@
 import joblib
 import pandas as pd
 import logging
+import sys
 import numpy as np
 
 from utils.helper_functions.parsing_arguments import GetArgs
@@ -180,6 +181,9 @@ def apply_model(args):
         regressionMetricsTable(
             destination, y_true, y_pred, X, data_type="test", logging=logging
         )
+
+    # Exit with code 0 for success
+    sys.exit(0)
 
 
 if __name__ == "__main__":

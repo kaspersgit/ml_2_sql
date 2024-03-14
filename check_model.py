@@ -5,7 +5,10 @@ import sys
 # Select data
 # List files in input/data/ directory
 data_dir = "input/data/"
-files = os.listdir(data_dir)
+files = []
+for f in os.listdir(data_dir):
+    if f.endswith(".csv"):
+        files.append(f)
 files.sort()
 
 print("Files in input/data/:")
@@ -50,6 +53,8 @@ while model_path is None:
         model_file_index = int(model_file_index) - 1
         model_path = os.path.join(model_dir, files[model_file_index])
         model_path = files[model_file_index]
+        model_path = model_path.replace(os.sep, "/")
+
     except (ValueError, IndexError):
         print("Invalid option, try again.")
 
@@ -57,21 +62,19 @@ print(f"Model {model_path} will be used for testing")
 
 # Create extra folder in trained model folder
 # Make directory with current data and model name
+model_folder = model_path.split("trained_models/")[1].split("/")[0]
+csv_name = csv_path.split("/")[-1].split(".")[0]
+destination_path = f"trained_models/{model_folder}/tested_datasets/{csv_name}"
+
+if not os.path.exists(destination_path.split(csv_name)[0]):
+    os.makedirs(destination_path.split(csv_name)[0])
+
 try:
-    model_folder = model_path.split("trained_models/")[1].split("/")[0]
-    csv_name = csv_path.split("/")[-1]
-    destination_path = f"trained_models/{model_folder}/tested_datasets/{csv_name}"
-
-    if not os.path.exists(destination_path.split(csv_name)[0]):
-        os.makedirs(destination_path.split(csv_name)[0])
-
     os.makedirs(destination_path)
     os.makedirs(f"{destination_path}/performance")
 
 except FileExistsError:
-    sys.exit(
-        "Error: tested_datasets directory already exists within trained_models/{model_folder}"
-    )
+    sys.exit(f"Error: Dataset is already tested on this model: {destination_path}")
 
 # Trigger python script to do the actual work
 print("\nRunning command:")

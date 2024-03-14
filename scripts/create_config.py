@@ -1,5 +1,6 @@
 import pandas as pd
 import json
+import random
 from utils.helper_functions.config_handling import select_ml_cols
 from utils.helper_functions.parsing_arguments import GetArgs
 
@@ -21,9 +22,28 @@ def get_input(options, message):
 def create_config(args):
     # Load in data
     csv_path = args.data_path
-    data = pd.read_csv(
-        args.data_path, keep_default_na=False, nrows=500, na_values=["", "N/A", "NULL"]
-    )
+
+    # Read in sample of data
+    #  try different %, until the nr of rows is at least 500 (or until we use 50% sample size)
+    nrows = 0
+    p = 0.005
+    while nrows < 500:
+        # if sample is 50% of all rows then continue
+        if p >= 0.5:
+            break
+
+        # increase p 10 fold with every loop
+        p = p * 10
+
+        # if random from [0,1] interval is greater than p the row will be skipped
+        data = pd.read_csv(
+            args.data_path,
+            keep_default_na=False,
+            na_values=["", "N/A", "NULL"],
+            header=0,
+            skiprows=lambda i: i > 0 and random.random() > p,
+        )
+        nrows = len(data)
 
     # Create a dictionary to store the features and their indices
     features_dict = {}
@@ -40,7 +60,7 @@ def create_config(args):
     target_column = features_dict.pop(target)
 
     config_creation = get_input(
-        ["Manual", "Automatic"],
+        ["Automatic", "Manual"],
         "Do you want to create config manually or automatically?",
     )
     print(config_creation)
@@ -51,6 +71,7 @@ def create_config(args):
         features_set = select_ml_cols(data)
         features_set.discard(target_column)
 
+        print("\nFinal config:")
         input_params = {
             "features": list(features_set),
             "model_params": {},
@@ -58,7 +79,7 @@ def create_config(args):
                 "calibration": "false",
                 "sql_split": "true",
                 "sql_decimals": 15,
-                "file_type": "html",
+                "file_type": "png",
             },
             "pre_params": {
                 "cv_type": "notimeseriesplit",
@@ -159,9 +180,9 @@ def create_config(args):
                         "Enter the value for each model parameter, separated by comma: "
                     ).split(",")
                     for i in range(len(model_params_keys)):
-                        model_params[
-                            model_params_keys[i].strip()
-                        ] = model_params_values[i].strip()
+                        model_params[model_params_keys[i].strip()] = (
+                            model_params_values[i].strip()
+                        )
                     input_params[key] = model_params
                 else:
                     print("No model parameters were set.\n")

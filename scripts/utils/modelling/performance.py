@@ -4,7 +4,6 @@ from matplotlib import pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import pingouin
 from sklearn.calibration import calibration_curve
 from sklearn.metrics import brier_score_loss
 from sklearn.metrics import classification_report
@@ -971,89 +970,6 @@ def plotDistributionViolin(
     return
 
 
-# TODO below function would need to have the test models available and make the calucations using those
-# So that the X_test is actually not seen yet by the model
-# Currently the clf['final'] is the model trained over all data
-def scorePartialCorrelation(given_name, clf, post_datasets):
-    for fold_id in range(len(post_datasets["X_test_list"])):
-        clf_fold = clf["test"][fold_id]
-
-        X_test = post_datasets["X_test_list"][fold_id]
-        X_train = post_datasets["X_train_list"][fold_id]
-        y_test = post_datasets["y_test_list"][fold_id]
-        y_train = post_datasets["y_train_list"][fold_id]
-
-        sl_test = clf_fold.predict_and_contrib(X_test, output="labels")
-        X_test_scores = pd.DataFrame(sl_test[1], columns=clf_fold.feature_names)
-        y_test_label = pd.Series(y_test, name="target")
-
-        sl_train = clf_fold.predict_and_contrib(X_train, output="labels")
-        X_train_scores = pd.DataFrame(sl_train[1], columns=clf_fold.feature_names)
-        y_train_label = pd.Series(y_train, name="target")
-
-    # Define function for partial correlation
-    def partial_correlation(X, y):
-        out = pd.Series(index=X.columns, dtype=float)
-        for feature_name in X.columns:
-            out[feature_name] = pingouin.partial_corr(
-                data=pd.concat([X, y], axis=1).astype(float),
-                x=feature_name,
-                y=y.name,
-                x_covar=[f for f in X.columns if f != feature_name],
-            ).loc["pearson", "r"]
-        return out
-
-    parscore_test = partial_correlation(X_test_scores, y_test_label)
-    parscore_train = partial_correlation(X_train_scores, y_train_label)
-    # parscore_diff = pd.Series(parscore_test - parscore_train, name = 'parscore_diff')
-
-    # Plot parshap
-    plotmin, plotmax = (
-        min(parscore_train.min(), parscore_test.min()),
-        max(parscore_train.max(), parscore_test.max()),
-    )
-    plotbuffer = 0.05 * (plotmax - plotmin)
-    fig, ax = plt.subplots()
-    if plotmin < 0:
-        ax.vlines(
-            0, plotmin - plotbuffer, plotmax + plotbuffer, color="darkgrey", zorder=0
-        )
-        ax.hlines(
-            0, plotmin - plotbuffer, plotmax + plotbuffer, color="darkgrey", zorder=0
-        )
-    ax.plot(
-        [plotmin - plotbuffer, plotmax + plotbuffer],
-        [plotmin - plotbuffer, plotmax + plotbuffer],
-        color="darkgrey",
-        zorder=0,
-    )
-    sc = ax.scatter(
-        parscore_train,
-        parscore_test,
-        edgecolor="grey",
-        #   c=[5]*16,
-        s=50,
-        cmap=plt.cm.get_cmap("Reds"),
-    )
-    ax.set(
-        title="Partial correlation bw Score and target...",
-        xlabel="... on Train data",
-        ylabel="... on Test data",
-    )
-    cbar = fig.colorbar(sc)
-    cbar.set_ticks([])
-    for txt in parscore_train.index:
-        ax.annotate(
-            txt,
-            (parscore_train[txt], parscore_test[txt] + plotbuffer / 2),
-            ha="center",
-            va="bottom",
-        )
-    fig.savefig(
-        f"{given_name}/performance/PartialCorrelation.png", dpi=300, bbox_inches="tight"
-    )
-
-
 def postModellingPlots(
     clf, model_name, model_type, given_name, post_datasets, post_params, logging
 ):
@@ -1176,9 +1092,6 @@ def postModellingPlots(
                 data_type="test",
                 logging=logging,
             )
-
-            # TODO fix this
-            # scorePartialCorrelation(given_name, clf, post_datasets)
 
         # If multiclass classification
         elif len(clf["final"].classes_) > 2:
