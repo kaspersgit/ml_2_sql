@@ -5,7 +5,7 @@ import sys
 # Select data
 # List files in input/data/ directory
 data_dir = "input/data/"
-files = os.listdir(data_dir)
+files = []
 for f in os.listdir(data_dir):
     if f.endswith(".csv"):
         files.append(f)
