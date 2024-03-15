@@ -30,6 +30,13 @@ This project tries to make the process simple enough for anyone to train a model
 An automated machine learning tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from interpretML) to train models which are explainable and interpretable, so called 'glassbox' models. SQL infrastructure is the only requirement to put a model into production.
 This tool can be used by anybody, but is aimed for people who want to easily train a model, understand what the impact of the features is and deploy it in a SQL system. 
 
+## Note
+- Limited to 3 models to choose from: 
+  - [Explainable Boostin Machine](https://interpret.ml/docs/ebm.html) 
+  - [Linear/Logistic regression](https://interpret.ml/docs/lr.html)
+  - [Decision tree](https://interpret.ml/docs/dt.html)
+- Only accepts CSV files
+
 </br>
 
 # Getting started
@@ -90,6 +97,8 @@ The csv file containing the data has to fulfill some basic assumptions:
 - Target column should have more than 1 unique value
 - For binary classification (target with 2 unique values) these values should be 0 and 1
 - File name should be .csv and not consist of any spaces
+
+Missing values are allowed
 
 ## Configuration json
 This file will inform the script which column is the target, which are the features and several other parameters for pre and post training.
