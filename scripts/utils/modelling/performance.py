@@ -250,6 +250,7 @@ def plotConfusionMatrix(
     else:
         plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging)
 
+
 def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type, logging):
     """
     Plots the ROC or Precision-Recall curve for a binary classification model, and saves the plot image.

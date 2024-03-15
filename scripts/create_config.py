@@ -6,15 +6,17 @@ from utils.helper_functions.parsing_arguments import GetArgs
 
 def get_input(options, message):
     print(f"\n{message}")
-    choice = None
-    while choice is None:
+    while True:
         for i, option in enumerate(options):
             print(f"{i + 1}. {option}")
         response = input("Enter the number of your choice: ")
         try:
             choice = options[int(response) - 1]
-        except (ValueError, IndexError):
-            print("Invalid option, try again.")
+            break
+        except IndexError:
+            print("Invalid index. Please try again.")
+        except ValueError:
+            print("Invalid input. Please enter an integer.")
     return choice
 
 
@@ -34,16 +36,25 @@ def create_config(args):
     print("Which column would you like to use as the target?")
     for i, header in features_dict.items():
         print(f"{i}. {header}")
-    target = int(input("Enter the index of the target column: "))
+
+    while True:
+        try:
+            target = int(input("Enter the index of the target column: "))
+            if target in features_dict:
+                break
+            else:
+                print("Invalid index. Please try again.")
+        except ValueError:
+            print("Invalid input. Please enter an integer.")
 
     # Remove the target from the list of features
     target_column = features_dict.pop(target)
 
     config_creation = get_input(
-        ["Manual", "Automatic"],
+        ["Automatic", "Manual"],
         "Do you want to create config manually or automatically?",
     )
-    print(config_creation)
+    print(f"{config_creation}\n")
 
     if config_creation == "Automatic":
         ## Call other script (mainly to not have to execute this script with an active venv)
@@ -159,9 +170,9 @@ def create_config(args):
                         "Enter the value for each model parameter, separated by comma: "
                     ).split(",")
                     for i in range(len(model_params_keys)):
-                        model_params[
-                            model_params_keys[i].strip()
-                        ] = model_params_values[i].strip()
+                        model_params[model_params_keys[i].strip()] = (
+                            model_params_values[i].strip()
+                        )
                     input_params[key] = model_params
                 else:
                     print("No model parameters were set.\n")
