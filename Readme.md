@@ -11,8 +11,9 @@
 1. [What is it?](#what-is-it)
 2. [Getting Started](#getting-started)
 3. [Input](#input)
-4. [Remarks](#remarks)
-5. [Troubleshooting](#troubleshooting)
+4. [Output](#output)
+5. [Remarks](#remarks)
+6. [Troubleshooting](#troubleshooting)
 
 <br>
 
@@ -26,19 +27,27 @@ This project tries to make the process simple enough for anyone to train a model
 - Explainable Boosting Machine on par with other boosted methods while fully explainable
 
 ## Background
-An automated machine learning tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from interpretML) to train models which are explainable and transparent in how they come to their prediction. SQL infrastructure is the only requirement to put a model into production.
-This tool can be used by anybody, but is aimed for people who want to easily train a model and want to use it in their SQL system. 
+An automated machine learning tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from interpretML) to train models which are explainable and interpretable, so called 'glassbox' models. SQL infrastructure is the only requirement to put a model into production.
+This tool can be used by anybody, but is aimed for people who want to easily train a model, understand what the impact of the features is and deploy it in a SQL system. 
+
+## Note
+- Limited to 3 models to choose from: 
+  - [Explainable Boostin Machine](https://interpret.ml/docs/ebm.html) 
+  - [Linear/Logistic regression](https://interpret.ml/docs/lr.html)
+  - [Decision tree](https://interpret.ml/docs/dt.html)
+- Only accepts CSV files
 
 </br>
 
 # Getting started
 ## Pre requisites
-1. Clone Github repo to your local machine and cd into folder
+1. Make sure you have python >= 3.8 installed
+2. Clone Github repo to your local machine and cd into folder
    ```
-   git clone git@github.com:kaspersgit/ml_2_sql.git`
+   git clone git@github.com:kaspersgit/ml_2_sql.git
    cd ml_2_sql
    ```
-2. Create virtual environment and install packages, run:
+3. Create virtual environment and install packages, run:
    
     Windows:
    ```
@@ -51,8 +60,8 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
    python3 -m venv .ml2sql
    .ml2sql/bin/python -m pip install -r docs/requirements.txt
    ```
-3. Wait until all packages are installed (could take a few minutes)
-4. You are ready to go (the virtual env does not need to be activated to use this tool)
+4. Wait until all packages are installed (could take a few minutes)
+5. You are ready to go (the virtual env does not need to be activated to use this tool)
 
 ## Try it out demo
 1. In the terminal in the root of this folder run: 
@@ -89,6 +98,8 @@ The csv file containing the data has to fulfill some basic assumptions:
 - For binary classification (target with 2 unique values) these values should be 0 and 1
 - File name should be .csv and not consist of any spaces
 
+Missing values are allowed
+
 ## Configuration json
 This file will inform the script which column is the target, which are the features and several other parameters for pre and post training.
 You can copy and edit a config file from the already existing example in `input/configuration/` or select `Create a new config` file in the second step 
@@ -102,7 +113,6 @@ Dictionary of parameters that can be used with model of choice (optional). Check
 - EBM ([model documentation](https://interpret.ml/docs/ebm.html))
 - Linear/Logistic regression ([model documentation](https://interpret.ml/docs/lr.html))
 - Decision tree ([model documentation](https://interpret.ml/docs/dt.html))
-- Decision rule ([model documentation](https://interpret.ml/docs/dr.html))
 
 `sql_split` options:
 - `false`, outputs the SQL model as one SELECT statement, using column aliases within the same select statement
@@ -132,9 +142,83 @@ Name of target column (required)
 
 </br>
 
+# Output
+The output consists of 4 parts:
+- Correlation matrix of the input features
+- Feature importance graphs (model specific)
+- Model performance graphs
+- The model itself in pickled and SQL form
+
+## Correlation matrices 
+Can be found in the created model's folder under `/feature_info`
+
+### Pearson Correlation Matrix (Numerical Features)
+- A Pearson correlation matrix for numerical features in the input data.
+- Visualized as a clustermap and saved as `numeric_clustermap.png` or `numeric_clustermap.html`.
+
+### Cramer's V Correlation Matrix (Categorical Features)
+- A Cramer's V correlation matrix for categorical features (object, category, boolean) in the input data.
+- Visualized as a clustermap and saved as `categorical_clustermap.png` or `categorical_clustermap.html`.
+
+
+## Feature importance
+Can be found in the created model's folder under `/feature_importance`
+
+### For EBM and logistic/linear regression
+- an overview of the top important features
+- seperate feature importance graph per feature
+
+### For Decision tree
+- graph with gini index
+
+## Model performance
+Can be found in the created model's folder under `/performance`
+
+### For Classification Models:
+
+1. Confusion Matrix
+- A confusion matrix is plotted and saved in both static (PNG) and interactive (HTML) formats for binary classification problems.
+- For multiclass classification, separate confusion matrices are plotted for each class.
+2. ROC Curve and Precision-Recall Curve
+- The tool plots the Receiver Operating Characteristic (ROC) curve and Precision-Recall curve for binary classification problems.
+- For multiclass classification, these curves are plotted for each class versus the rest.
+3. Calibration Plot
+- A calibration plot (reliability curve) is generated to assess the calibration of the predicted probabilities.
+4. Probability Distribution Plot
+- A probability distribution plot is created to visualize the distribution of predicted probabilities for the positive and negative classes (binary classification) or for each class (multiclass classification).
+
+### For Regression Models:
+
+1. Scatter Plot of Predicted vs. True Values
+- A scatter plot is generated to compare the predicted values against the true values.
+2. Quantile Error Plot
+- A box plot is created to visualize the prediction error across different quantiles of the true values.
+3. Regression Metrics Table
+- A table summarizing various regression performance metrics, such as:
+  - Mean Absolute Error (MAE)
+  - Mean Squared Error (MSE)
+  - Root Mean Squared Error (RMSE)
+  - R-squared
+  - Adjusted R-squared
+  - Mean Absolute Percentage Error (MAPE)
+  - Explained Variance Score (EVS)
+  - Max Error
+  - Median Absolute Error (MedAE)
+  - Mean Squared Log Error (MSLE)
+  - Root Mean Squared Log Error (RMSLE)
+
+## The model
+Can be found in the created model's folder under `/model`
+
+- Pickled version of the model is saved as `.sav` file
+- SQL version of the model is saved as `.sql` file
+
+<br>
+
 # Remarks
 
 ## Notes
+- Limited to 3 models (EBM, lin./log. regression and decision tree)
 - Data imbalance treatments (e.g. oversampling + model calibration) not fully implemented
 - Decision rule not implemented yet
 - Only accepts CSV files

@@ -33,14 +33,16 @@ for i, file in enumerate(files, 1):
     print(f"{i}. {file}")
 
 # Ask for CSVPATH
-csv_path = None
-while csv_path is None:
-    csv_file_index = input("\nSelect CSV file for training the model: ")
+while True:
     try:
+        csv_file_index = input("\nSelect CSV file for training the model: ")
         csv_file_index = int(csv_file_index) - 1
         csv_path = os.path.join(data_dir, files[csv_file_index])
-    except (ValueError, IndexError):
-        print("Invalid option, try again.")
+        break
+    except IndexError:
+        print("Invalid index. Please try again.")
+    except ValueError:
+        print("Invalid input. Please enter an integer.")
 
 print(f"CSV file {csv_path} will be used for modelling")
 
@@ -58,8 +60,7 @@ def create_new_config(csv_path):
 
 
 # Ask for JSONPATH
-json_path = None
-while json_path is None:
+while True:
     # List files in input/configuration/ directory
     files = []
     configuration_dir = "input/configuration/"
@@ -93,8 +94,11 @@ while json_path is None:
             create_new_config(csv_path)
         else:
             json_path = os.path.join(configuration_dir, files[json_file_index])
-    except (ValueError, IndexError):
-        print("Invalid option, try again.")
+            break
+    except IndexError:
+        print("Invalid index. Please try again.")
+    except ValueError:
+        print("Invalid input. Please enter an integer.")
 
 print(f"Configuration file {json_path} will be used for modelling")
 

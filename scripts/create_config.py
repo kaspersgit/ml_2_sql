@@ -7,15 +7,17 @@ from utils.helper_functions.parsing_arguments import GetArgs
 
 def get_input(options, message):
     print(f"\n{message}")
-    choice = None
-    while choice is None:
+    while True:
         for i, option in enumerate(options):
             print(f"{i + 1}. {option}")
         response = input("Enter the number of your choice: ")
         try:
             choice = options[int(response) - 1]
-        except (ValueError, IndexError):
-            print("Invalid option, try again.")
+            break
+        except IndexError:
+            print("Invalid index. Please try again.")
+        except ValueError:
+            print("Invalid input. Please enter an integer.")
     return choice
 
 
@@ -39,7 +41,7 @@ def create_config(args):
         data = pd.read_csv(
             args.data_path,
             keep_default_na=False,
-            na_values=["", "N/A", "NULL"],
+            na_values=["", "N/A", "NULL", "None", "NONE"],
             header=0,
             skiprows=lambda i: i > 0 and random.random() > p,
         )
@@ -51,19 +53,28 @@ def create_config(args):
         features_dict[i] = header
 
     # Ask the user to choose a target
-    print("Which column would you like to use as the target?")
+    print("\nWhich column would you like to use as the target?")
     for i, header in features_dict.items():
         print(f"{i}. {header}")
-    target = int(input("Enter the index of the target column: "))
+
+    while True:
+        try:
+            target_ind = int(input("\nEnter the index of the target column: "))
+            if target_ind in features_dict:
+                break
+            else:
+                print("Invalid index. Please try again.")
+        except ValueError:
+            print("Invalid input. Please enter an integer.")
 
     # Remove the target from the list of features
-    target_column = features_dict.pop(target)
+    target_column = features_dict.pop(target_ind)
 
     config_creation = get_input(
         ["Automatic", "Manual"],
         "Do you want to create config manually or automatically?",
     )
-    print(config_creation)
+    print(f"{config_creation}\n")
 
     if config_creation == "Automatic":
         ## Call other script (mainly to not have to execute this script with an active venv)

@@ -251,43 +251,6 @@ def plotConfusionMatrix(
         plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging)
 
 
-def classificationReportSave(given_name, y_true, y_pred, data_type, logging):
-    """
-    Save the classification report as a CSV file.
-
-    Parameters
-    ----------
-    given_name : str
-        The name of the project or experiment.
-    y_true : array-like of shape (n_samples,)
-        Ground truth (correct) target values.
-    y_pred : array-like of shape (n_samples,)
-        Estimated targets as returned by a classifier.
-    data_type : str
-        The type of data being evaluated (e.g. 'train', 'test').
-    logging : logging.Logger
-        An instance of the logging.Logger class to record the event.
-
-    Returns
-    -------
-    None
-        This function does not return any value but saves the classification report as a CSV file.
-
-    """
-
-    from sklearn.metrics import classification_report
-
-    report = classification_report(y_true, y_pred, output_dict=True)
-    report_df = pd.DataFrame(report).transpose()
-    report_df.to_csv(
-        "{given_name}/performance/{data_type}_classification_report.csv".format(
-            given_name=given_name, data_type=data_type
-        )
-    )
-
-    logging.info("Classification report saved")
-
-
 def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type, logging):
     """
     Plots the ROC or Precision-Recall curve for a binary classification model, and saves the plot image.

@@ -40,7 +40,7 @@ def main(args):
 
     # Load in data
     data = pd.read_csv(
-        args.data_path, keep_default_na=False, na_values=["", "N/A", "NULL"]
+        args.data_path, keep_default_na=False, na_values=["", "N/A", "NULL", "None", "NONE"]
     )
 
     # Get configuration file
@@ -117,7 +117,6 @@ if __name__ == "__main__":
 
     # Check if this script is run from terminal
     if set_env == "prod":
-        print("from terminal")
         # (Prod) script is being run through the terminal
         argvals = None
     else:
