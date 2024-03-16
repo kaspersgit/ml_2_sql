@@ -24,7 +24,7 @@ def create_config(args):
     # Load in data
     csv_path = args.data_path
     data = pd.read_csv(
-        args.data_path, keep_default_na=False, nrows=500, na_values=["", "N/A", "NULL"]
+        args.data_path, keep_default_na=False, nrows=500, na_values=["", "N/A", "NULL", "None", "NONE"]
     )
 
     # Create a dictionary to store the features and their indices
@@ -33,14 +33,14 @@ def create_config(args):
         features_dict[i] = header
 
     # Ask the user to choose a target
-    print("Which column would you like to use as the target?")
+    print("\nWhich column would you like to use as the target?")
     for i, header in features_dict.items():
         print(f"{i}. {header}")
 
     while True:
         try:
-            target = int(input("Enter the index of the target column: "))
-            if target in features_dict:
+            target_ind = int(input("\nEnter the index of the target column: "))
+            if target_ind in features_dict:
                 break
             else:
                 print("Invalid index. Please try again.")
@@ -48,7 +48,7 @@ def create_config(args):
             print("Invalid input. Please enter an integer.")
 
     # Remove the target from the list of features
-    target_column = features_dict.pop(target)
+    target_column = features_dict.pop(target_ind)
 
     config_creation = get_input(
         ["Automatic", "Manual"],

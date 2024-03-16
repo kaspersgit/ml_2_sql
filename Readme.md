@@ -44,7 +44,7 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
 1. Make sure you have python >= 3.8 install 
 2. Clone Github repo to your local machine and cd into folder
    ```
-   git clone git@github.com:kaspersgit/ml_2_sql.git`
+   git clone git@github.com:kaspersgit/ml_2_sql.git
    cd ml_2_sql
    ```
 3. Create virtual environment and install packages, run:

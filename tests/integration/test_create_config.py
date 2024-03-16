@@ -52,7 +52,7 @@ def test_create_config(mock_args, monkeypatch, tmp_path):
     # Load and test the generated config
     with open(config_path) as f:
         config = json.load(f)
-    assert config["features"] == ["B", "C"]
+    assert set(config["features"]) == set(test_data.columns) - {"A"}
     assert config["target"] == "A"
 
     # Clean up
@@ -119,7 +119,7 @@ def test_create_config_with_model_params(mock_args, monkeypatch, tmp_path):
     # Load and test the generated config
     with open(config_path) as f:
         config = json.load(f)
-    assert config["features"] == ["B", "C"]
+    assert set(config["features"]) == set(test_data.columns) - {"A"}
     assert config["target"] == "A"
     assert config["model_params"] == {"max_depth": "5", "n_estimators": "100"}
 

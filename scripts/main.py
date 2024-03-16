@@ -40,7 +40,7 @@ def main(args):
 
     # Load in data
     data = pd.read_csv(
-        args.data_path, keep_default_na=False, na_values=["", "N/A", "NULL"]
+        args.data_path, keep_default_na=False, na_values=["", "N/A", "NULL", "None", "NONE"]
     )
 
     # Get configuration file

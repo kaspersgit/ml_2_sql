@@ -172,6 +172,7 @@ def select_ml_cols(df):
             features_set.discard(col)
             print(f'"{col}" is int column with high cardinality')
 
+        # TODO remove this and rely on the data type inferring
         elif any([cdc in col.lower() for cdc in check_date_cols]):
             for cdc in check_date_cols:
                 if cdc in col.lower():
