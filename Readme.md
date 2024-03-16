@@ -41,7 +41,7 @@ This tool can be used by anybody, but is aimed for people who want to easily tra
 
 # Getting started
 ## Pre requisites
-1. Make sure you have python >= 3.8 install 
+1. Make sure you have python >= 3.8 installed
 2. Clone Github repo to your local machine and cd into folder
    ```
    git clone git@github.com:kaspersgit/ml_2_sql.git
@@ -182,7 +182,7 @@ Can be found in the created model's folder under `/performance`
 2. ROC Curve and Precision-Recall Curve
 - The tool plots the Receiver Operating Characteristic (ROC) curve and Precision-Recall curve for binary classification problems.
 - For multiclass classification, these curves are plotted for each class versus the rest.
-3. alibration Plot
+3. Calibration Plot
 - A calibration plot (reliability curve) is generated to assess the calibration of the predicted probabilities.
 4. Probability Distribution Plot
 - A probability distribution plot is created to visualize the distribution of predicted probabilities for the positive and negative classes (binary classification) or for each class (multiclass classification).

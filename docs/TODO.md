@@ -5,6 +5,7 @@ Checks and config
   - Add check such that variables have (enough different values)
   - Add random seed to config file
   - Add pass through columns
+  - Improve auto config maker
 
 - Performance monitoring
   - Add performance summary for easy and quick comparison (including label count, auc pr & roc, best f1-score, etc)
@@ -19,5 +20,7 @@ Checks and config
   - Improve logging (exclude unwanted info and include usable info) 
   - Add dependancy package versions to logging
   - Add SQL translation for decision rule
-  - Creat a package out of ml2sql
+  - Create a package out of ml2sql
   - Improve feature importance logistic/linear regression for multiclass classification
+  - Create a script which cleans a dataset
+  - 
