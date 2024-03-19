@@ -14,13 +14,13 @@ Checks and config
 
 - Other 
   - Allow for other data file types (apart from csv)
-  - Switch decision tree from sklearn to interpret for coherence
+  - Switch decision tree from sklearn to interpret for coherence (wait on [issue 552](https://github.com/interpretml/interpret/issues/522))
   - Add calibration (platt scaling/isotonic regression)
   - Add changelog and versioning
   - Improve logging (exclude unwanted info and include usable info) 
   - Add dependancy package versions to logging
-  - Add SQL translation for decision rule
   - Create a package out of ml2sql
   - Improve feature importance logistic/linear regression for multiclass classification
   - Create a script which cleans a dataset
-  - 
+  - Next to SQL, have a model be outputted in python using only if else statements
+  - Have some local explainations of actual predictions
