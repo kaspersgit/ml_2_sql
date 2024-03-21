@@ -69,10 +69,10 @@ def test_main_script(setup_file_structure):
     assert result.returncode == 0
 
     # Check for more logged strings in output
-    assert 'Script input arguments:' in result.stderr
-    assert 'Configuration file content:' in result.stderr
-    assert 'Target column has 2 unique values' in result.stderr
-    assert 'This problem will be treated as a classification problem' in result.stderr
+    assert "Script input arguments:" in result.stderr
+    assert "Configuration file content:" in result.stderr
+    assert "Target column has 2 unique values" in result.stderr
+    assert "This problem will be treated as a classification problem" in result.stderr
 
 
 def test_modeltester_script(setup_file_structure):

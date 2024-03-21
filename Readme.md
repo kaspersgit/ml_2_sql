@@ -6,8 +6,11 @@
 ![Python Version](https://img.shields.io/pypi/pyversions/interpret.svg?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/kaspersgit/ml_2_sql?style=flat-square)
 
-
 # Table of Contents
+
+<img src="docs/media/ml2sql_logo.png" align="right"
+     alt="ML2SQL">
+
 1. [What is it?](#what-is-it)
 2. [Getting Started](#getting-started)
 3. [Input](#input)
@@ -103,7 +106,8 @@ The csv file containing the data has to fulfill some basic assumptions:
 - For binary classification (target with 2 unique values) these values should be 0 and 1
 - File name should be .csv and not consist of any spaces
 
-Missing values are allowed
+EBM can handle categorical values (will be excluded when choosing decision tree or linear/logistic regression)
+Missing values are allowed for EBM
 
 ## Configuration json
 This file will inform the script which column is the target, which are the features and several other parameters for pre and post training.

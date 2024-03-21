@@ -15,8 +15,9 @@ def checkTargetHard(target, logging):
         # Check if the two unique values are 0 and 1
         unique_values = target_non_null.unique()
         if set(unique_values) != set([0, 1]):
-            raise ValueError(f"Target with 2 unique values ({unique_values}), these should be converted into 0 and 1")
-         
+            raise ValueError(
+                f"Target with 2 unique values ({unique_values}), these should be converted into 0 and 1"
+            )
 
 
 def checkFeatures(features, logging):

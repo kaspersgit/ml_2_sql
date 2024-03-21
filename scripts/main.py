@@ -2,7 +2,6 @@
 import logging
 import pandas as pd
 import json
-import sys
 
 # Main modelling function
 from utils.modelling.main_modeler import make_model
@@ -28,14 +27,16 @@ def main(args):
     # get given name from the first given argument
     given_name = args.name
 
-    # Set logger 
+    # Set logger
     setup_logger(given_name + "/logging.log")
 
     logging.info(f"Script input arguments: \n{args}")
 
     # Load in data
     data = pd.read_csv(
-        args.data_path, keep_default_na=False, na_values=["", "N/A", "NULL", "None", "NONE"]
+        args.data_path,
+        keep_default_na=False,
+        na_values=["", "N/A", "NULL", "None", "NONE"],
     )
 
     # Get configuration file
