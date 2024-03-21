@@ -61,13 +61,12 @@ def cleanAndCastColumns(
         logging.info(
             "Columns with NaN values: \n{nans}".format(nans=nan_cols.isna().sum())
         )
-    
+
     # Remove columns where more than 50% of rows are NaN/None/Null
     nan_cols = _data.columns[_data.isna().mean() > 0.5]
     if len(nan_cols) > 0:
         _data.drop(nan_cols, axis=1, inplace=True)
         print(f"Columns with more than 50% NaN values removed: {', '.join(nan_cols)}")
-
 
     # Adjust this to allow for categorical features
     for col in _data[feature_cols].select_dtypes(include=["object"]).columns:

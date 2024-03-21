@@ -6,8 +6,11 @@
 ![Python Version](https://img.shields.io/pypi/pyversions/interpret.svg?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/kaspersgit/ml_2_sql?style=flat-square)
 
-
 # Table of Contents
+
+<img src="docs/media/ml2sql_logo.png" align="right"
+     alt="ML2SQL">
+
 1. [What is it?](#what-is-it)
 2. [Getting Started](#getting-started)
 3. [Input](#input)
@@ -19,16 +22,21 @@
 
 # What is it?
 ## In short
-This project tries to make the process simple enough for anyone to train a model, check the performance and deploy that model in SQL.
+Have a csv file with data and a variable you want to predict, run the this model training tool, get insights from it and save an SQL version of it for further use.
 
 ## Philosophy:
-- Automated training, easy to use and clear performance metrics
-- Model written in SQL (avoid Data Science debt for a complex pipeline)
-- Explainable Boosting Machine on par with other boosted methods while fully explainable
+- For a quick analysis: 
+  - Automated training and model performance tested
+  - Feature correlations, feature importance and model performance metrics
+  - EBM gives more insights into feature importance then any other model
+- For model deployment in SQL:
+  - Output model in SQL code
+  - EBM, Decision Tree and linear/logistic regression
+- Explainable Boosting Machine (EBM) on par with other boosted methods while fully explainable
 
 ## Background
-An automated machine learning tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from interpretML) to train models which are explainable and interpretable, so called 'glassbox' models. SQL infrastructure is the only requirement to put a model into production.
-This tool can be used by anybody, but is aimed for people who want to easily train a model, understand what the impact of the features is and deploy it in a SQL system. 
+An automated machine learning tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from interpretML) to train models which are explainable and interpretable, so called 'glassbox' models. With the outputted model in SQL format, a place to schedule SQL queries is the only requirement to put a model into production.
+This tool can be used by anybody, but is aimed for people who want to do a quick analysis and/or deploy a model in an SQL system. 
 
 ## Note
 - Limited to 3 models to choose from: 
@@ -98,7 +106,8 @@ The csv file containing the data has to fulfill some basic assumptions:
 - For binary classification (target with 2 unique values) these values should be 0 and 1
 - File name should be .csv and not consist of any spaces
 
-Missing values are allowed
+EBM can handle categorical values (will be excluded when choosing decision tree or linear/logistic regression)
+Missing values are allowed for EBM
 
 ## Configuration json
 This file will inform the script which column is the target, which are the features and several other parameters for pre and post training.

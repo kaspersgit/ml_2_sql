@@ -13,6 +13,4 @@ def setup_logger(log_file_path):
     # disable certain matplotlib warnings
     # logging.getLogger('matplotlib.font_manager').disabled = True # ignore matplotlibs font warnings
 
-    logger = logging.getLogger("matplotlib").setLevel(logging.ERROR)
-
-    return logger
+    logging.getLogger("matplotlib").setLevel(logging.ERROR)

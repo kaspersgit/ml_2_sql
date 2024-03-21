@@ -2,7 +2,6 @@
 import logging
 import pandas as pd
 import json
-import sys
 
 # Main modelling function
 from utils.modelling.main_modeler import make_model
@@ -14,6 +13,7 @@ from utils.output_scripts import ebm_as_code  # noqa: F401
 from utils.output_scripts import l_regression_as_code  # noqa: F401
 
 from utils.helper_functions.checks import checkInputDataHard
+from utils.helper_functions.setup_logger import setup_logger
 
 from utils.helper_functions.config_handling import config_handling
 from utils.helper_functions.parsing_arguments import GetArgs
@@ -21,26 +21,22 @@ from utils.pre_processing.pre_process import pre_process_kfold
 
 
 def main(args):
+    # Set random seed
+    random_seed = 42
+
     # get given name from the first given argument
     given_name = args.name
 
-    # set logger
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        handlers=[
-            logging.FileHandler(given_name + "/logging.log"),
-            logging.StreamHandler(),
-        ],
-    )
-    logging.getLogger(
-        "matplotlib.font_manager"
-    ).disabled = True  # ignore matplotlibs font warnings
+    # Set logger
+    setup_logger(given_name + "/logging.log")
+
     logging.info(f"Script input arguments: \n{args}")
 
     # Load in data
     data = pd.read_csv(
-        args.data_path, keep_default_na=False, na_values=["", "N/A", "NULL", "None", "NONE"]
+        args.data_path,
+        keep_default_na=False,
+        na_values=["", "N/A", "NULL", "None", "NONE"],
     )
 
     # Get configuration file
@@ -107,9 +103,6 @@ def main(args):
         clf, given_name, post_params, logging
     )
 
-    # Exit with code 0 for success
-    sys.exit(0)
-
 
 # Run function
 if __name__ == "__main__":
@@ -134,9 +127,6 @@ if __name__ == "__main__":
         # settings
         pd.set_option("display.max_rows", 500)
         pd.set_option("display.max_columns", 10)
-
-    # Set random seed
-    random_seed = 42
 
     # Get arguments from the CLI
     args = GetArgs("main", argvals)

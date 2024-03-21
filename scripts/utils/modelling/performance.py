@@ -961,7 +961,7 @@ def postModellingPlots(
             y_all_prob,
             y_all_pred,
             post_params["file_type"],
-            data_type="final_train",
+            data_type="train",
             logging=logging,
         )
         plotConfusionMatrix(
@@ -988,7 +988,7 @@ def postModellingPlots(
                 y_all,
                 y_all_prob,
                 curve_type="roc",
-                data_type="final_train",
+                data_type="train",
                 logging=logging,
             )
             plotClassificationCurve(
@@ -1005,7 +1005,7 @@ def postModellingPlots(
                 y_all,
                 y_all_prob,
                 curve_type="pr",
-                data_type="final_train_class1",
+                data_type="train_class1",
                 logging=logging,
             )
             plotClassificationCurve(
@@ -1013,7 +1013,7 @@ def postModellingPlots(
                 y_all_neg,
                 y_all_prob_neg,
                 curve_type="pr",
-                data_type="final_train_class0",
+                data_type="train_class0",
                 logging=logging,
             )
 
@@ -1022,7 +1022,7 @@ def postModellingPlots(
                 y_test_list,
                 y_test_prob_list,
                 curve_type="pr",
-                data_type="test_data_class1",
+                data_type="test_class1",
                 logging=logging,
             )
             plotClassificationCurve(
@@ -1030,12 +1030,12 @@ def postModellingPlots(
                 y_test_list_neg,
                 y_test_prob_list_neg,
                 curve_type="pr",
-                data_type="test_data_class0",
+                data_type="test_class0",
                 logging=logging,
             )
 
             plotCalibrationCurve(
-                given_name, y_all, y_all_prob, data_type="final_train", logging=logging
+                given_name, y_all, y_all_prob, data_type="train", logging=logging
             )
             plotCalibrationCurve(
                 given_name,
@@ -1046,7 +1046,7 @@ def postModellingPlots(
             )
 
             plotProbabilityDistribution(
-                given_name, y_all, y_all_prob, data_type="final_train", logging=logging
+                given_name, y_all, y_all_prob, data_type="train", logging=logging
             )
             plotProbabilityDistribution(
                 given_name,
@@ -1086,7 +1086,7 @@ def postModellingPlots(
                 # y_all_prob_ova = [x[class_index] for x in y_all_prob]
 
                 # Threshold independant
-                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='roc', data_type=f'final_train_class_{c}', logging=logging)
+                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='roc', data_type=f'train_class_{c}', logging=logging)
                 plotClassificationCurve(
                     given_name,
                     y_test_list_ova,
@@ -1096,7 +1096,7 @@ def postModellingPlots(
                     logging=logging,
                 )
 
-                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='pr', data_type='final_train_class1', logging=logging)
+                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='pr', data_type='train_class1', logging=logging)
                 plotClassificationCurve(
                     given_name,
                     y_test_list_ova,
@@ -1115,7 +1115,7 @@ def postModellingPlots(
                     logging=logging,
                 )
 
-                # plotProbabilityDistribution(given_name, y_all_ova, y_all_prob_ova, data_type='final_train', logging=logging)
+                # plotProbabilityDistribution(given_name, y_all_ova, y_all_prob_ova, data_type='train', logging=logging)
                 plotProbabilityDistribution(
                     given_name,
                     y_test_ova,
@@ -1130,14 +1130,14 @@ def postModellingPlots(
             given_name, y_test_concat, y_test_pred, data_type="test", logging=logging
         )
         plotYhatVsYSave(
-            given_name, y_all, y_all_pred, data_type="final_train", logging=logging
+            given_name, y_all, y_all_pred, data_type="train", logging=logging
         )
 
         plotQuantileError(
             given_name, y_test_concat, y_test_pred, data_type="test", logging=logging
         )
         plotQuantileError(
-            given_name, y_all, y_all_pred, data_type="final_train", logging=logging
+            given_name, y_all, y_all_pred, data_type="train", logging=logging
         )
 
         regressionMetricsTable(
@@ -1153,7 +1153,7 @@ def postModellingPlots(
             y_all,
             y_all_pred,
             X_all,
-            data_type="final_train",
+            data_type="train",
             logging=logging,
         )
 

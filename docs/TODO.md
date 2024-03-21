@@ -12,15 +12,20 @@ Checks and config
   - Add feature over/under fitting plot (https://towardsdatascience.com/which-of-your-features-are-overfitting-c46d0762e769)
   - Make distribution plot grouped instead of overlaid or stacked (maybe switch to plotly histogram)
 
+- Documentation
+  - Source of insipiration (https://github.com/matiassingers/awesome-readme?tab=readme-ov-file)
+  - Use show/hide in readme (as in https://github.com/ai/size-limit#readme)
+  - Add hyperlinks to metrics and other technical topics in readme
+
 - Other 
   - Allow for other data file types (apart from csv)
-  - Switch decision tree from sklearn to interpret for coherence
+  - Switch decision tree from sklearn to interpret for coherence (wait on [issue 552](https://github.com/interpretml/interpret/issues/522))
   - Add calibration (platt scaling/isotonic regression)
   - Add changelog and versioning
   - Improve logging (exclude unwanted info and include usable info) 
   - Add dependancy package versions to logging
-  - Add SQL translation for decision rule
   - Create a package out of ml2sql
   - Improve feature importance logistic/linear regression for multiclass classification
-  - Create a script which cleans a dataset
-  - 
+  - Create a script which cleans a dataset so that it can be used by the tool
+  - Next to SQL, have a model be outputted in python using only if else statements
+  - Have some local explainations of actual predictions (as part of modeltester script)

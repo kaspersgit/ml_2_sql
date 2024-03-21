@@ -1,11 +1,17 @@
 # files and data
 input/data/*.csv
-!input/data/example_*.csv
-
 input/configuration/*.json
-!input/configuration/example_*.json
-
 trained_models/*
+
+# Keep example files
+!input/data/example_binary_titanic.csv
+!input/data/example_multiclass_faults.csv
+!input/data/example_regression_used_cars.csv
+
+!input/configuration/example_binary_titanic.json
+!input/configuration/example_multiclass_faults.json
+!input/configuration/example_regression_used_cars.json
+
 !trained_models/example_titanic/
 
 # Editors

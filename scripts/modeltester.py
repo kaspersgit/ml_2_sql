@@ -1,7 +1,6 @@
 import joblib
 import pandas as pd
 import logging
-import sys
 import numpy as np
 
 from utils.helper_functions.parsing_arguments import GetArgs
@@ -96,23 +95,6 @@ def apply_model(args):
                 logging=logging,
             )
 
-            plotClassificationCurve(
-                destination,
-                y_true,
-                y_prob,
-                curve_type="pr",
-                data_type="test_data_class1",
-                logging=logging,
-            )
-            plotClassificationCurve(
-                destination,
-                y_neg,
-                y_prob_neg,
-                curve_type="pr",
-                data_type="test_data_class0",
-                logging=logging,
-            )
-
             plotCalibrationCurve(
                 destination, y_true, y_prob, data_type="test", logging=logging
             )
@@ -182,33 +164,10 @@ def apply_model(args):
             destination, y_true, y_pred, X, data_type="test", logging=logging
         )
 
-    # Exit with code 0 for success
-    sys.exit(0)
-
 
 if __name__ == "__main__":
-    set_env = "prod"  # either prod or dev
-
-    # Check if this script is run from terminal
-    if set_env == "prod":
-        # (Prod) script is being run through the terminal
-        argvals = None
-    else:
-        # (Dev) script is not being run through the terminal
-
-        # Command line arguments used for testing
-        argvals = (
-            "--model_path ../trained_models/20230622_datathon_ebm/model/ebm_regression.sav "
-            "--data_path ../input/data/20230525_cq_datathon.csv "
-            "--destination_path ../trained_models/20230622_datathon_ebm/tested_datasets/20230525_cq_datathon.csv".split()
-        )  # example of passing test params to parser
-
-        # settings
-        pd.set_option("display.max_rows", 500)
-        pd.set_option("display.max_columns", 10)
-
     # Get arguments from the CLI
-    args = GetArgs("test_model", argvals)
+    args = GetArgs("test_model", None)
 
     # Run main with given arguments
     apply_model(args)
