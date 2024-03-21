@@ -96,23 +96,6 @@ def apply_model(args):
                 logging=logging,
             )
 
-            plotClassificationCurve(
-                destination,
-                y_true,
-                y_prob,
-                curve_type="pr",
-                data_type="test_data_class1",
-                logging=logging,
-            )
-            plotClassificationCurve(
-                destination,
-                y_neg,
-                y_prob_neg,
-                curve_type="pr",
-                data_type="test_data_class0",
-                logging=logging,
-            )
-
             plotCalibrationCurve(
                 destination, y_true, y_prob, data_type="test", logging=logging
             )

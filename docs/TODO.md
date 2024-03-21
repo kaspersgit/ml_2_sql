@@ -11,6 +11,7 @@ Checks and config
   - Add performance summary for easy and quick comparison (including label count, auc pr & roc, best f1-score, etc)
   - Add feature over/under fitting plot (https://towardsdatascience.com/which-of-your-features-are-overfitting-c46d0762e769)
   - Make distribution plot grouped instead of overlaid or stacked (maybe switch to plotly histogram)
+  - Have modeltester call the same performance functions as the main script
 
 - Other 
   - Allow for other data file types (apart from csv)
@@ -21,6 +22,8 @@ Checks and config
   - Add dependancy package versions to logging
   - Create a package out of ml2sql
   - Improve feature importance logistic/linear regression for multiclass classification
-  - Create a script which cleans a dataset
+  - Create a script which cleans a dataset so that it can be used by the tool
   - Next to SQL, have a model be outputted in python using only if else statements
-  - Have some local explainations of actual predictions
+  - Have some local explainations of actual predictions (as part of modeltester script)
+  - Use show/hide in readme (as in https://github.com/ai/size-limit#readme)
+  - Add hyperlinks to metrics and other technical topics in readme
