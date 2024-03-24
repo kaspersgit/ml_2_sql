@@ -2,9 +2,12 @@ from interpret.glassbox import (
     ExplainableBoostingClassifier,
     ExplainableBoostingRegressor,
 )
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-def trainModel(X_train, y_train, params, model_type, logging):
+def trainModel(X_train, y_train, params, model_type):
     """
     Trains an Explainable Boosting Machine (EBM) model on the given training data.
 
@@ -18,8 +21,6 @@ def trainModel(X_train, y_train, params, model_type, logging):
         Parameters for the EBM model.
     model_type : str
         Type of model to train, either 'regression' or 'classification'.
-    logging : logging.Logger
-        Logger instance for logging information.
 
     Returns
     -------
@@ -52,16 +53,16 @@ def trainModel(X_train, y_train, params, model_type, logging):
     elif model_type == "classification":
         clf = ExplainableBoostingClassifier(**params)
     else:
-        logging.warning("Only regression or classification available")
+        logger.warning("Only regression or classification available")
 
     clf.fit(X_train, y_train)
-    logging.info(f"Model params:\n {clf.get_params}")
-    logging.info("Trained explainable boosting machine")
+    logger.info(f"Model params:\n {clf.get_params}")
+    logger.info("Trained explainable boosting machine")
 
     return clf
 
 
-def featureExplanationSave(clf, given_name, file_type, logging):
+def featureExplanationSave(clf, given_name, file_type):
     """
     Saves feature-specific and overall feature importance graphs for a given Explainable Boosting Machine (EBM) model.
 
@@ -73,8 +74,6 @@ def featureExplanationSave(clf, given_name, file_type, logging):
         Name for the output files.
     file_type : str
         Type of file to save the output graphs, either 'png' or 'html'.
-    logging : logging.Logger
-        Logger instance for logging information.
 
     Returns
     -------
@@ -140,10 +139,10 @@ def featureExplanationSave(clf, given_name, file_type, logging):
             # or as html file
             plotly_fig.write_html(f"{given_name}/explain_{feature_name}.html")
 
-    logging.info(
+    logger.info(
         "Explanation plots of {n_features} features saved".format(n_features=index + 1)
     )
 
 
-def postModelPlots(clf, given_name, file_type, logging):
-    featureExplanationSave(clf, given_name, file_type, logging)
+def postModelPlots(clf, given_name, file_type):
+    featureExplanationSave(clf, given_name, file_type)

@@ -18,15 +18,18 @@ from sklearn.metrics import (
     mean_squared_log_error,
 )
 
-
 # The actual algorithms (grey as we refer to them dynamically)
 from utils.modelling.models import ebm  # noqa: F401
 from utils.modelling.models import decision_rule  # noqa: F401
 from utils.modelling.models import decision_tree  # noqa: F401
 from utils.modelling.models import l_regression  # noqa: F401
 
+import logging
 
-def plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging):
+logger = logging.getLogger(__name__)
+
+
+def plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type):
     """
     Plot and save a confusion matrix for given predictions.
 
@@ -40,8 +43,6 @@ def plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging):
         Predicted labels of the samples.
     data_type : str
         The type of the data (train, val, test, etc.)
-    logging : logging object
-        The object to log the status and messages.
 
     Returns
     -------
@@ -66,11 +67,11 @@ def plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging):
         bbox_inches="tight",
     )
 
-    logging.info(f"Created and saved confusion matrix for {data_type} data")
+    logger.info(f"Created and saved confusion matrix for {data_type} data")
 
 
 # Mainly meant for binary classification
-def plotConfusionMatrixSlider(given_name, y_true, y_prob, data_type, logging):
+def plotConfusionMatrixSlider(given_name, y_true, y_prob, data_type):
     conf_matrices = []
     steps = []
 
@@ -235,23 +236,21 @@ def plotConfusionMatrixSlider(given_name, y_true, y_prob, data_type, logging):
         f"{given_name}/performance/{data_type}_confusion_matrix.html", auto_play=False
     )
 
-    logging.info(f"Created and saved confusion matrix for {data_type} data")
+    logger.info(f"Created and saved confusion matrix for {data_type} data")
 
 
-def plotConfusionMatrix(
-    given_name, y_true, y_prob, y_pred, file_type, data_type, logging
-):
+def plotConfusionMatrix(given_name, y_true, y_prob, y_pred, file_type, data_type):
     # If html is wanted and binary classification
     # Make confusion matrix plot with slider
     if (file_type == "html") & (len(set(y_true)) == 2):
-        plotConfusionMatrixSlider(given_name, y_true, y_prob, data_type, logging)
+        plotConfusionMatrixSlider(given_name, y_true, y_prob, data_type)
 
     # Otherwise make 'simple' static confusion matrix plot
     else:
-        plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type, logging)
+        plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type)
 
 
-def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type, logging):
+def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type):
     """
     Plots the ROC or Precision-Recall curve for a binary classification model, and saves the plot image.
 
@@ -267,8 +266,6 @@ def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type, l
         Type of curve to plot. Either 'ROC' for Receiver Operating Characteristic curve, or 'PR' for Precision-Recall curve.
     data_type : str
         Type of data being plotted. This string is included in the plot title.
-    logging : logging object
-        Logging object for recording progress and error messages.
 
     Returns:
     --------
@@ -370,12 +367,12 @@ def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type, l
 
     fig.write_image(f"{given_name}/performance/{data_type}_{curve_type}_plot.png")
 
-    logging.info(f"Created and saved {curve_type} plot for {data_type} data")
+    logger.info(f"Created and saved {curve_type} plot for {data_type} data")
 
     return np.mean(auc_list)
 
 
-def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
+def plotCalibrationCurve(given_name, y_true, y_prob, data_type):
     """
     Plot the calibration curve for a set of true and predicted values.
 
@@ -389,8 +386,6 @@ def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
         The predicted probabilities of target.
     data_type : str
         The type of the given data (train or test).
-    logging : logging.Logger
-        An instance of the `logging.Logger` class.
 
     Returns
     -------
@@ -410,12 +405,6 @@ def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
 
     The function also calculates the Brier score loss for each fold of cross-validation
     and adds the mean Brier score loss to the plot.
-
-    Examples
-    --------
-    >>> y_true = [0, 1, 1, 0, 1, 0]
-    >>> y_prob = [0.2, 0.6, 0.7, 0.4, 0.8, 0.1]
-    >>> plotCalibrationCurve("data", y_true, y_prob, "test", logging.getLogger())
     """
 
     # Create plot
@@ -496,7 +485,7 @@ def plotCalibrationCurve(given_name, y_true, y_prob, data_type, logging):
 
     fig.write_image(f"{given_name}/performance/{data_type}_calibration_plot.png")
 
-    logging.info(f"Created and saved calibration plot for {data_type} data")
+    logger.info(f"Created and saved calibration plot for {data_type} data")
 
     return
 
@@ -575,7 +564,7 @@ def multiClassPlotCalibrationCurvePlotly(given_name, actuals, probs, title, bins
     fig.show(renderer="browser")
 
 
-def plotProbabilityDistribution(given_name, y_true, y_prob, data_type, logging):
+def plotProbabilityDistribution(given_name, y_true, y_prob, data_type):
     """
     Plot the probability distribution of true and predicted values.
 
@@ -589,8 +578,6 @@ def plotProbabilityDistribution(given_name, y_true, y_prob, data_type, logging):
         Predicted probabilities.
     data_type : str
         Type of data, such as "train", "test", or "validation".
-    logging : logger object
-        Logging object for printing errors and warnings.
 
     Returns
     -------
@@ -609,7 +596,7 @@ def plotProbabilityDistribution(given_name, y_true, y_prob, data_type, logging):
             [do, dont], ["1", "0"], colors=["green", "red"], bin_size=0.01
         )
     except Exception as e:
-        logging.info(f"Could not create distribution plot because of \n{e}")
+        logger.info(f"Could not create distribution plot because of \n{e}")
         return
 
     # Update size of figure
@@ -625,12 +612,12 @@ def plotProbabilityDistribution(given_name, y_true, y_prob, data_type, logging):
 
     fig.write_image(f"{given_name}/performance/{data_type}_distribution_plot.png")
 
-    logging.info("Created and saved probability distribution plot")
+    logger.info("Created and saved probability distribution plot")
 
     return
 
 
-def plotDistribution(given_name, groups, values, data_type, logging):
+def plotDistribution(given_name, groups, values, data_type):
     """
     Create a plotly histogram figure displaying the distribution of values for each group.
 
@@ -644,8 +631,6 @@ def plotDistribution(given_name, groups, values, data_type, logging):
     An array-like object containing the values to be plotted.
     data_type: str
     A string representing the type of data being plotted (e.g., training, validation, test).
-    logging: logger object
-    A logger object that can be used to record messages.
 
     Returns
     -------
@@ -654,12 +639,6 @@ def plotDistribution(given_name, groups, values, data_type, logging):
     Raises
     ------
     Exception: If the histogram cannot be created.
-
-    Example
-    -------
-    >>> groups = [0, 0, 1, 1, 2, 2]
-    >>> values = [1, 2, 2, 3, 3, 3]
-    >>> plotDistribution("myplot", groups, values, "training", logging.getLogger())
     """
     df = pd.DataFrame({"groups": groups, "values": values})
 
@@ -688,7 +667,7 @@ def plotDistribution(given_name, groups, values, data_type, logging):
                 )
             )
     except Exception as e:
-        logging.info(f"Could not create distribution plot because of \n{e}")
+        logger.info(f"Could not create distribution plot because of \n{e}")
         return
 
     fig.update_layout(
@@ -703,7 +682,7 @@ def plotDistribution(given_name, groups, values, data_type, logging):
 
     fig.write_image(f"{given_name}/performance/{data_type}_distribution_plot.png")
 
-    logging.info("Created and saved probability distribution plot")
+    logger.info("Created and saved probability distribution plot")
 
     return
 
@@ -713,7 +692,7 @@ Metrics and plot which are related to regression
 """
 
 
-def plotYhatVsYSave(given_name, y_true, y_pred, data_type, logging):
+def plotYhatVsYSave(given_name, y_true, y_pred, data_type):
     """
     Plots a scatter plot of predicted values (y_pred) against true values (y_true)
     and saves the plot in a specified directory.
@@ -728,8 +707,6 @@ def plotYhatVsYSave(given_name, y_true, y_pred, data_type, logging):
         Estimated targets as returned by a classifier.
     data_type : str
         Type of data, e.g. train, validation, or test.
-    logging : logging.Logger
-        Logging instance to log information about the execution.
 
     Returns:
     --------
@@ -744,10 +721,10 @@ def plotYhatVsYSave(given_name, y_true, y_pred, data_type, logging):
         )
     )
 
-    logging.info(f"Scatter plot of yhat vs y saved for {data_type}")
+    logger.info(f"Scatter plot of yhat vs y saved for {data_type}")
 
 
-def plotQuantileError(given_name, y_true, y_pred, data_type, logging):
+def plotQuantileError(given_name, y_true, y_pred, data_type):
     # Add prediction error
     plot_df = pd.DataFrame(
         {"y_true": y_true, "y_pred": y_pred, "y_diff": y_pred - y_true}
@@ -775,10 +752,10 @@ def plotQuantileError(given_name, y_true, y_pred, data_type, logging):
         )
     )
 
-    logging.info(f"Quantile error plot saved for {data_type}")
+    logger.info(f"Quantile error plot saved for {data_type}")
 
 
-def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type, logging):
+def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type):
     y_true_pos = np.clip(y_true, 0, None)
     y_pred_pos = np.clip(y_pred, 0, None)
 
@@ -854,15 +831,13 @@ def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type, logging
     # Save table
     fig.write_image(f"{given_name}/performance/{data_type}_regression_metrics.png")
 
-    logging.info("Created and saved regression metrics table")
+    logger.info("Created and saved regression metrics table")
 
     return
 
 
 # To be used for feature exploration (TODO add more colors)
-def plotDistributionViolin(
-    given_name, feature_name, groups, values, data_type, logging
-):
+def plotDistributionViolin(given_name, feature_name, groups, values, data_type):
     """
     Plot violin plot of distribution of values across different groups.
 
@@ -880,9 +855,6 @@ def plotDistributionViolin(
     data_type : str
     Type of the data.
 
-    logging : logging.Logger
-    Logger object for logging messages.
-
     Returns
     -------
     None
@@ -891,10 +863,6 @@ def plotDistributionViolin(
     Notes
     -----
     This function uses the Plotly library to create the violin plot. It first creates a pandas DataFrame from the input data, and then uses a for loop to create a violin plot for each group. The resulting figure is saved as a png file in the directory specified by given_name.
-
-    Examples
-    --------
-    >>> plotDistributionViolin('my_figure', [0, 1, 0, 1], [2.5, 3.7, 4.2, 5.3], 'continuous', logging)
     """
     df = pd.DataFrame({"groups": groups, "values": values})
 
@@ -915,7 +883,7 @@ def plotDistributionViolin(
                 )
             )
     except Exception as e:
-        logging.info(f"Could not create distribution plot because of \n{e}")
+        logger.info(f"Could not create distribution plot because of \n{e}")
         return
 
     fig.update_layout(
@@ -928,13 +896,13 @@ def plotDistributionViolin(
 
     fig.write_image(f"{given_name}/feature_info/{feature_name}_distributions.png")
 
-    logging.info("Created and saved feature distribution plot")
+    logger.info("Created and saved feature distribution plot")
 
     return
 
 
 def postModellingPlots(
-    clf, model_name, model_type, given_name, post_datasets, post_params, logging
+    clf, model_name, model_type, given_name, post_datasets, post_params
 ):
     # Performance and other post modeling plots
     # unpack dict
@@ -962,7 +930,6 @@ def postModellingPlots(
             y_all_pred,
             post_params["file_type"],
             data_type="train",
-            logging=logging,
         )
         plotConfusionMatrix(
             given_name,
@@ -971,7 +938,6 @@ def postModellingPlots(
             y_test_pred,
             post_params["file_type"],
             data_type="test",
-            logging=logging,
         )
 
         if len(clf["final"].classes_) == 2:
@@ -989,7 +955,6 @@ def postModellingPlots(
                 y_all_prob,
                 curve_type="roc",
                 data_type="train",
-                logging=logging,
             )
             plotClassificationCurve(
                 given_name,
@@ -997,7 +962,6 @@ def postModellingPlots(
                 y_test_prob_list,
                 curve_type="roc",
                 data_type="test",
-                logging=logging,
             )
 
             plotClassificationCurve(
@@ -1006,7 +970,6 @@ def postModellingPlots(
                 y_all_prob,
                 curve_type="pr",
                 data_type="train_class1",
-                logging=logging,
             )
             plotClassificationCurve(
                 given_name,
@@ -1014,7 +977,6 @@ def postModellingPlots(
                 y_all_prob_neg,
                 curve_type="pr",
                 data_type="train_class0",
-                logging=logging,
             )
 
             plotClassificationCurve(
@@ -1023,7 +985,6 @@ def postModellingPlots(
                 y_test_prob_list,
                 curve_type="pr",
                 data_type="test_class1",
-                logging=logging,
             )
             plotClassificationCurve(
                 given_name,
@@ -1031,29 +992,24 @@ def postModellingPlots(
                 y_test_prob_list_neg,
                 curve_type="pr",
                 data_type="test_class0",
-                logging=logging,
             )
 
-            plotCalibrationCurve(
-                given_name, y_all, y_all_prob, data_type="train", logging=logging
-            )
+            plotCalibrationCurve(given_name, y_all, y_all_prob, data_type="train")
             plotCalibrationCurve(
                 given_name,
                 y_test_list,
                 y_test_prob_list,
                 data_type="test",
-                logging=logging,
             )
 
             plotProbabilityDistribution(
-                given_name, y_all, y_all_prob, data_type="train", logging=logging
+                given_name, y_all, y_all_prob, data_type="train"
             )
             plotProbabilityDistribution(
                 given_name,
                 y_test_concat,
                 y_test_prob,
                 data_type="test",
-                logging=logging,
             )
 
         # If multiclass classification
@@ -1061,7 +1017,7 @@ def postModellingPlots(
             # loop through classes
             for c in clf["final"].classes_:
                 # stating the class
-                logging.info(f"\nFor class {c}:")
+                logger.info(f"\nFor class {c}:")
 
                 # creating a list of all the classes except the current class
                 other_class = [x for x in clf["final"].classes_ if x != c]
@@ -1086,24 +1042,22 @@ def postModellingPlots(
                 # y_all_prob_ova = [x[class_index] for x in y_all_prob]
 
                 # Threshold independant
-                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='roc', data_type=f'train_class_{c}', logging=logging)
+                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='roc', data_type=f'train_class_{c}')
                 plotClassificationCurve(
                     given_name,
                     y_test_list_ova,
                     y_test_prob_list_ova,
                     curve_type="roc",
                     data_type=f"test_class_{c}",
-                    logging=logging,
                 )
 
-                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='pr', data_type='train_class1', logging=logging)
+                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='pr', data_type='train_class1')
                 plotClassificationCurve(
                     given_name,
                     y_test_list_ova,
                     y_test_prob_list_ova,
                     curve_type="pr",
                     data_type=f"test_class_{c}",
-                    logging=logging,
                 )
 
                 # multiClassPlotCalibrationCurvePlotly(given_name, y_all, pd.DataFrame(y_all_prob, columns=clf['final'].classes_), title='fun')
@@ -1112,33 +1066,23 @@ def postModellingPlots(
                     y_test_list_ova,
                     y_test_prob_list_ova,
                     data_type=f"test_class_{c}",
-                    logging=logging,
                 )
 
-                # plotProbabilityDistribution(given_name, y_all_ova, y_all_prob_ova, data_type='train', logging=logging)
+                # plotProbabilityDistribution(given_name, y_all_ova, y_all_prob_ova, data_type='train')
                 plotProbabilityDistribution(
                     given_name,
                     y_test_ova,
                     y_test_prob_ova,
                     data_type=f"test_class_{c}",
-                    logging=logging,
                 )
 
     # if regression
     elif model_type == "regression":
-        plotYhatVsYSave(
-            given_name, y_test_concat, y_test_pred, data_type="test", logging=logging
-        )
-        plotYhatVsYSave(
-            given_name, y_all, y_all_pred, data_type="train", logging=logging
-        )
+        plotYhatVsYSave(given_name, y_test_concat, y_test_pred, data_type="test")
+        plotYhatVsYSave(given_name, y_all, y_all_pred, data_type="train")
 
-        plotQuantileError(
-            given_name, y_test_concat, y_test_pred, data_type="test", logging=logging
-        )
-        plotQuantileError(
-            given_name, y_all, y_all_pred, data_type="train", logging=logging
-        )
+        plotQuantileError(given_name, y_test_concat, y_test_pred, data_type="test")
+        plotQuantileError(given_name, y_all, y_all_pred, data_type="train")
 
         regressionMetricsTable(
             given_name,
@@ -1146,7 +1090,6 @@ def postModellingPlots(
             y_test_pred,
             X_all,
             data_type="test",
-            logging=logging,
         )
         regressionMetricsTable(
             given_name,
@@ -1154,7 +1097,6 @@ def postModellingPlots(
             y_all_pred,
             X_all,
             data_type="train",
-            logging=logging,
         )
 
     # Post modeling plots, specific per model but includes feature importance among others
@@ -1162,5 +1104,4 @@ def postModellingPlots(
         clf["final"],
         given_name + "/feature_importance",
         post_params["file_type"],
-        logging,
     )

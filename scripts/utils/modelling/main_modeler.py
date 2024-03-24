@@ -12,10 +12,12 @@ from utils.modelling.models import decision_rule  # noqa: F401
 from utils.modelling.models import decision_tree  # noqa: F401
 from utils.modelling.models import l_regression  # noqa: F401
 
+import logging
 
-def make_model(
-    given_name, datasets, model_name, model_type, model_params, post_params, logging
-):
+logger = logging.getLogger(__name__)
+
+
+def make_model(given_name, datasets, model_name, model_type, model_params, post_params):
     """
     Train and save a model, and generate performance plots.
 
@@ -33,8 +35,6 @@ def make_model(
         A dictionary containing the hyperparameters of the model.
     post_params : dict
         A dictionary containing the postprocessing parameters.
-    logging : logger
-        A logger object used for logging.
 
     Returns
     -------
@@ -58,7 +58,7 @@ def make_model(
         clf_dict = {"test": {}}
 
         for fold_id in range(len(X_train)):
-            logging.info(f"Fold {fold_id} - Train model on test data")
+            logger.info(f"Fold {fold_id} - Train model on test data")
 
             # Check if model needs to be calibrated
             if post_params["calibration"] != "false":
@@ -73,7 +73,7 @@ def make_model(
 
             # Train the model
             clf = globals()[model_name].trainModel(
-                X_slice_train, y_slice_train, model_params, model_type, logging
+                X_slice_train, y_slice_train, model_params, model_type
             )
 
             # Save model of this fold in a dict
@@ -84,7 +84,6 @@ def make_model(
                     clf,
                     X_cal,
                     y_cal,
-                    logging,
                     method=post_params["calibration"],
                     final_model=False,
                 )
@@ -110,7 +109,7 @@ def make_model(
     # If just regular train/test split has been applied
     else:
         clf = globals()[model_name].trainModel(
-            X_train, y_train, model_params, model_type, logging
+            X_train, y_train, model_params, model_type
         )
 
         # discrete prediction
@@ -121,7 +120,7 @@ def make_model(
             y_test_prob = clf.predict_proba(X_test)[:, 1]
 
     # train model one last time on all samples (upsampled)
-    logging.info("Train final model on all data")
+    logger.info("Train final model on all data")
 
     # Check if model needs to be calibrated
     if post_params["calibration"] != "false":
@@ -130,9 +129,7 @@ def make_model(
         )
 
     # Train final model
-    clf = globals()[model_name].trainModel(
-        X_all, y_all, model_params, model_type, logging
-    )
+    clf = globals()[model_name].trainModel(X_all, y_all, model_params, model_type)
 
     # Save in dict
     clf_dict["final"] = clf
@@ -160,7 +157,6 @@ def make_model(
             clf,
             X_cal,
             y_cal,
-            logging,
             method=post_params["calibration"],
             final_model=True,
         )
@@ -216,7 +212,6 @@ def make_model(
         given_name,
         post_datasets,
         post_params,
-        logging,
     )
 
     return clf

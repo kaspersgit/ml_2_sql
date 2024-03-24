@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
 from contextlib import redirect_stdout
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def ReduceSingleFeature(df_):
@@ -833,7 +836,7 @@ def ebm_to_sql(model_name, df, classes, split=True):
         lookup_df_to_sql(model_name, df, model_type, split)
 
 
-def save_model_and_extras(ebm, model_name, post_params, logging):
+def save_model_and_extras(ebm, model_name, post_params):
     # extract lookup table from EBM
     lookup_df = extractLookupTable(ebm, post_params)
 
@@ -847,4 +850,4 @@ def save_model_and_extras(ebm, model_name, post_params, logging):
         with redirect_stdout(f):
             model_name = model_name.split("/")[-1]
             ebm_to_sql(model_name, lookup_df, ebm.classes_, post_params["sql_split"])
-    logging.info("SQL version of EBM saved")
+    logger.info("SQL version of EBM saved")

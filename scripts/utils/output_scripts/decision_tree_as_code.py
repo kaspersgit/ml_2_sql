@@ -5,6 +5,9 @@
 from sklearn.tree import _tree
 import numpy as np
 from contextlib import redirect_stdout
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def tree_to_sql(tree):
@@ -83,11 +86,11 @@ def tree_to_sql(tree):
     print("FROM <source_table> -- change to your table name")
 
 
-def save_model_and_extras(clf, model_name, post_params, logging):
+def save_model_and_extras(clf, model_name, post_params):
     # Write printed output to file
     with open(
         "{model_name}/model/tree_in_sql.sql".format(model_name=model_name), "w"
     ) as f:
         with redirect_stdout(f):
             tree_to_sql(clf)
-    logging.info("SQL version of decision tree saved")
+    logger.info("SQL version of decision tree saved")

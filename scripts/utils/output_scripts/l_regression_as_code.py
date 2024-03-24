@@ -1,5 +1,8 @@
 import numpy as np
 from contextlib import redirect_stdout
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def extract_parameters(model):
@@ -169,7 +172,7 @@ def format_sql(
     return
 
 
-def save_model_and_extras(clf, model_name, post_params, logging):
+def save_model_and_extras(clf, model_name, post_params):
     model_type, pclasses, features, coefficients, intercept = extract_parameters(clf)
     # Write printed output to file
     with open(
@@ -186,4 +189,4 @@ def save_model_and_extras(clf, model_name, post_params, logging):
                 intercept,
                 post_params,
             )
-    logging.info("SQL version of logistic/linear regression saved")
+    logger.info("SQL version of logistic/linear regression saved")

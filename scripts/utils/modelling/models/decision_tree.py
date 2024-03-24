@@ -1,9 +1,13 @@
 from sklearn import tree
 import pandas as pd
+import numpy as np
 import plotly.express as px
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-def trainModel(X_train, y_train, params, model_type, logging):
+def trainModel(X_train, y_train, params, model_type):
     """
     Trains a decision tree model using the given training data and parameters.
 
@@ -17,8 +21,6 @@ def trainModel(X_train, y_train, params, model_type, logging):
         Parameters to configure the decision tree.
     model_type : str
         Type of the model. Can be 'regression' or 'classification'.
-    logging : logging.Logger
-        Logger object to record messages.
 
     Returns
     -------
@@ -38,32 +40,23 @@ def trainModel(X_train, y_train, params, model_type, logging):
 
     The trained decision tree model is returned.
 
-    Example:
-    --------
-    >>> from sklearn.datasets import load_breast_cancer
-    >>> from sklearn.model_selection import train_test_split
-    >>> from sklearn.tree import DecisionTreeClassifier
-    >>> X, y = load_breast_cancer(return_X_y=True)
-    >>> X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    >>> params = {'max_depth': 3, 'min_samples_split': 2}
-    >>> clf = trainModel(X_train, y_train, params, 'classification', logging)
     """
     if model_type == "regression":
         clf = tree.DecisionTreeRegressor(**params)
     elif model_type == "classification":
         clf = tree.DecisionTreeClassifier(**params)
     else:
-        logging.warning("Only regression or classification available")
+        logger.warning("Only regression or classification available")
 
     clf.fit(X_train, y_train)
-    logging.info(f"Model params:\n {clf.get_params}")
+    logger.info(f"Model params:\n {clf.get_params}")
 
-    logging.info("Trained decision tree")
+    logger.info("Trained decision tree")
 
     return clf
 
 
-def featureImportanceSave(clf, given_name, file_type, logging):
+def featureImportanceSave(clf, given_name, file_type):
     """
     Generates and saves a bar plot of feature importance using Plotly.
 
@@ -75,8 +68,6 @@ def featureImportanceSave(clf, given_name, file_type, logging):
         The directory name where the plot should be saved.
     file_type: str {'png', 'html'}
         The type of file in which the plot should be saved.
-    logging: logging.Logger object
-        A logging object to log information or errors.
 
     Returns:
     --------
@@ -116,8 +107,56 @@ def featureImportanceSave(clf, given_name, file_type, logging):
     elif file_type == "html":
         plotly_fig.write_html(f"{given_name}/gini_feature_importance.html")
 
-    logging.info("Gini feature importance plot saved")
+    logger.info("Gini feature importance plot saved")
 
 
-def postModelPlots(clf, given_name, file_type, logging):
-    featureImportanceSave(clf, given_name, file_type, logging)
+def allClassesHaveLeafNode(clf):
+    """
+    Check if all classes are represented by a leaf node in a given decision tree classifier.
+
+    Parameters:
+    -----------
+    clf : sklearn.tree.DecisionTreeClassifier object
+        The decision tree classifier to be checked.
+
+    Returns:
+    --------
+    bool
+        True if all classes are represented by a leaf node, False otherwise.
+    """
+    n_nodes = clf.tree_.node_count
+    children_left = clf.tree_.children_left
+    children_right = clf.tree_.children_right
+    # feature = clf.tree_.feature
+    # threshold = clf.tree_.threshold
+    class_values = clf.tree_.value
+    classes = clf.classes_
+
+    end_leaf_classes = []
+
+    for node_id in range(n_nodes):
+        if children_left[node_id] == children_right[node_id]:
+            # feature_index = feature[node_id]
+            class_name = clf.classes_[np.argmax(class_values[node_id])]
+            end_leaf_classes.append(class_name)
+
+    if len(set(end_leaf_classes)) == len(classes):
+        logger.info("All classes are represented by a leaf node\n")
+
+        return True
+    else:
+        logger.info(
+            "{}/{} classes are represented by a leaf node ({})".format(
+                len(set(end_leaf_classes)), len(clf.classes_), len(end_leaf_classes)
+            )
+        )
+        logger.info(
+            "Missing class(es): {}\n".format(set(clf.classes_) - set(end_leaf_classes))
+        )
+
+        return False
+
+
+def postModelPlots(clf, given_name, file_type):
+    featureImportanceSave(clf, given_name, file_type)
+    allClassesHaveLeafNode(clf)

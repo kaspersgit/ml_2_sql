@@ -9,7 +9,7 @@ import logging
 import pytest
 import pandas as pd
 import numpy as np
-from utils.helper_functions.checks import checkInputDataHard
+from utils.helper_functions.checks import checkInputData
 from utils.helper_functions.config_handling import config_handling
 from utils.pre_processing.pre_process import pre_process_kfold
 
@@ -102,11 +102,11 @@ def test_config_handling(test_data, test_config):
     }
 
 
-def test_checkInputDataHard(test_data, test_config):
+def test_checkInputData(test_data, test_config):
     csv_path, df = test_data
     config_path, config = test_config
 
-    checkInputDataHard(
+    checkInputData(
         df, config, None
     )  # No assertion needed, it should not raise an error
 
