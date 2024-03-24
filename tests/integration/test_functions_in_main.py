@@ -84,7 +84,7 @@ def test_config_handling(test_data, test_config):
     config_path, config = test_config
 
     target_col, feature_cols, model_params, pre_params, post_params = config_handling(
-        config, df, logger
+        config, df
     )
     assert target_col == "target"
     assert feature_cols == ["col1", "col2"]
@@ -106,9 +106,7 @@ def test_checkInputData(test_data, test_config):
     csv_path, df = test_data
     config_path, config = test_config
 
-    checkInputData(
-        df, config, None
-    )  # No assertion needed, it should not raise an error
+    checkInputData(df, config)  # No assertion needed, it should not raise an error
 
 
 def test_pre_process_kfold(test_data, test_config, test_path):
@@ -122,7 +120,6 @@ def test_pre_process_kfold(test_data, test_config, test_path):
         ["col1", "col2"],
         model_name="ebm",
         model_type="classification",
-        logging=logger,
         pre_params=config["pre_params"],
         post_params=config["post_params"],
         random_seed=42,

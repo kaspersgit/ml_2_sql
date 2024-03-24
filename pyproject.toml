@@ -39,4 +39,5 @@ dev = [
     "pytest",
     "pip-tools",
     "ruff",
+    "pre-commit"
 ]
