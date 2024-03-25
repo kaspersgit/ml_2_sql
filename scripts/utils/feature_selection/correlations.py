@@ -4,9 +4,12 @@ import plotly.figure_factory as ff
 import pandas as pd
 import numpy as np
 import scipy.stats as ss
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-def plotClustermap(dfc, matrix_type, given_name, file_type, logging):
+def plotClustermap(dfc, matrix_type, given_name, file_type):
     """
     Plot a clustermap of a given correlation matrix/dataframe and save it as either a png or an html file.
 
@@ -15,7 +18,6 @@ def plotClustermap(dfc, matrix_type, given_name, file_type, logging):
         matrix_type (str): A string representing the type of matrix being plotted (e.g., 'correlation', 'covariance').
         given_name (str): A string representing the name of the project being worked on.
         file_type (str): A string representing the type of file to save the plot as (either 'png' or 'html').
-        logging (logging.Logger): A logging object used for logging events.
 
     Returns:
         None
@@ -135,7 +137,7 @@ def plotClustermap(dfc, matrix_type, given_name, file_type, logging):
         fig.write_html(f"{given_name}/feature_info/{matrix_type}_clustermap.html")
 
 
-def plotPearsonCorrelation(df, given_name, file_type, logging):
+def plotPearsonCorrelation(df, given_name, file_type):
     """
     Creates a Pearson correlation matrix using numerical columns of a Pandas DataFrame,
     and generates a clustermap plot of the matrix using the plotClustermap function.
@@ -144,7 +146,6 @@ def plotPearsonCorrelation(df, given_name, file_type, logging):
         df (Pandas DataFrame): The DataFrame containing the data to analyze.
         given_name (str): The name of the project, used in the output file name.
         file_type (str): The file type to save the output as ('png' or 'html').
-        logging (logging.Logger): The logger object to log progress and errors.
 
     Returns:
         None
@@ -159,10 +160,10 @@ def plotPearsonCorrelation(df, given_name, file_type, logging):
 
     # if above dataframe is empty then skip function
     if data_.empty:
-        logging.info("No numerical variables found")
+        logger.info("No numerical variables found")
         return
     elif data_.shape[1] == 1:
-        logging.info(
+        logger.info(
             "Skip Pearson correlation matrix due to fewer than 2 numerical variables found"
         )
         return
@@ -174,10 +175,10 @@ def plotPearsonCorrelation(df, given_name, file_type, logging):
     matrix_type = "numeric"
 
     # Plot matrix
-    plotClustermap(data_corr, matrix_type, given_name, file_type, logging)
+    plotClustermap(data_corr, matrix_type, given_name, file_type)
 
     # success message
-    logging.info("Created Pearson correlation matrix (for numerical features)")
+    logger.info("Created Pearson correlation matrix (for numerical features)")
 
 
 def cramers_corrected_stat(confusion_matrix):
@@ -209,7 +210,7 @@ def cramers_corrected_stat(confusion_matrix):
     return np.sqrt(phi2corr / min((kcorr - 1), (rcorr - 1)))
 
 
-def plotCramervCorrelation(df, given_name, file_type, logging):
+def plotCramervCorrelation(df, given_name, file_type):
     """
     Plot CramerV correlation matrix for nominal categorical values.
 
@@ -221,8 +222,6 @@ def plotCramervCorrelation(df, given_name, file_type, logging):
         Given name for the output file containing the correlation matrix plot
     file_type : str
         Type of the output file, e.g., png, pdf, etc.
-    logging : logging.Logger
-        Logging object for recording the progress and errors during runtime.
 
     Returns:
     --------
@@ -250,7 +249,7 @@ def plotCramervCorrelation(df, given_name, file_type, logging):
 
     # if above dataframe is empty then skip function
     if data_.shape[1] < 2:
-        logging.info(
+        logger.info(
             "Skip CramerV correlation matrix due to fewer than 2 categorical variables found"
         )
         return
@@ -278,7 +277,7 @@ def plotCramervCorrelation(df, given_name, file_type, logging):
     matrix_type = "categorical"
 
     # Plot matrix
-    plotClustermap(df_cramerv, matrix_type, given_name, file_type, logging)
+    plotClustermap(df_cramerv, matrix_type, given_name, file_type)
 
     # Success message
-    logging.info("Created CramerV correlation matrix (for categorical values)")
+    logger.info("Created CramerV correlation matrix (for categorical values)")

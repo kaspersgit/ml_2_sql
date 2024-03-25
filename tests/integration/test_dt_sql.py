@@ -14,6 +14,9 @@ import pytest
 from utils.test_helpers.sql_model import execute_sql_script
 from utils.output_scripts.decision_tree_as_code import save_model_and_extras
 
+# Set logger
+logger = logging.getLogger(__name__)
+
 # Assuming your_model.pkl is the pickled model and df is the DataFrame for testing
 SQL_OUTPUT_PATH = "tests/model/tree_in_sql.sql"
 
@@ -74,16 +77,12 @@ def post_params(request):
     return config["post_params"]
 
 
-def test_model_processing(
-    load_model_data, post_params, logging=logging.getLogger(__name__)
-):
+def test_model_processing(load_model_data, post_params):
     # unpack data and model
     data, model, model_type = load_model_data
 
     # Generate SQL from the loaded model
-    save_model_and_extras(
-        clf=model, model_name="tests", post_params=post_params, logging=logging
-    )
+    save_model_and_extras(clf=model, model_name="tests", post_params=post_params)
 
     # Load the SQL version
     with open(SQL_OUTPUT_PATH, "r") as sql_file:
@@ -113,7 +112,7 @@ def test_model_processing(
         assert sum(model_pred != sql_pred) / len(model_pred) <= tolerance
     else:
         model_pred = model.predict(data[model.feature_names_in_])
-        logging.info(
+        logger.info(
             f"Max difference SQL - pickled model: {(abs(sql_pred - model_pred)).max()}"
         )
 

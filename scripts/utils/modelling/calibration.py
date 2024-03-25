@@ -2,9 +2,12 @@
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-def calibrateModel(model, X, y, logging, method="auto", final_model=False):
+def calibrateModel(model, X, y, method="auto", final_model=False):
     """
     Calibrate a classification model.
 
@@ -16,8 +19,6 @@ def calibrateModel(model, X, y, logging, method="auto", final_model=False):
         The input data.
     y : array-like of shape (n_samples,)
         The target values.
-    logging : object
-        A logging object for logging messages.
     method : str, optional
         The calibration method to use. If 'auto', the method is chosen automatically based on the size of the calibration dataset. If 'sigmoid', the logistic regression method is used. If 'isotonic', the isotonic regression method is used. Default is 'auto'.
     final_model : bool, optional
@@ -34,10 +35,10 @@ def calibrateModel(model, X, y, logging, method="auto", final_model=False):
     if method == "auto":
         if len(X) > 1000:
             method = "isotonic"
-            logging.info("Applying isotonic regression as calibration method")
+            logger.info("Applying isotonic regression as calibration method")
         else:
             method = "sigmoid"
-            logging.info("Applying logistic regression as calibration method")
+            logger.info("Applying logistic regression as calibration method")
 
     if final_model:
         if method == "sigmoid":
@@ -54,15 +55,7 @@ def calibrateModel(model, X, y, logging, method="auto", final_model=False):
     # set attributes
     model_cal.feature_names = model.feature_names
 
-    logging.info("Trained calibrated model")
-
-    # plotCalibrationCurve(given_name='trained_models/20220303_henkie', y_true=y_test[part_id], y_prob=y_pred,
-    #                      prediction_type='uncal', data_type='')
-    #
-    # y_pred_cal = iso_reg.predict(y_pred)
-    #
-    # plotCalibrationCurve(given_name='trained_models/20220303_henkie', y_true=y_test[part_id], y_prob=y_pred_cal,
-    #                      prediction_type='cal', data_type='')
+    logger.info("Trained calibrated model")
 
     if final_model:
         return model_cal, cal_reg

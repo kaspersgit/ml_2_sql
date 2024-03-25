@@ -5,16 +5,17 @@ from utils.feature_selection.correlations import (
     plotPearsonCorrelation,
     plotCramervCorrelation,
 )
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-def cleanAndCastColumns(
-    data, feature_cols, target_col, model_name, model_type, logging
-):
+def cleanAndCastColumns(data, feature_cols, target_col, model_name, model_type):
     # make copy of data
     _data = data.copy()
 
     # clean out where target is NaN
-    logging.info(
+    logger.info(
         "Rows being removed due to NaN in target column: {nans} \n".format(
             nans=len(_data[_data[target_col].isna()])
         )
@@ -27,7 +28,7 @@ def cleanAndCastColumns(
 
     if len(one_nunique) > 0:
         _data = _data.loc[:, ~_data.columns.isin(one_nunique)]
-        logging.info(
+        logger.info(
             f"Features being removed due to single unique value: {one_nunique} \n"
         )
 
@@ -46,7 +47,7 @@ def cleanAndCastColumns(
         if len(one_occurence_class) > 0:
             _data = _data[~_data[target_col].isin(one_occurence_class)]
 
-            logging.info(
+            logger.info(
                 "Removed class {classification} due to having only 1 observation".format(
                     classification=one_occurence_class
                 )
@@ -58,7 +59,7 @@ def cleanAndCastColumns(
         _data[feature_cols].columns[_data[feature_cols].isna().sum() > 0]
     ]
     if len(nan_cols) > 0:
-        logging.info(
+        logger.info(
             "Columns with NaN values: \n{nans}".format(nans=nan_cols.isna().sum())
         )
 
@@ -78,7 +79,7 @@ def cleanAndCastColumns(
 
     if model_name != "ebm":  # otherwise model can't handle categorical features
         cat_col = _data[feature_cols].select_dtypes(include=["category"]).columns
-        logging.info(
+        logger.info(
             f"Features being removed due to type being categorical: {cat_col} \n"
         )
         # Remove feature from feature_cols if in there
@@ -87,7 +88,7 @@ def cleanAndCastColumns(
                 feature_cols.remove(f)
 
     # Overview of _data types
-    logging.info(
+    logger.info(
         "Column types in data set (including target)\n{col_types} \n".format(
             col_types=_data[feature_cols].dtypes.value_counts()
         )
@@ -117,28 +118,27 @@ def pre_process_kfold(
     feature_cols,
     model_name,
     model_type,
-    logging,
     pre_params,
     post_params,
     random_seed=42,
 ):
     # clean and cast
     data_clean = cleanAndCastColumns(
-        data, feature_cols, target_col, model_name, model_type, logging
+        data, feature_cols, target_col, model_name, model_type
     )
 
     # Limit dataset with respect to the max_rows parameter
     if "max_rows" in pre_params:
         max_rows = min(pre_params["max_rows"], len(data_clean))
         data_clean = data_clean.sample(n=max_rows).reset_index(drop=True)
-        logging.info(f"Limited dataset to {max_rows}")
+        logger.info(f"Limited dataset to {max_rows}")
 
     # Create correlation plots
     plotPearsonCorrelation(
-        data_clean[feature_cols], given_name, post_params["file_type"], logging
+        data_clean[feature_cols], given_name, post_params["file_type"]
     )
     plotCramervCorrelation(
-        data_clean[feature_cols], given_name, post_params["file_type"], logging
+        data_clean[feature_cols], given_name, post_params["file_type"]
     )
 
     # create kfolds in a statified manner
@@ -146,14 +146,14 @@ def pre_process_kfold(
 
     # initiate kfold
     if pre_params["cv_type"] == "timeseriesplit":
-        logging.info("Performing time series split cross validation")
+        logger.info("Performing time series split cross validation")
         data.sort_values(pre_params["time_sensitive_column"], inplace=True)
         kfold = TimeSeriesSplit(n_splits=5)
     elif model_type == "classification":
-        logging.info("Performing stratified kfold cross validation")
+        logger.info("Performing stratified kfold cross validation")
         kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=random_seed)
     elif model_type == "regression":
-        logging.info("Performing normal kfold cross validation")
+        logger.info("Performing normal kfold cross validation")
         kfold = KFold(n_splits=5, shuffle=True, random_state=random_seed)
 
     # Create initial dict to collect datasets
@@ -167,10 +167,10 @@ def pre_process_kfold(
         #### Create upsampled version of full dataset for final training
         # Make sure total rows * columns after upsampling won't hit x nr of cells
         max_cells = 50000
-        X_trim, y_trim = trimPreUpsampleDataRows(X, y, max_cells, logging)
+        X_trim, y_trim = trimPreUpsampleDataRows(X, y, max_cells)
 
         # upsample by trying SMOTE algo
-        X_ups, y_ups = upsampleData(X, y_trim, model_type, logging, random_seed=42)
+        X_ups, y_ups = upsampleData(X, y_trim, model_type, random_seed=42)
 
         # Add to datasets
         datasets["final_train"] = {"X": X_ups, "y": y_ups}
@@ -208,7 +208,7 @@ def pre_process_kfold(
     kfold_nr = 0
     for train_ix, test_ix in kfold.split(X, y):
         # Record kfold
-        logging.info(f"Creating fold nr {kfold_nr+1}")
+        logger.info(f"Creating fold nr {kfold_nr+1}")
 
         # select rows
         X_train, X_test = X.iloc[train_ix, :], X.iloc[test_ix, :]
@@ -216,28 +216,28 @@ def pre_process_kfold(
 
         if pre_params["upsampling"] != "false":
             # report on nr rows
-            logging.info(f"Nr rows pre trimming: {len(X_train)}")
-            logging.info(f"imbalanceness pre trimming: \n {y_train.value_counts()}")
+            logger.info(f"Nr rows pre trimming: {len(X_train)}")
+            logger.info(f"imbalanceness pre trimming: \n {y_train.value_counts()}")
 
             X_train_trim, y_train_trim = trimPreUpsampleDataRows(
-                X_train, y_train, max_cells, logging
+                X_train, y_train, max_cells, logger
             )
 
             # Nr rows after trimming down dataset
-            logging.info(f"Nr rows pre upsampling: {len(X_train_trim)}")
-            logging.info(
+            logger.info(f"Nr rows pre upsampling: {len(X_train_trim)}")
+            logger.info(
                 f"imbalanceness pre upsampling: \n {y_train_trim.value_counts()}"
             )
 
             # upsample by trying SMOTE algo
             X_train, y_train = upsampleData(
-                X_train_trim, y_train_trim, model_type, logging, random_seed=42
+                X_train_trim, y_train_trim, model_type, random_seed=42
             )
 
         # Nr rows of training set
-        logging.info(f"Nr rows train set: {len(X_train)}")
-        logging.info(f"Nr rows test set: {len(X_test)}")
-        logging.info(f"imbalanceness train: \n {y_train.value_counts()}")
+        logger.info(f"Nr rows train set: {len(X_train)}")
+        logger.info(f"Nr rows test set: {len(X_test)}")
+        logger.info(f"imbalanceness train: \n {y_train.value_counts()}")
 
         # append to the lists
         X_train_list.append(X_train)
@@ -255,7 +255,7 @@ def pre_process_kfold(
     return datasets
 
 
-def upsampleData(X, y, model_type, logging, random_seed=42):
+def upsampleData(X, y, model_type, random_seed=42):
     if model_type == "classification":
         # oversample train data
         # nested try except (https://stackoverflow.com/questions/17015230/are-nested-try-except-blocks-in-python-a-good-programming-practice)
@@ -267,15 +267,15 @@ def upsampleData(X, y, model_type, logging, random_seed=42):
                     categorical_features=categorical_cols, random_state=random_seed
                 )
                 X_ups, y_ups = ros.fit_resample(X, y)
-                logging.info("SMOTE-NC oversampling")
+                logger.info("SMOTE-NC oversampling")
             else:
                 ros = SMOTE(random_state=random_seed)
                 X_ups, y_ups = ros.fit_resample(X, y)
-                logging.info("SMOTE oversampling")
+                logger.info("SMOTE oversampling")
         except Exception:
             ros = RandomOverSampler(random_state=random_seed)
             X_ups, y_ups = ros.fit_resample(X, y)
-            logging.info("Random oversampling")
+            logger.info("Random oversampling")
 
     elif model_type == "regression":
         X_ups, y_ups = X, y
@@ -283,11 +283,11 @@ def upsampleData(X, y, model_type, logging, random_seed=42):
     return X_ups, y_ups
 
 
-def trimDownDataRows(X, y, max_cells, logging):
+def trimDownDataRows(X, y, max_cells):
     # Trim dataset if necessary based on amount of cells (columns x rows)
     nr_cells = X.shape[0] * X.shape[1]
     if nr_cells > max_cells:
-        logging.info(
+        logger.info(
             f"Dataset shape {X.shape} resulting in {nr_cells} cells \nTrimming down..."
         )
         df_pretrim = X.join(y)
@@ -295,7 +295,7 @@ def trimDownDataRows(X, y, max_cells, logging):
         X_trim = df_posttrim[X.columns].reset_index(drop=True)
         y_trim = df_posttrim[y.name].reset_index(drop=True)
         nr_cells_trim = X_trim.shape[0] * X_trim.shape[1]
-        logging.info(
+        logger.info(
             f"Trimmed down to {X_trim.shape} resulting in {nr_cells_trim} cells."
         )
     else:
@@ -305,7 +305,7 @@ def trimDownDataRows(X, y, max_cells, logging):
     return X_trim, y_trim
 
 
-def trimPreUpsampleDataRows(X, y, max_cells, logging):
+def trimPreUpsampleDataRows(X, y, max_cells):
     # reset index
     X_ = X.reset_index(drop=True)
     y_ = y.reset_index(drop=True)
@@ -318,7 +318,7 @@ def trimPreUpsampleDataRows(X, y, max_cells, logging):
     max_rows = round(max_cells / (X_.shape[1]))  # * nr_classes
 
     if exp_nr_cells > max_cells:
-        logging.info(
+        logger.info(
             f"Expecting {exp_nr_cells} cells, more than set limit of {max_cells}"
         )
         big_classes = classes_counts.index[classes_counts > max_rows]
@@ -334,6 +334,6 @@ def trimPreUpsampleDataRows(X, y, max_cells, logging):
         y_trim = y_
         X_trim = X_
 
-    logging.info(f"Original nr of rows {len(X_)} \nNew nr of rows {len(X_trim)}")
+    logger.info(f"Original nr of rows {len(X_)} \nNew nr of rows {len(X_trim)}")
 
     return X_trim.reset_index(drop=True), y_trim.reset_index(drop=True)

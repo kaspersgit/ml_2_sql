@@ -12,7 +12,7 @@ from utils.output_scripts import decision_rule_as_code  # noqa: F401
 from utils.output_scripts import ebm_as_code  # noqa: F401
 from utils.output_scripts import l_regression_as_code  # noqa: F401
 
-from utils.helper_functions.checks import checkInputDataHard
+from utils.helper_functions.checks import checkInputData
 from utils.helper_functions.setup_logger import setup_logger
 
 from utils.helper_functions.config_handling import config_handling
@@ -29,8 +29,9 @@ def main(args):
 
     # Set logger
     setup_logger(given_name + "/logging.log")
+    logger = logging.getLogger(__name__)
 
-    logging.info(f"Script input arguments: \n{args}")
+    logger.info(f"Script input arguments: \n{args}")
 
     # Load in data
     data = pd.read_csv(
@@ -48,14 +49,14 @@ def main(args):
 
     # Handle the configuration file
     target_col, feature_cols, model_params, pre_params, post_params = config_handling(
-        configuration, data, logging
+        configuration, data
     )
 
     # Log parameters
-    logging.info(f"Configuration file content: \n{configuration}")
+    logger.info(f"Configuration file content: \n{configuration}")
 
     # Perform some basic checks
-    checkInputDataHard(data, configuration, logging)
+    checkInputData(data, configuration)
 
     # set model type based on target value
     if (data[target_col].dtype == "float") | (
@@ -65,9 +66,9 @@ def main(args):
     else:
         model_type = "classification"
 
-        logging.info(f"Target column has {data[target_col].nunique()} unique values")
+        logger.info(f"Target column has {data[target_col].nunique()} unique values")
 
-    logging.info(
+    logger.info(
         "This problem will be treated as a {model_type} problem".format(
             model_type=model_type
         )
@@ -81,7 +82,6 @@ def main(args):
         feature_cols,
         model_name=model_name,
         model_type=model_type,
-        logging=logging,
         pre_params=pre_params,
         post_params=post_params,
         random_seed=random_seed,
@@ -95,12 +95,11 @@ def main(args):
         model_type=model_type,
         model_params=model_params,
         post_params=post_params,
-        logging=logging,
     )
 
     # Create SQL version of model and save it
     globals()[model_name + "_as_code"].save_model_and_extras(
-        clf, given_name, post_params, logging
+        clf, given_name, post_params
     )
 
 

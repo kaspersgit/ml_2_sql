@@ -1,11 +1,13 @@
 import pandas as pd
+import logging
 import warnings
 
 warnings.simplefilter("ignore", UserWarning)
+logger = logging.getLogger(__name__)
 
 
 # Handle the configuration file
-def config_handling(configuration, data, logging):
+def config_handling(configuration, data):
     """
     Handles the configuration file and extracts necessary information.
 
@@ -39,12 +41,12 @@ def config_handling(configuration, data, logging):
     # features columns
     if "features" in configuration.keys():
         feature_cols = configuration["features"]
-        logging.info(f"{len(feature_cols)} features specified in file")
+        logger.info(f"{len(feature_cols)} features specified in file")
     else:
         # treat all other columns as features
         feature_cols = list(data.columns)
         feature_cols.remove(target_col)
-        logging.info(f"Using {len(feature_cols)} features (all columns except target)")
+        logger.info(f"Using {len(feature_cols)} features (all columns except target)")
 
     # model related parameters
     if "model_params" in configuration.keys():

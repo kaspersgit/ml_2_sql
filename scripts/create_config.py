@@ -94,7 +94,7 @@ def create_config(args):
             },
             "pre_params": {
                 "cv_type": "notimeseriesplit",
-                "max_rows": 10000,
+                "max_rows": 50000,
                 "time_sensitive_column": "_",
                 "upsampling": "false",
             },
