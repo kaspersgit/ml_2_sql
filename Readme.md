@@ -43,7 +43,7 @@ This tool can be used by anybody, but is aimed for people who want to do a quick
 
 # Getting started
 <details> 
-<summary><strong>Prerequisites</strong></summary>
+<summary><strong>Installation</strong></summary>
 <br>
 
   1. Make sure you have python >= 3.8 installed
@@ -128,7 +128,7 @@ The csv file containing the data has to fulfill some basic assumptions:
 - EBM can handle categorical values (these will be excluded when choosing decision tree or linear/logistic regression)
 - EBM can handle missing values
 
-## Configuration json
+## Configuration json ([example](https://github.com/kaspersgit/ml_2_sql/blob/main/input/configuration/example_binary_titanic.json))
 This file will inform the script which column is the target, which are the features and several other parameters for pre and post training.
 You can copy and edit a config file from the already existing example in `input/configuration/` or select `Create a new config` file in the second step 
 when running the `run.py` file.
@@ -176,7 +176,7 @@ Configs are saved in `input/configuration/`.
 </details> 
 </br>
 
-# Output
+# Output ([example](https://github.com/kaspersgit/ml_2_sql/tree/main/trained_models/example_titanic))
 The output consists of 4 parts:
 - Correlation matrix of the input features
 - Feature importance graphs (model specific)

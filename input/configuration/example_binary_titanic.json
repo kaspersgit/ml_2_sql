@@ -12,7 +12,8 @@
   "post_params": {
     "calibration": "false",
     "sql_split": "true",
-    "file_type": "png"
+    "file_type": "png",
+    "sql_decimals": 15
   },
   "pre_params": {
     "cv_type": "notimeseriesplit",
