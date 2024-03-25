@@ -23,6 +23,9 @@
 An automated machine learning tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from [interpretml](https://github.com/interpretml/interpret/)) to train models which are explainable and interpretable, so called 'glassbox' models. With the outputted model in SQL format which can be used to put a model in 'production' in an SQL environment.
 This tool can be used by anybody, but is aimed for people who want to do a quick analysis and/or deploy a model in an SQL system. 
 
+<center><img src="docs/media/ml2sql_demo.gif"
+     alt="ML2SQL_demo" height=400 width=600></center>
+
 ## Philosophy:
 - For a quick analysis: 
   - Automated training and model performance tested
