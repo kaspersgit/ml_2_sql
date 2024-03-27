@@ -900,10 +900,7 @@ def plotDistributionViolin(given_name, feature_name, groups, values, data_type):
 
     return
 
-
-def postModellingPlots(
-    clf, model_name, model_type, given_name, post_datasets, post_params
-):
+def modelPerformancePlots(clf, model_name, model_type, given_name, data_type, post_datasets, post_params):
     # Performance and other post modeling plots
     # unpack dict
     X_all = post_datasets["X_all"]
@@ -923,22 +920,26 @@ def postModellingPlots(
         )
 
         # Threshold dependant
-        plotConfusionMatrix(
-            given_name,
-            y_all,
-            y_all_prob,
-            y_all_pred,
-            post_params["file_type"],
-            data_type="train",
-        )
-        plotConfusionMatrix(
-            given_name,
-            y_test_concat,
-            y_test_prob,
-            y_test_pred,
-            post_params["file_type"],
-            data_type="test",
-        )
+        if data_type == 'test':
+            plotConfusionMatrix(
+                given_name,
+                y_test_concat,
+                y_test_prob,
+                y_test_pred,
+                post_params["file_type"],
+                data_type=data_type,
+            )
+
+        elif data_type == 'train':
+            plotConfusionMatrix(
+                given_name,
+                y_all,
+                y_all_prob,
+                y_all_pred,
+                post_params["file_type"],
+                data_type=data_type,
+            )
+
 
         if len(clf["final"].classes_) == 2:
             # Also create pr curve for class 0
@@ -948,69 +949,76 @@ def postModellingPlots(
             y_test_list_neg = [[1 - j for j in i] for i in y_test_list]
             y_test_prob_list_neg = [[1 - j for j in i] for i in y_test_prob_list]
 
-            # Threshold independant
-            plotClassificationCurve(
-                given_name,
-                y_all,
-                y_all_prob,
-                curve_type="roc",
-                data_type="train",
-            )
-            plotClassificationCurve(
-                given_name,
-                y_test_list,
-                y_test_prob_list,
-                curve_type="roc",
-                data_type="test",
-            )
+            # Threshold independent
+            if data_type == 'test':
+                plotClassificationCurve(
+                    given_name,
+                    y_test_list,
+                    y_test_prob_list,
+                    curve_type="roc",
+                    data_type=data_type,
+                )
 
-            plotClassificationCurve(
-                given_name,
-                y_all,
-                y_all_prob,
-                curve_type="pr",
-                data_type="train_class1",
-            )
-            plotClassificationCurve(
-                given_name,
-                y_all_neg,
-                y_all_prob_neg,
-                curve_type="pr",
-                data_type="train_class0",
-            )
+                plotClassificationCurve(
+                    given_name,
+                    y_test_list,
+                    y_test_prob_list,
+                    curve_type="pr",
+                    data_type=f"{data_type}_class_1",
+                )
+                plotClassificationCurve(
+                    given_name,
+                    y_test_list_neg,
+                    y_test_prob_list_neg,
+                    curve_type="pr",
+                    data_type=f"{data_type}_class_0",
+                )
 
-            plotClassificationCurve(
-                given_name,
-                y_test_list,
-                y_test_prob_list,
-                curve_type="pr",
-                data_type="test_class1",
-            )
-            plotClassificationCurve(
-                given_name,
-                y_test_list_neg,
-                y_test_prob_list_neg,
-                curve_type="pr",
-                data_type="test_class0",
-            )
+                plotCalibrationCurve(
+                    given_name,
+                    y_test_list,
+                    y_test_prob_list,
+                    data_type=data_type,
+                )
 
-            plotCalibrationCurve(given_name, y_all, y_all_prob, data_type="train")
-            plotCalibrationCurve(
-                given_name,
-                y_test_list,
-                y_test_prob_list,
-                data_type="test",
-            )
+                plotProbabilityDistribution(
+                    given_name,
+                    y_test_concat,
+                    y_test_prob,
+                    data_type=data_type,
+                )
 
-            plotProbabilityDistribution(
-                given_name, y_all, y_all_prob, data_type="train"
-            )
-            plotProbabilityDistribution(
-                given_name,
-                y_test_concat,
-                y_test_prob,
-                data_type="test",
-            )
+            elif data_type == 'train':
+                plotClassificationCurve(
+                    given_name,
+                    y_all,
+                    y_all_prob,
+                    curve_type="roc",
+                    data_type=data_type,
+                )
+
+                plotClassificationCurve(
+                    given_name,
+                    y_all,
+                    y_all_prob,
+                    curve_type="pr",
+                    data_type=f"{data_type}_class_1",
+                )
+
+                plotClassificationCurve(
+                    given_name,
+                    y_all_neg,
+                    y_all_prob_neg,
+                    curve_type="pr",
+                    data_type=f"{data_type}_class_0",
+                )
+
+                plotCalibrationCurve(given_name, y_all, y_all_prob, data_type=data_type)
+
+                plotProbabilityDistribution(
+                    given_name, y_all, y_all_prob, data_type=data_type
+                )
+
 
         # If multiclass classification
         elif len(clf["final"].classes_) > 2:
@@ -1041,63 +1049,72 @@ def postModellingPlots(
                 # y_all_ova = [0 if x in other_class else 1 for x in y_all]
                 # y_all_prob_ova = [x[class_index] for x in y_all_prob]
 
-                # Threshold independant
-                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='roc', data_type=f'train_class_{c}')
-                plotClassificationCurve(
-                    given_name,
-                    y_test_list_ova,
-                    y_test_prob_list_ova,
-                    curve_type="roc",
-                    data_type=f"test_class_{c}",
-                )
+                # Threshold independent
+                if data_type == 'test':
+                    # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='roc', data_type=f'train_class_{c}')
+                    plotClassificationCurve(
+                        given_name,
+                        y_test_list_ova,
+                        y_test_prob_list_ova,
+                        curve_type="roc",
+                        data_type=f"{data_type}_class_{c}",
+                    )
 
-                # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='pr', data_type='train_class1')
-                plotClassificationCurve(
-                    given_name,
-                    y_test_list_ova,
-                    y_test_prob_list_ova,
-                    curve_type="pr",
-                    data_type=f"test_class_{c}",
-                )
+                    # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='pr', data_type='train_class1')
+                    plotClassificationCurve(
+                        given_name,
+                        y_test_list_ova,
+                        y_test_prob_list_ova,
+                        curve_type="pr",
+                        data_type=f"{data_type}_class_{c}",
+                    )
 
-                # multiClassPlotCalibrationCurvePlotly(given_name, y_all, pd.DataFrame(y_all_prob, columns=clf['final'].classes_), title='fun')
-                plotCalibrationCurve(
-                    given_name,
-                    y_test_list_ova,
-                    y_test_prob_list_ova,
-                    data_type=f"test_class_{c}",
-                )
+                    # multiClassPlotCalibrationCurvePlotly(given_name, y_all, pd.DataFrame(y_all_prob, columns=clf['final'].classes_), title='fun')
+                    plotCalibrationCurve(
+                        given_name,
+                        y_test_list_ova,
+                        y_test_prob_list_ova,
+                        data_type=f"{data_type}_class_{c}",
+                    )
 
-                # plotProbabilityDistribution(given_name, y_all_ova, y_all_prob_ova, data_type='train')
-                plotProbabilityDistribution(
-                    given_name,
-                    y_test_ova,
-                    y_test_prob_ova,
-                    data_type=f"test_class_{c}",
-                )
+                    # plotProbabilityDistribution(given_name, y_all_ova, y_all_prob_ova, data_type='train')
+                    plotProbabilityDistribution(
+                        given_name,
+                        y_test_ova,
+                        y_test_prob_ova,
+                        data_type=f"{data_type}_class_{c}",
+                    )
 
     # if regression
     elif model_type == "regression":
-        plotYhatVsYSave(given_name, y_test_concat, y_test_pred, data_type="test")
-        plotYhatVsYSave(given_name, y_all, y_all_pred, data_type="train")
+        if data_type == 'test':
+            plotYhatVsYSave(given_name, y_test_concat, y_test_pred, data_type=data_type)
+            plotQuantileError(given_name, y_test_concat, y_test_pred, data_type=data_type)
+            regressionMetricsTable(
+                given_name,
+                y_test_concat,
+                y_test_pred,
+                X_all,
+                data_type=data_type,
+            )
+        elif data_type == 'train':
+            plotYhatVsYSave(given_name, y_all, y_all_pred, data_type=data_type)
+            plotQuantileError(given_name, y_all, y_all_pred, data_type=data_type)
+            regressionMetricsTable(
+                given_name,
+                y_all,
+                y_all_pred,
+                X_all,
+                data_type=data_type,
+            )
 
-        plotQuantileError(given_name, y_test_concat, y_test_pred, data_type="test")
-        plotQuantileError(given_name, y_all, y_all_pred, data_type="train")
 
-        regressionMetricsTable(
-            given_name,
-            y_test_concat,
-            y_test_pred,
-            X_all,
-            data_type="test",
-        )
-        regressionMetricsTable(
-            given_name,
-            y_all,
-            y_all_pred,
-            X_all,
-            data_type="train",
-        )
+def postModellingPlots(
+    clf, model_name, model_type, given_name, post_datasets, post_params
+):
+    # Create model performance plots for train and test data
+    for data_type in ['train', 'test']:
+        modelPerformancePlots(clf, model_name, model_type, given_name, data_type, post_datasets, post_params)
 
     # Post modeling plots, specific per model but includes feature importance among others
     globals()[model_name].postModelPlots(

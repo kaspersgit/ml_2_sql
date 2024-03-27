@@ -136,6 +136,8 @@ def make_model(given_name, datasets, model_name, model_type, model_params, post_
 
     # Save target column name as part of model
     clf.target = y_all.name
+    # Save feature names as part of the model
+    clf.feature_names = X_all.columns
 
     # Save model in pickled format
     filename = f"{given_name}/model/{model_name}_{model_type}.sav"

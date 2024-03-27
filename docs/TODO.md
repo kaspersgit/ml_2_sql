@@ -29,3 +29,4 @@ Checks and config
   - Create a script which cleans a dataset so that it can be used by the tool
   - Next to SQL, have a model be outputted in python using only if else statements
   - Have some local explainations of actual predictions (as part of modeltester script)
+  - Have the model instance save feature names under model.feature_names

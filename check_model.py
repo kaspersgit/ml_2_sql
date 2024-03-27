@@ -72,6 +72,7 @@ if not os.path.exists(destination_path.split(csv_name)[0]):
 try:
     os.makedirs(destination_path)
     os.makedirs(f"{destination_path}/performance")
+    os.makedirs(f"{destination_path}/local_explanations")
 
 except FileExistsError:
     sys.exit(f"Error: Dataset is already tested on this model: {destination_path}")
