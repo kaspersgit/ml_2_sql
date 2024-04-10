@@ -4,6 +4,7 @@ from imblearn.over_sampling import RandomOverSampler, SMOTE, SMOTENC
 from utils.feature_selection.correlations import (
     plotPearsonCorrelation,
     plotCramervCorrelation,
+    plotXiCorrelation,
 )
 import logging
 
@@ -101,16 +102,6 @@ def cleanAndCastColumns(data, feature_cols, target_col, model_name, model_type):
     return _data.reset_index(drop=True)
 
 
-def imbalanceness(labels):
-    classes_count = labels.value_counts()
-    max_class_size = classes_count.max()
-    min_class_size = classes_count.min()
-    total_size = classes_count.sum()
-    nclasses = len(classes_count)
-
-    return (max_class_size - min_class_size) / (total_size - nclasses)
-
-
 def pre_process_kfold(
     given_name,
     data,
@@ -140,6 +131,7 @@ def pre_process_kfold(
     plotCramervCorrelation(
         data_clean[feature_cols], given_name, post_params["file_type"]
     )
+    plotXiCorrelation(data_clean[feature_cols], given_name, post_params["file_type"])
 
     # create kfolds in a statified manner
     from sklearn.model_selection import StratifiedKFold, KFold, TimeSeriesSplit
@@ -237,7 +229,11 @@ def pre_process_kfold(
         # Nr rows of training set
         logger.info(f"Nr rows train set: {len(X_train)}")
         logger.info(f"Nr rows test set: {len(X_test)}")
-        logger.info(f"imbalanceness train: \n {y_train.value_counts()}")
+
+        if y_train.nunique() > 10:
+            logger.info(f"Mean: {np.mean(y_train)} \nStddev: {np.std(y_train)}")
+        else:
+            logger.info(f"imbalanceness train: \n {y_train.value_counts()}")
 
         # append to the lists
         X_train_list.append(X_train)

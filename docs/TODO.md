@@ -7,7 +7,7 @@ Checks and config
   - Add pass through columns
   - Improve auto config maker
 
-- Performance monitoring
+- Graphs and visuals
   - Add performance summary for easy and quick comparison (including label count, auc pr & roc, best f1-score, etc)
   - Add feature over/under fitting plot (https://towardsdatascience.com/which-of-your-features-are-overfitting-c46d0762e769)
   - Make distribution plot grouped instead of overlaid or stacked (maybe switch to plotly histogram)

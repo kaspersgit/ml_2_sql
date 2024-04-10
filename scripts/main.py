@@ -8,7 +8,6 @@ from utils.modelling.main_modeler import make_model
 
 # The translations to SQL (grey as we refer to them dynamically)
 from utils.output_scripts import decision_tree_as_code  # noqa: F401
-from utils.output_scripts import decision_rule_as_code  # noqa: F401
 from utils.output_scripts import ebm_as_code  # noqa: F401
 from utils.output_scripts import l_regression_as_code  # noqa: F401
 

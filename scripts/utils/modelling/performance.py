@@ -20,7 +20,6 @@ from sklearn.metrics import (
 
 # The actual algorithms (grey as we refer to them dynamically)
 from utils.modelling.models import ebm  # noqa: F401
-from utils.modelling.models import decision_rule  # noqa: F401
 from utils.modelling.models import decision_tree  # noqa: F401
 from utils.modelling.models import l_regression  # noqa: F401
 
@@ -900,7 +899,10 @@ def plotDistributionViolin(given_name, feature_name, groups, values, data_type):
 
     return
 
-def modelPerformancePlots(clf, model_name, model_type, given_name, data_type, post_datasets, post_params):
+
+def modelPerformancePlots(
+    clf, model_name, model_type, given_name, data_type, post_datasets, post_params
+):
     # Performance and other post modeling plots
     # unpack dict
     X_all = post_datasets["X_all"]
@@ -920,7 +922,7 @@ def modelPerformancePlots(clf, model_name, model_type, given_name, data_type, po
         )
 
         # Threshold dependant
-        if data_type == 'test':
+        if data_type == "test":
             plotConfusionMatrix(
                 given_name,
                 y_test_concat,
@@ -930,7 +932,7 @@ def modelPerformancePlots(clf, model_name, model_type, given_name, data_type, po
                 data_type=data_type,
             )
 
-        elif data_type == 'train':
+        elif data_type == "train":
             plotConfusionMatrix(
                 given_name,
                 y_all,
@@ -939,7 +941,6 @@ def modelPerformancePlots(clf, model_name, model_type, given_name, data_type, po
                 post_params["file_type"],
                 data_type=data_type,
             )
-
 
         if len(clf["final"].classes_) == 2:
             # Also create pr curve for class 0
@@ -950,7 +951,7 @@ def modelPerformancePlots(clf, model_name, model_type, given_name, data_type, po
             y_test_prob_list_neg = [[1 - j for j in i] for i in y_test_prob_list]
 
             # Threshold independent
-            if data_type == 'test':
+            if data_type == "test":
                 plotClassificationCurve(
                     given_name,
                     y_test_list,
@@ -988,7 +989,7 @@ def modelPerformancePlots(clf, model_name, model_type, given_name, data_type, po
                     data_type=data_type,
                 )
 
-            elif data_type == 'train':
+            elif data_type == "train":
                 plotClassificationCurve(
                     given_name,
                     y_all,
@@ -1018,7 +1019,6 @@ def modelPerformancePlots(clf, model_name, model_type, given_name, data_type, po
                 plotProbabilityDistribution(
                     given_name, y_all, y_all_prob, data_type=data_type
                 )
-
 
         # If multiclass classification
         elif len(clf["final"].classes_) > 2:
@@ -1050,7 +1050,7 @@ def modelPerformancePlots(clf, model_name, model_type, given_name, data_type, po
                 # y_all_prob_ova = [x[class_index] for x in y_all_prob]
 
                 # Threshold independent
-                if data_type == 'test':
+                if data_type == "test":
                     # plotClassificationCurve(given_name, y_all_ova, y_all_prob_ova, curve_type='roc', data_type=f'train_class_{c}')
                     plotClassificationCurve(
                         given_name,
@@ -1087,9 +1087,11 @@ def modelPerformancePlots(clf, model_name, model_type, given_name, data_type, po
 
     # if regression
     elif model_type == "regression":
-        if data_type == 'test':
+        if data_type == "test":
             plotYhatVsYSave(given_name, y_test_concat, y_test_pred, data_type=data_type)
-            plotQuantileError(given_name, y_test_concat, y_test_pred, data_type=data_type)
+            plotQuantileError(
+                given_name, y_test_concat, y_test_pred, data_type=data_type
+            )
             regressionMetricsTable(
                 given_name,
                 y_test_concat,
@@ -1097,7 +1099,7 @@ def modelPerformancePlots(clf, model_name, model_type, given_name, data_type, po
                 X_all,
                 data_type=data_type,
             )
-        elif data_type == 'train':
+        elif data_type == "train":
             plotYhatVsYSave(given_name, y_all, y_all_pred, data_type=data_type)
             plotQuantileError(given_name, y_all, y_all_pred, data_type=data_type)
             regressionMetricsTable(
@@ -1113,8 +1115,16 @@ def postModellingPlots(
     clf, model_name, model_type, given_name, post_datasets, post_params
 ):
     # Create model performance plots for train and test data
-    for data_type in ['train', 'test']:
-        modelPerformancePlots(clf, model_name, model_type, given_name, data_type, post_datasets, post_params)
+    for data_type in ["train", "test"]:
+        modelPerformancePlots(
+            clf,
+            model_name,
+            model_type,
+            given_name,
+            data_type,
+            post_datasets,
+            post_params,
+        )
 
     # Post modeling plots, specific per model but includes feature importance among others
     globals()[model_name].postModelPlots(

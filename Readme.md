@@ -49,7 +49,7 @@ This tool can be used by anybody, but is aimed for people who want to do a quick
 <summary><strong>Installation</strong></summary>
 <br>
 
-  1. Make sure you have python >= 3.8 installed
+  1. Make sure you have python >= 3.8 and git installed
   2. Clone Github repo to your local machine and cd into folder, run:
       ```
       git clone git@github.com:kaspersgit/ml_2_sql.git

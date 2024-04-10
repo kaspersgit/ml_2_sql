@@ -56,12 +56,36 @@ def plotClustermap(dfc, matrix_type, given_name, file_type):
         hovertext.append(list())
         for xi, xx in enumerate(x):
             hovertext[-1].append(
-                "x: {}<br />y: {}<br />corr.: {}".format(xx, yy, z[yy][xx])
+                "x: {}<br />y: {}<br />corr.: {}".format(xx, yy, z[xx][yy])
             )
+
+    # Figure out where correlation of 0 falls
+    # Different color scale based on correlation coefficient used (some range from -1 to 1 and some from 0 to 1)
+    if "pearson" in matrix_type:
+        # Create custom colorscale
+        colorscale = [
+            [0, "rgba(214, 39, 40, 0.85)"],
+            [0.5, "rgba(255, 255, 255, 0.85)"],
+            [1, "rgba(6,54,21, 0.85)"],
+        ]
+        min_value = -1
+        max_value = 1
+    else:
+        # Create custom colorscale
+        colorscale = [[0, "rgba(255, 255, 255, 0.85)"], [1, "rgba(6,54,21, 0.85)"]]
+        min_value = 0
+        max_value = 1
 
     heatmap = [
         go.Heatmap(
-            x=x, y=y, z=z, colorscale="Blues", hoverinfo="text", hovertext=hovertext
+            x=x,
+            y=y,
+            z=z,
+            colorscale=colorscale,
+            zmin=min_value,  # Set the minimum value for the colorscale
+            zmax=max_value,  # Set the maximum value for the colorscale
+            hoverinfo="text",
+            hovertext=hovertext,
         )
     ]
 
@@ -84,7 +108,7 @@ def plotClustermap(dfc, matrix_type, given_name, file_type):
     # Edit xaxis
     fig.update_layout(
         xaxis={
-            "domain": [0.15, 1],
+            "domain": [0.2, 1],
             "mirror": False,
             "showgrid": False,
             "showline": False,
@@ -95,7 +119,7 @@ def plotClustermap(dfc, matrix_type, given_name, file_type):
     # Edit xaxis2
     fig.update_layout(
         xaxis2={
-            "domain": [0, 0.15],
+            "domain": [0, 0.2],
             "mirror": False,
             "showgrid": False,
             "showline": False,
@@ -108,7 +132,7 @@ def plotClustermap(dfc, matrix_type, given_name, file_type):
     # Edit yaxis
     fig.update_layout(
         yaxis={
-            "domain": [0, 0.85],
+            "domain": [0, 0.8],
             "mirror": False,
             "showgrid": False,
             "showline": False,
@@ -120,7 +144,7 @@ def plotClustermap(dfc, matrix_type, given_name, file_type):
     # Edit yaxis2
     fig.update_layout(
         yaxis2={
-            "domain": [0.825, 0.975],
+            "domain": [0.8, 0.95],
             "mirror": False,
             "showgrid": False,
             "showline": False,
@@ -172,7 +196,7 @@ def plotPearsonCorrelation(df, given_name, file_type):
     data_corr.fillna(0, inplace=True)
     data_corr = np.clip(data_corr, -1, 1)
 
-    matrix_type = "numeric"
+    matrix_type = "pearson_numeric"
 
     # Plot matrix
     plotClustermap(data_corr, matrix_type, given_name, file_type)
@@ -274,10 +298,120 @@ def plotCramervCorrelation(df, given_name, file_type):
     df_cramerv = df_cramerv.astype(float)
 
     # set matrix data type
-    matrix_type = "categorical"
+    matrix_type = "cramerv_categorical"
 
     # Plot matrix
     plotClustermap(df_cramerv, matrix_type, given_name, file_type)
 
     # Success message
     logger.info("Created CramerV correlation matrix (for categorical values)")
+
+
+# Xi correlation (paper: https://arxiv.org/pdf/1909.10140.pdf)
+def xicor_original(X, Y, ties=True):
+    np.random.seed(42)
+
+    # Convert to array if list
+    if isinstance(X, list):
+        X = np.array(X)
+    if isinstance(Y, list):
+        Y = np.array(Y)
+
+    n = len(X)
+    order = np.array([i[0] for i in sorted(enumerate(X), key=lambda x: x[1])])
+    if ties:
+        L = np.array([sum(y >= Y[order]) for y in Y[order]])
+        r = L.copy()
+        for j in range(n):
+            if sum([r[j] == r[i] for i in range(n)]) > 1:
+                tie_index = np.array([r[j] == r[i] for i in range(n)])
+                r[tie_index] = np.random.choice(
+                    r[tie_index] - np.arange(0, sum([r[j] == r[i] for i in range(n)])),
+                    sum(tie_index),
+                    replace=False,
+                )
+        return 1 - n * sum(abs(r[1:] - r[: n - 1])) / (2 * sum(L * (n - L)))
+    else:
+        r = np.array([sum(y >= Y[order]) for y in Y[order]])
+        return 1 - 3 * sum(abs(r[1:] - r[: n - 1])) / (n**2 - 1)
+
+
+# Faster implementation 99.9% similar to above
+def xicor(X, Y, ties=True):
+    np.random.seed(42)
+    X = np.asarray(X)
+    Y = np.asarray(Y)
+    n = len(X)
+    order = X.argsort()
+    Y_sorted = Y[order]
+    if ties:
+        L = np.searchsorted(Y_sorted, Y_sorted, side="right")
+        r = L.copy()
+        for j in range(n):
+            tie_index = r == r[j]
+            tie_count = tie_index.sum()
+            if tie_count > 1:
+                tie_adjustment = np.arange(tie_count)
+                np.random.shuffle(tie_adjustment)
+                r[tie_index] = r[tie_index] - tie_adjustment
+        return 1 - n * sum(abs(r[1:] - r[: n - 1])) / (2 * sum(L * (n - L)))
+    else:
+        r = np.searchsorted(Y_sorted, Y_sorted, side="right")
+        return 1 - 3 * sum(abs(r[1:] - r[: n - 1])) / (n**2 - 1)
+
+
+def plotXiCorrelation(df, given_name, file_type):
+    """
+    Creates a Xi correlation matrix using numerical columns of a Pandas DataFrame,
+    and generates a clustermap plot of the matrix using the plotClustermap function.
+
+    Args:
+        df (Pandas DataFrame): The DataFrame containing the data to analyze.
+        given_name (str): The name of the project, used in the output file name.
+        file_type (str): The file type to save the output as ('png' or 'html').
+
+    Returns:
+        None
+
+    Raises:
+        None
+
+    """
+    # Numerical values
+    # Creating pearson correlation matrix
+    data_ = df.select_dtypes(exclude=["object", "category", "bool"]).copy()
+
+    # if above dataframe is empty then skip function
+    if data_.empty:
+        logger.info("No numerical variables found")
+        return
+    elif data_.shape[1] == 1:
+        logger.info(
+            "Skip Xi correlation matrix due to fewer than 2 numerical variables found"
+        )
+        return
+
+    cols = data_.columns
+    data_corr = pd.DataFrame(columns=cols, index=cols)
+    for i in cols:
+        for j in cols:
+            if i == j:
+                xicorr = 1
+            else:
+                xicorr = xicor(data_[i], data_[j])
+
+            data_corr.at[i, j] = xicorr
+
+    data_corr.fillna(0, inplace=True)
+    data_corr = np.clip(data_corr, 0, 1)
+
+    # cast matrix content to float
+    data_corr = data_corr.astype(float)
+
+    matrix_type = "xi_numeric"
+
+    # Plot matrix
+    plotClustermap(data_corr, matrix_type, given_name, file_type)
+
+    # success message
+    logger.info("Created Xi correlation matrix (for numerical features)")
