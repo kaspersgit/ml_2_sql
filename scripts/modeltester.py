@@ -152,14 +152,19 @@ def apply_model(args):
     sample.sort()
 
     # TODO allow user to choose row to explain (and clear way of recognising which row)
-    file_type = "png" # hardcoded for now as there is no config for this yet
+    file_type = "png"  # hardcoded for now as there is no config for this yet
     for s in sample:
         plotly_fig = model.explain_local(df).visualize(s)
         if file_type == "png":
-            plotly_fig.write_image(f"{destination}/local_explanations/explain_row_{s}.png")
+            plotly_fig.write_image(
+                f"{destination}/local_explanations/explain_row_{s}.png"
+            )
         elif file_type == "html":
             # or as html file
-            plotly_fig.write_html(f"{destination}/local_explanations/explain_row_{s}.html")
+            plotly_fig.write_html(
+                f"{destination}/local_explanations/explain_row_{s}.html"
+            )
+
 
 if __name__ == "__main__":
     # Get arguments from the CLI
