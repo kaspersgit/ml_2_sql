@@ -1,6 +1,7 @@
 import joblib
 import pandas as pd
 import logging
+import random
 import numpy as np
 
 from utils.helper_functions.parsing_arguments import GetArgs
@@ -144,6 +145,25 @@ def apply_model(args):
         plotQuantileError(destination, y_true, y_pred, data_type="test")
 
         regressionMetricsTable(destination, y_true, y_pred, X, data_type="test")
+
+    # Save local explanations (max 10)
+    nr_rows = range(0, len(df))
+    sample = random.sample(nr_rows, 10)
+    sample.sort()
+
+    # TODO allow user to choose row to explain (and clear way of recognising which row)
+    file_type = "png"  # hardcoded for now as there is no config for this yet
+    for s in sample:
+        plotly_fig = model.explain_local(df).visualize(s)
+        if file_type == "png":
+            plotly_fig.write_image(
+                f"{destination}/local_explanations/explain_row_{s}.png"
+            )
+        elif file_type == "html":
+            # or as html file
+            plotly_fig.write_html(
+                f"{destination}/local_explanations/explain_row_{s}.html"
+            )
 
 
 if __name__ == "__main__":

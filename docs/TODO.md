@@ -7,7 +7,7 @@ Checks and config
   - Add pass through columns
   - Improve auto config maker
 
-- Performance monitoring
+- Graphs and visuals
   - Add performance summary for easy and quick comparison (including label count, auc pr & roc, best f1-score, etc)
   - Add feature over/under fitting plot (https://towardsdatascience.com/which-of-your-features-are-overfitting-c46d0762e769)
   - Make distribution plot grouped instead of overlaid or stacked (maybe switch to plotly histogram)
@@ -29,3 +29,4 @@ Checks and config
   - Create a script which cleans a dataset so that it can be used by the tool
   - Next to SQL, have a model be outputted in python using only if else statements
   - Have some local explainations of actual predictions (as part of modeltester script)
+  - Have the model instance save feature names under model.feature_names

@@ -28,6 +28,7 @@ def setup_file_structure():
         destination_path = f"{OUTPUT_PATH}/tested_datasets/{csv_name}"
         os.makedirs(destination_path)
         os.makedirs(f"{destination_path}/performance")
+        os.makedirs(f"{destination_path}/local_explanations")
 
     except FileExistsError:
         sys.exit("Error: Model directory already exists")

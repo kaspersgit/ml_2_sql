@@ -8,7 +8,6 @@ from utils.modelling.main_modeler import make_model
 
 # The translations to SQL (grey as we refer to them dynamically)
 from utils.output_scripts import decision_tree_as_code  # noqa: F401
-from utils.output_scripts import decision_rule_as_code  # noqa: F401
 from utils.output_scripts import ebm_as_code  # noqa: F401
 from utils.output_scripts import l_regression_as_code  # noqa: F401
 
@@ -21,86 +20,84 @@ from utils.pre_processing.pre_process import pre_process_kfold
 
 
 def main(args):
-    # Set random seed
-    random_seed = 42
+    """
+    Main function to train machine learning models and save the trained model along with its SQL representation.
 
-    # get given name from the first given argument
-    given_name = args.name
+    Args:
+        args (argparse.Namespace): Command-line arguments parsed by argparse.
+    """
 
     # Set logger
-    setup_logger(given_name + "/logging.log")
+    setup_logger(args.name + "/logging.log")
     logger = logging.getLogger(__name__)
+    logger.info(f"Script input arguments: {args}")
 
-    logger.info(f"Script input arguments: \n{args}")
-
-    # Load in data
+    # Load data
+    logger.info(f"Loading data from {args.data_path}...")
     data = pd.read_csv(
         args.data_path,
         keep_default_na=False,
         na_values=["", "N/A", "NULL", "None", "NONE"],
     )
 
-    # Get configuration file
+    # Load configuration
+    logger.info(f"Loading configuration from {args.configuration}...")
     with open(args.configuration) as json_file:
         configuration = json.load(json_file)
-
-    # get model name
-    model_name = args.model_name
 
     # Handle the configuration file
     target_col, feature_cols, model_params, pre_params, post_params = config_handling(
         configuration, data
     )
 
-    # Log parameters
-    logger.info(f"Configuration file content: \n{configuration}")
+    logger.info(f"Configuration file content: {configuration}")
 
-    # Perform some basic checks
+    # Perform input checks
     checkInputData(data, configuration)
 
-    # set model type based on target value
-    if (data[target_col].dtype == "float") | (
-        (data[target_col].dtype == "int") & (data[target_col].nunique() > 10)
+    # Determine model type
+    if (data[target_col].dtype == "float") or (
+        (data[target_col].dtype == "int") and (data[target_col].nunique() > 10)
     ):
         model_type = "regression"
     else:
         model_type = "classification"
 
-        logger.info(f"Target column has {data[target_col].nunique()} unique values")
+    logger.info(f"Target column has {data[target_col].nunique()} unique values")
+    logger.info(f"This problem will be treated as a {model_type} problem")
 
-    logger.info(
-        "This problem will be treated as a {model_type} problem".format(
-            model_type=model_type
-        )
-    )
-
-    # pre process data
+    # Preprocess data
+    logger.info("Preprocessing data...")
     datasets = pre_process_kfold(
-        given_name,
+        args.name,
         data,
         target_col,
         feature_cols,
-        model_name=model_name,
+        model_name=args.model_name,
         model_type=model_type,
         pre_params=pre_params,
         post_params=post_params,
-        random_seed=random_seed,
+        random_seed=42,
     )
 
-    # train decision tree and figures and save them
+    # Train model
+    logger.info(f"Training {args.model_name} model...")
     clf = make_model(
-        given_name,
+        args.name,
         datasets,
-        model_name=model_name,
+        model_name=args.model_name,
         model_type=model_type,
         model_params=model_params,
         post_params=post_params,
     )
 
     # Create SQL version of model and save it
-    globals()[model_name + "_as_code"].save_model_and_extras(
-        clf, given_name, post_params
+    logger.info(f"Saving {args.model_name} model and its SQL representation...")
+    globals()[f"{args.model_name}_as_code"].save_model_and_extras(
+        clf, args.name, post_params
     )
+
+    logger.info("Script finished.")
 
 
 # Run function
