@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies  
         run: |  
           python -m pip install --upgrade pip  
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi  
+          if [ -f docs/requirements-dev.txt ]; then pip install -r docs/requirements-dev.txt; fi  
       - name: Lint with Ruff  
         run: |  
           pip install ruff  
@@ -26,7 +26,4 @@ jobs:
         continue-on-error: true  
       - name: Test with pytest  
         run: |  
-          coverage run -m pytest  -v -s  
-      - name: Generate Coverage Report  
-        run: |  
-          coverage report -m
+          pytest  -v -s
