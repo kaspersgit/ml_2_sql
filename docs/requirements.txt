@@ -4,9 +4,7 @@
 #
 #    pip-compile --output-file=docs/requirements.txt pyproject.toml
 #
---index-url https://artifactory-edge.ess.midasplayer.com/artifactory/api/pypi/pypi-all/pypi
---extra-index-url https://pypi.org/simple
---trusted-host artifactory.ess.midasplayer.com
+--index-url https://pypi.org/simple
 
 appnope==0.1.4
     # via ipykernel

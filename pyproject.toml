@@ -39,5 +39,6 @@ dev = [
     "pytest",
     "pip-tools",
     "ruff",
-    "pre-commit"
+    "pre-commit",
+    "coverage"
 ]
