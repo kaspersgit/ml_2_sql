@@ -19,15 +19,14 @@ jobs:
         run: |  
           python -m pip install --upgrade pip  
           python -m venv .ml2sql
-          if [ -f docs/requirements-dev.txt ]; then .ml2sql/bin/pip install -r docs/requirements-dev.txt; fi  
+          if [ -f docs/requirements-dev.txt ]; then .ml2sql/bin/python -m pip install --index-url https://pypi.org/simple -r docs/requirements-dev.txt; fi  
       - name: Lint with Ruff  
         run: |  
-          pip install ruff  
           ruff check
         continue-on-error: true  
       - name: Test with pytest  
         run: |  
-          coverage run -m pytest  -v -s  
+          .ml2sql/bin/coverage run -m pytest  -v -s  
       - name: Generate Coverage Report  
         run: |  
-          coverage report -m
+          .ml2sql/bin/coverage report -m
