@@ -21,9 +21,9 @@ jobs:
               python -m pip install --upgrade pip  
               python -m venv .ml2sql
               if [ "$RUNNER_OS" == "Windows" ]; then
-                    if [Test-Path "docs\requirements-dev.txt"]; then .ml2sql\Scripts\python.exe -m pip install --index-url https://pypi.org/simple -r "docs\requirements-dev.txt"; fi
+                    ".ml2sql\Scripts\python.exe" -m pip install --index-url https://pypi.org/simple -r "docs\requirements-dev.txt"
               else
-                    if [ -f docs/requirements-dev.txt ]; then .ml2sql/bin/python -m pip install --index-url https://pypi.org/simple -r docs/requirements-dev.txt; fi  
+                    .ml2sql/bin/python -m pip install --index-url https://pypi.org/simple -r docs/requirements-dev.txt  
               fi
         shell: bash
       - name: Lint with Ruff  
