@@ -19,7 +19,7 @@ jobs:
       - name:  Install dependencies ${{ matrix.os }}
         run:   |
               if [ "$RUNNER_OS" == "Windows" ]; then
-                    if (Test-Path "docs\requirements-dev.txt") { .ml2sql\Scripts\python.exe -m pip install --index-url https://pypi.org/simple -r "docs\requirements-dev.txt" }
+                    if [Test-Path "docs\requirements-dev.txt"]; then .ml2sql\Scripts\python.exe -m pip install --index-url https://pypi.org/simple -r "docs\requirements-dev.txt"; fi
               else
                     if [ -f docs/requirements-dev.txt ]; then .ml2sql/bin/python -m pip install --index-url https://pypi.org/simple -r docs/requirements-dev.txt; fi  
                     exit 1
