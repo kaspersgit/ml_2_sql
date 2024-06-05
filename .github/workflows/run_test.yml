@@ -16,33 +16,41 @@ jobs:
         uses: actions/setup-python@v5
         with:  
           python-version: ${{ matrix.python-version }}  
-          allow-prereleases: true
-      - name: Install dependencies (Linux/macOS)
-        run: |  
-          python -m pip install --upgrade pip  
-          python -m venv .ml2sql
-          if [ -f docs/requirements-dev.txt ]; then .ml2sql/bin/python -m pip install --index-url https://pypi.org/simple -r docs/requirements-dev.txt; fi  
-        shell: bash  # This step uses bash for Linux/macOS
-      - name: Install dependencies (Windows)
-        run: |  
-          # Use powershell commands for Windows
-          python -m pip install --upgrade pip  
-          python -m venv .ml2sql
-          if (Test-Path "docs\requirements-dev.txt") { .ml2sql\Scripts\python.exe -m pip install --index-url https://pypi.org/simple -r "docs\requirements-dev.txt" }
-        shell: pwsh  # This step uses powershell for Windows
+      - name:  Install dependencies ${{ matrix.os }}
+        run:   |
+              if [ "$RUNNER_OS" == "Windows" ]; then
+                    if (Test-Path "docs\requirements-dev.txt") { .ml2sql\Scripts\python.exe -m pip install --index-url https://pypi.org/simple -r "docs\requirements-dev.txt" }
+              else
+                    if [ -f docs/requirements-dev.txt ]; then .ml2sql/bin/python -m pip install --index-url https://pypi.org/simple -r docs/requirements-dev.txt; fi  
+                    exit 1
+              fi
+        shell: bash
       - name: Lint with Ruff  
-        run: |  
-          .ml2sql/bin/ruff check
+        run: |
+              if [ "$RUNNER_OS" == "Windows" ]; then
+                    .ml2sql/Scripts/ruff check
+              else
+                    .ml2sql/bin/ruff check
+                    exit 1
+              fi  
+        shell: bash 
         continue-on-error: true  
       - name: Test with pytest (Linux/macOS)  
         run: |  
-          .ml2sql/bin/coverage run -m pytest  -v -s  
-        shell: bash  # This step uses bash for Linux/macOS
-      - name: Test with pytest (Windows)  
-        run: |  
-          # Use powershell equivalent for coverage run
-          & .ml2sql\Scripts\coverage.exe run -m pytest  -v -s
-        shell: pwsh  # This step uses powershell for Windows
+              if [ "$RUNNER_OS" == "Windows" ]; then
+                    .ml2sql\Scripts\coverage.exe run -m pytest  -v -s
+              else
+                    .ml2sql/bin/coverage run -m pytest  -v -s  
+                    exit 1
+              fi  
+        shell: bash 
       - name: Generate Coverage Report  
         run: |  
-          .ml2sql/bin/coverage report -m
+              if [ "$RUNNER_OS" == "Windows" ]; then
+                    .ml2sql\Scripts\coverage.exe report -m
+              else
+                    .ml2sql/bin/coverage report -m
+                    exit 1
+              fi  
+        shell: bash  
+          
