@@ -40,7 +40,7 @@ jobs:
       - name: Test with pytest (Linux/macOS)  
         run: |  
               if [ "$RUNNER_OS" == "Windows" ]; then
-                    ".ml2sql\Scripts\coverage.exe" run -m pytest  -v -s
+                    ".ml2sql\Scripts\coverage" run -m pytest  -v -s
               else
                     .ml2sql/bin/coverage run -m pytest  -v -s  
                     exit 1
@@ -49,7 +49,7 @@ jobs:
       - name: Generate Coverage Report  
         run: |  
               if [ "$RUNNER_OS" == "Windows" ]; then
-                    ".ml2sql\Scripts\coverage.exe" report -m
+                    ".ml2sql\Scripts\coverage" report -m
               else
                     .ml2sql/bin/coverage report -m
                     exit 1
