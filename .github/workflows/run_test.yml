@@ -1,4 +1,4 @@
-name: Run Unit Test via Pytest on Linux, Unix and Windows
+name: Run Tests via Pytest on Linux, Unix and Windows
 
 on: [push]  
 
@@ -17,7 +17,7 @@ jobs:
         with:  
           python-version: ${{ matrix.python-version }}  
       - name:  Install dependencies ${{ matrix.os }}
-        run:   |
+        run: |
               python -m pip install --upgrade pip  
               python -m venv .ml2sql
               if [ "$RUNNER_OS" == "Windows" ]; then
@@ -37,6 +37,7 @@ jobs:
         continue-on-error: true  
       - name: Test with pytest
         run: |  
+              "scripts" >> $GITHUB_PATH
               if [ "$RUNNER_OS" == "Windows" ]; then
                     ".ml2sql\Scripts\pip" install pytest pytest-cov
                     ".ml2sql\Scripts\pytest" --doctest-modules --junitxml=junit/test-results.xml --cov-report=html
