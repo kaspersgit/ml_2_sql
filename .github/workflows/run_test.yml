@@ -40,10 +40,10 @@ jobs:
               echo "scripts" >> $GITHUB_PATH
               if [ "$RUNNER_OS" == "Windows" ]; then
                     ".ml2sql\Scripts\activate"
+                    pip freeze
                     coverage run -m pytest -s
               else
                     source .ml2sql/bin/activate
-                    pip install pytest-cov
                     coverage run -m pytest -s
               fi  
         shell: bash 
