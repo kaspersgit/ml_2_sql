@@ -39,7 +39,7 @@ jobs:
         run: |  
               if [ "$RUNNER_OS" == "Windows" ]; then
                     ".ml2sql\Scripts\activate"
-                    coverage run -m pytest -s
+                    pytest -s
               else
                     source .ml2sql/bin/activate
                     coverage run -m pytest -s
