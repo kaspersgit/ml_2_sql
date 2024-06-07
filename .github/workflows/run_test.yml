@@ -21,7 +21,7 @@ jobs:
               python -m pip install --upgrade pip  
               python -m venv .ml2sql
               if [ "$RUNNER_OS" == "Windows" ]; then
-                    ".ml2sql\Scripts\python.exe" -m pip install --index-url https://pypi.org/simple -r "docs\requirements-dev.txt"
+                    ".ml2sql\Scripts\python" -m pip install --index-url https://pypi.org/simple -r "docs\requirements-dev.txt"
               else
                     .ml2sql/bin/python -m pip install --index-url https://pypi.org/simple -r docs/requirements-dev.txt  
               fi
@@ -37,10 +37,8 @@ jobs:
         continue-on-error: true  
       - name: Test with pytest
         run: |  
-              echo "scripts" >> $GITHUB_PATH
               if [ "$RUNNER_OS" == "Windows" ]; then
                     ".ml2sql\Scripts\activate"
-                    ls .ml2sql/lib/python3.11/site-packages/
                     coverage run -m pytest -s
               else
                     source .ml2sql/bin/activate
