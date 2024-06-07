@@ -39,18 +39,22 @@ jobs:
         run: |  
               echo "scripts" >> $GITHUB_PATH
               if [ "$RUNNER_OS" == "Windows" ]; then
-                    ".ml2sql\Scripts\pip" install pytest pytest-cov
-                    ".ml2sql\Scripts\pytest" --doctest-modules --junitxml=junit/test-results.xml --cov-report=html
+                    ".ml2sql\Scripts\activate"
+                    pip install pytest pytest-cov
+                    pytest -s --doctest-modules --junitxml=junit/test-results.xml --cov-report=html
               else
-                    .ml2sql/bin/pip install pytest pytest-cov
-                    .ml2sql/bin/pytest --doctest-modules --junitxml=junit/test-results.xml --cov-report=html  
+                    .ml2sql/bin/activate
+                    pip install pytest pytest-cov
+                    pytest --doctest-modules --junitxml=junit/test-results.xml --cov-report=html  
               fi  
         shell: bash 
       - name: Generate Coverage Report  
         run: |  
               if [ "$RUNNER_OS" == "Windows" ]; then
+                    ".ml2sql\Scripts\activate"
                     ".ml2sql\Scripts\coverage" report -m
               else
+                    .ml2sql/bin/activate
                     .ml2sql/bin/coverage report -m
               fi  
         shell: bash  
