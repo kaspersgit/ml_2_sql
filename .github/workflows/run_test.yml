@@ -41,11 +41,11 @@ jobs:
               if [ "$RUNNER_OS" == "Windows" ]; then
                     ".ml2sql\Scripts\activate"
                     pip install pytest pytest-cov
-                    pytest -s --doctest-modules --junitxml=junit/test-results.xml --cov-report=html
+                    pytest -s --cov-report=html
               else
                     source .ml2sql/bin/activate
                     pip install pytest pytest-cov
-                    pytest -s --doctest-modules --junitxml=junit/test-results.xml --cov-report=html  
+                    pytest -s --cov-report=html  
               fi  
         shell: bash 
       - name: Generate Coverage Report  
