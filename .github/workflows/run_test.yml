@@ -48,14 +48,4 @@ jobs:
                     pytest -s --cov-report=html  
               fi  
         shell: bash 
-      - name: Generate Coverage Report  
-        run: |  
-              if [ "$RUNNER_OS" == "Windows" ]; then
-                    ".ml2sql\Scripts\activate"
-                    ".ml2sql\Scripts\coverage" report -m
-              else
-                    source .ml2sql/bin/activate
-                    .ml2sql/bin/coverage report -m
-              fi  
-        shell: bash  
           
