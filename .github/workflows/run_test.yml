@@ -45,7 +45,7 @@ jobs:
               else
                     source .ml2sql/bin/activate
                     pip install pytest pytest-cov
-                    pytest --doctest-modules --junitxml=junit/test-results.xml --cov-report=html  
+                    pytest -s --doctest-modules --junitxml=junit/test-results.xml --cov-report=html  
               fi  
         shell: bash 
       - name: Generate Coverage Report  
