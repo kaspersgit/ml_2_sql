@@ -40,7 +40,8 @@ jobs:
               echo "scripts" >> $GITHUB_PATH
               if [ "$RUNNER_OS" == "Windows" ]; then
                     ".ml2sql\Scripts\activate"
-                    pip install pytest pytest-cov joblib pandas
+                    pip install pytest pytest-cov
+                    pip install -r "docs\requirements-dev.txt"
                     pytest -s --cov-report=html
               else
                     source .ml2sql/bin/activate
