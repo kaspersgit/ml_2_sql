@@ -43,7 +43,7 @@ jobs:
                     pip install pytest pytest-cov
                     pytest -s --doctest-modules --junitxml=junit/test-results.xml --cov-report=html
               else
-                    .ml2sql/bin/activate
+                    source .ml2sql/bin/activate
                     pip install pytest pytest-cov
                     pytest --doctest-modules --junitxml=junit/test-results.xml --cov-report=html  
               fi  
@@ -54,7 +54,7 @@ jobs:
                     ".ml2sql\Scripts\activate"
                     ".ml2sql\Scripts\coverage" report -m
               else
-                    .ml2sql/bin/activate
+                    source .ml2sql/bin/activate
                     .ml2sql/bin/coverage report -m
               fi  
         shell: bash  
