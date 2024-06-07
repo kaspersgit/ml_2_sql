@@ -29,9 +29,9 @@ jobs:
       - name: Lint with Ruff  
         run: |
               if [ "$RUNNER_OS" == "Windows" ]; then
-                    ".ml2sql\Scripts\ruff" --output-format=github .
+                    ".ml2sql\Scripts\ruff" check --output-format=github .
               else
-                    .ml2sql/bin/ruff --output-format=github .
+                    .ml2sql/bin/ruff check --output-format=github .
               fi  
         shell: bash 
         continue-on-error: true  
@@ -40,7 +40,7 @@ jobs:
               echo "scripts" >> $GITHUB_PATH
               if [ "$RUNNER_OS" == "Windows" ]; then
                     ".ml2sql\Scripts\activate"
-                    pip freeze
+                    echo `pip freeze`
                     coverage run -m pytest -s
               else
                     source .ml2sql/bin/activate
