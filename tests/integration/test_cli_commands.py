@@ -45,11 +45,21 @@ def test_main_script(setup_file_structure):
     # Check platform, windows is different from linux/mac
     if sys.platform == "win32":
         executable = ".ml2sql\\Scripts\\python.exe"
+        command = [
+            executable,
+            "scripts\\main.py",
+            "--name",
+            OUTPUT_PATH,
+            "--data_path",
+            DATA_PATH,
+            "--configuration",
+            "input\\configuration\\example_binary_titanic.json",
+            "--model",
+            "ebm",
+        ]
     else:
         executable = ".ml2sql/bin/python"
-
-    result = subprocess.run(
-        [
+        command = [
             executable,
             "scripts/main.py",
             "--name",
@@ -60,7 +70,10 @@ def test_main_script(setup_file_structure):
             "input/configuration/example_binary_titanic.json",
             "--model",
             "ebm",
-        ],
+        ]
+
+    result = subprocess.run(
+        command,
         # stdout=subprocess.PIPE,
         capture_output=True,
         text=True,
@@ -78,27 +91,36 @@ def test_main_script(setup_file_structure):
 
 def test_modeltester_script(setup_file_structure):
     OUTPUT_PATH, DATA_PATH = setup_file_structure
-    MODEL_PATH = f"{OUTPUT_PATH}/model/ebm_classification.sav"
-    DATASET_NAME = DATA_PATH.split("/")[-1].split(".")[0]
-    DESTINATION_PATH = f"{OUTPUT_PATH}/tested_datasets/{DATASET_NAME}"
+    DATASET_NAME = os.path.split(DATA_PATH)[-1].split(".")[0]
 
     # Check platform, windows is different from linux/mac
     if sys.platform == "win32":
         executable = ".ml2sql\\Scripts\\python.exe"
-    else:
-        executable = ".ml2sql/bin/python"
-
-    result = subprocess.run(
-        [
+        command = [
             executable,
-            "scripts/modeltester.py",
+            "scripts\\modeltester.py",
             "--model_path",
-            MODEL_PATH,
+            f"{OUTPUT_PATH}\\model\\ebm_classification.sav",
             "--data_path",
             DATA_PATH,
             "--destination_path",
-            DESTINATION_PATH,
-        ],
+            f"{OUTPUT_PATH}\\tested_datasets\\{DATASET_NAME}",
+        ]
+    else:
+        executable = ".ml2sql/bin/python"
+        command = [
+            executable,
+            "scripts/modeltester.py",
+            "--model_path",
+            f"{OUTPUT_PATH}/model/ebm_classification.sav",
+            "--data_path",
+            DATA_PATH,
+            "--destination_path",
+            f"{OUTPUT_PATH}/tested_datasets/{DATASET_NAME}",
+        ]
+
+    result = subprocess.run(
+        command,
         stdout=subprocess.PIPE,
         text=True,
         check=False,

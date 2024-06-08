@@ -76,4 +76,3 @@ def test_interpret_model_version():
 
     # Checking if all models in testing direcotry are of installed version
     assert all(files_with_version)
-    print("success")
