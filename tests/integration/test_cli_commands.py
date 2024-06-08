@@ -10,6 +10,7 @@ import pytest
 
 @pytest.fixture(scope="module")
 def setup_file_structure():
+    print("Start file structure setup function")
     OUTPUT_PATH = "trained_models/test_tool"
     DATA_PATH = "input/data/example_binary_titanic.csv"
 
@@ -33,6 +34,7 @@ def setup_file_structure():
     except FileExistsError:
         sys.exit("Error: Model directory already exists")
 
+    print("finish file structure setup function")
     yield OUTPUT_PATH, DATA_PATH
 
     # Remove the folder and its contents
@@ -40,6 +42,7 @@ def setup_file_structure():
 
 
 def test_main_script(setup_file_structure):
+    print("Start main calling function")
     OUTPUT_PATH, DATA_PATH = setup_file_structure
 
     # Check platform, windows is different from linux/mac
@@ -88,8 +91,11 @@ def test_main_script(setup_file_structure):
     assert "Target column has 2 unique values" in result.stderr
     assert "This problem will be treated as a classification problem" in result.stderr
 
+    print("Finish calling main function")
+
 
 def test_modeltester_script(setup_file_structure):
+    print("Start calling modeltester function")
     OUTPUT_PATH, DATA_PATH = setup_file_structure
     DATASET_NAME = os.path.split(DATA_PATH)[-1].split(".")[0]
 
@@ -126,3 +132,4 @@ def test_modeltester_script(setup_file_structure):
         check=False,
     )
     assert result.returncode == 0
+    print("Finish calling modeltester function")
