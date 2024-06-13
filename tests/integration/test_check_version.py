@@ -69,10 +69,11 @@ def test_interpret_model_version():
 
     print(f"Looking for files ending with '_v{version_suffix}' in '{folder_path}'")
 
-    files_with_version = []
-    for filename in os.listdir(folder_path):
-        filename = filename.split(".")[0]
-        files_with_version.append(filename.endswith(f"_v{version_suffix}"))
+    # Check if the version in filenames matches the version_suffix
+    files_with_version = [
+        os.path.splitext(filename)[0].split("_v")[-1] == str(version_suffix)
+        for filename in os.listdir(folder_path)
+    ]
 
     # Checking if all models in testing direcotry are of installed version
     assert all(files_with_version)
