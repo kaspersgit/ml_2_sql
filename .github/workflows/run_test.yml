@@ -21,7 +21,7 @@ jobs:
               python -m pip install --upgrade pip  
               python -m venv .ml2sql
               if [ "$RUNNER_OS" == "Windows" ]; then
-                    ".ml2sql\Scripts\python" -m pip install --no-cache-dir --index-url https://pypi.org/simple -r "docs\requirements-dev.txt"
+                    ".ml2sql\Scripts\python" -m pip install --index-url https://pypi.org/simple -r "docs\requirements-dev.txt"
               else
                     .ml2sql/bin/python -m pip install --index-url https://pypi.org/simple -r docs/requirements-dev.txt  
               fi
