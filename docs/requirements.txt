@@ -220,7 +220,7 @@ threadpoolctl==3.5.0
     # via
     #   imbalanced-learn
     #   scikit-learn
-tornado==6.4
+tornado==6.4.1
     # via
     #   ipykernel
     #   jupyter-client
