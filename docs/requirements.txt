@@ -4,9 +4,6 @@
 #
 #    pip-compile --output-file=docs/requirements.txt pyproject.toml
 #
---index-url https://artifactory-edge.ess.midasplayer.com/artifactory/api/pypi/pypi-all/pypi
---extra-index-url https://pypi.org/simple
---trusted-host artifactory.ess.midasplayer.com
 
 appnope==0.1.4
     # via ipykernel
@@ -151,6 +148,9 @@ parso==0.8.4
 pexpect==4.9.0
     # via ipython
 pillow==10.3.0
+pexpect==4.9.0
+    # via ipython
+pillow==10.3.0
     # via matplotlib
 platformdirs==4.2.1
     # via jupyter-core
@@ -248,6 +248,8 @@ werkzeug==3.0.3
     # via
     #   dash
     #   flask
+zipp==3.18.1
+    # via importlib-metadata
 zipp==3.18.1
     # via importlib-metadata
 zope-event==5.0

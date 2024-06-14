@@ -79,6 +79,7 @@ def post_params(request):
 
 
 def test_model_processing(load_model_data, post_params):
+    print("Start lr SQL creation and run test")
     # unpack data and model
     data, model, model_type = load_model_data
 
