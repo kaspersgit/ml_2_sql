@@ -39,10 +39,10 @@ jobs:
         run: |  
               if [ "$RUNNER_OS" == "Windows" ]; then
                     ".ml2sql\Scripts\activate"
-                    ".ml2sql\Scripts\pytest.exe" -s
+                    ".ml2sql\Scripts\pytest.exe" -v
               else
                     source .ml2sql/bin/activate
-                    coverage run -m pytest -s
+                    coverage run -m pytest -v
               fi  
         shell: bash 
           

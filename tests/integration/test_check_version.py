@@ -74,7 +74,5 @@ def test_interpret_model_version():
         os.path.splitext(filename)[0].split("_v")[-1] == str(version_suffix)
         for filename in os.listdir(folder_path)
     ]
-    print(files_with_version)
     # Checking if all models in testing direcotry are of installed version
     assert all(files_with_version)
-    print("assert done")
