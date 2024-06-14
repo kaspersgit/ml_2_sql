@@ -38,7 +38,7 @@ jobs:
       - name: Test with pytest
         run: |  
               if [ "$RUNNER_OS" == "Windows" ]; then
-                    ".ml2sql\Scripts\pytest" -v -k "not _script"
+                    ".ml2sql\Scripts\pytest" -v -k "not _script and not test_pre_process_kfold"
               else
                     source .ml2sql/bin/activate
                     coverage run -m pytest -v
