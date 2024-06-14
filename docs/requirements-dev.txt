@@ -380,7 +380,7 @@ threadpoolctl==3.5.0
     #   -c docs/requirements.txt
     #   imbalanced-learn
     #   scikit-learn
-tornado==6.4
+tornado==6.4.1
     # via
     #   -c docs/requirements.txt
     #   ipykernel
