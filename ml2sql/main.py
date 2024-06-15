@@ -83,8 +83,12 @@ def check_model():
 
 
 @app.command()
-def clean_data():
+def clean_data(
+    data_path: str = typer.Option(
+        None, "--data-path", help="Path to the CSV file to be cleaned"
+    ),
+):
     """
     Select a csv file and have it cleaned to be used for modeling
     """
-    quick_clean_data()
+    quick_clean_data(data_path)
