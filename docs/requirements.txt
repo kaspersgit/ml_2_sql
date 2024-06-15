@@ -16,7 +16,9 @@ certifi==2024.2.2
 charset-normalizer==3.3.2
     # via requests
 click==8.1.7
-    # via flask
+    # via
+    #   flask
+    #   typer
 cloudpickle==3.0.0
     # via shap
 comm==0.2.2
@@ -102,6 +104,8 @@ kiwisolver==1.4.5
     # via matplotlib
 llvmlite==0.42.0
     # via numba
+markdown-it-py==3.0.0
+    # via rich
 markupsafe==2.1.5
     # via
     #   jinja2
@@ -112,6 +116,8 @@ matplotlib-inline==0.1.7
     # via
     #   ipykernel
     #   ipython
+mdurl==0.1.2
+    # via markdown-it-py
 multiprocess==0.70.16
     # via salib
 nest-asyncio==1.6.0
@@ -166,7 +172,9 @@ ptyprocess==0.7.0
 pure-eval==0.2.2
     # via stack-data
 pygments==2.18.0
-    # via ipython
+    # via
+    #   ipython
+    #   rich
 pyparsing==3.1.2
     # via matplotlib
 python-dateutil==2.9.0.post0
@@ -186,6 +194,8 @@ requests==2.31.0
     #   interpret-core
 retrying==1.3.4
     # via dash
+rich==13.7.1
+    # via typer
 salib==1.5.0
     # via interpret-core
 scikit-learn==1.4.2
@@ -202,6 +212,8 @@ scipy==1.13.0
     #   shap
 shap==0.45.1
     # via interpret-core
+shellingham==1.5.4
+    # via typer
 six==1.16.0
     # via
     #   asttokens
@@ -231,10 +243,13 @@ traitlets==5.14.3
     #   jupyter-client
     #   jupyter-core
     #   matplotlib-inline
+typer==0.12.3
+    # via ml2sql (pyproject.toml)
 typing-extensions==4.11.0
     # via
     #   dash
     #   ipython
+    #   typer
 tzdata==2024.1
     # via pandas
 urllib3==2.2.1
