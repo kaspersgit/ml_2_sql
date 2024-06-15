@@ -1,8 +1,8 @@
 import pandas as pd
 import json
 import random
-from utils.helper_functions.config_handling import select_ml_cols
-from utils.helper_functions.parsing_arguments import GetArgs
+from ml2sql.utils.helper_functions.config_handling import select_ml_cols
+from ml2sql.utils.helper_functions.parsing_arguments import GetArgs
 
 
 def get_input(options, message):

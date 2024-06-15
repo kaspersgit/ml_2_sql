@@ -3,7 +3,7 @@
 # use example data for this (titanic, although that will only cover the binary classification)
 import sys
 
-sys.path.append("scripts")
+sys.path.append("ml2sql")
 
 import os
 import joblib

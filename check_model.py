@@ -80,9 +80,9 @@ except FileExistsError:
 # Trigger python script to do the actual work
 print("\nRunning command:")
 if sys.platform == "win32":
-    command = f".ml2sql\Scripts\python.exe scripts/modeltester.py --model_path {model_path} --data_path {csv_path} --destination_path {destination_path}"
+    command = f".ml2sql\Scripts\python.exe ml2sql/modeltester.py --model_path {model_path} --data_path {csv_path} --destination_path {destination_path}"
 else:
-    command = f".ml2sql/bin/python scripts/modeltester.py --model_path {model_path} --data_path {csv_path} --destination_path {destination_path}"
+    command = f".ml2sql/bin/python ml2sql/modeltester.py --model_path {model_path} --data_path {csv_path} --destination_path {destination_path}"
 
 print(command)
 

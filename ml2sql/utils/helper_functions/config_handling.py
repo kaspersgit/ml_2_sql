@@ -172,7 +172,7 @@ def select_ml_cols(df):
 
         elif (uniqueness_ratio > 0.9) & (df[col].dtypes == "int") & (all_same_length):
             features_set.discard(col)
-            print(f'"{col}" is int column with high cardinality')
+            print(f'"{col}" is int column with high cardinality but same length')
 
         # TODO remove this and rely on the data type inferring
         elif any([cdc in col.lower() for cdc in check_date_cols]):
@@ -181,7 +181,7 @@ def select_ml_cols(df):
                     features_set.discard(col)
                     print(f'"{col}" is a date column')
 
-        elif (uniqueness_ratio > 0.2) & (df[col].dtypes == "object"):
+        elif (uniqueness_ratio > 0.4) & (df[col].dtypes == "object"):
             features_set.discard(col)
             print(f'"{col}" is object column with high cardinality')
 

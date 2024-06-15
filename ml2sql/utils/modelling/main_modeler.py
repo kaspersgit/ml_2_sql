@@ -4,13 +4,13 @@ import numpy as np
 from typing import Any, Dict, Tuple
 
 from sklearn.model_selection import train_test_split
-from utils.modelling.performance import postModellingPlots
-from utils.modelling.calibration import calibrateModel
+from ml2sql.utils.modelling.performance import postModellingPlots
+from ml2sql.utils.modelling.calibration import calibrateModel
 
 # Algorithms (imported dynamically)
-from utils.modelling.models import ebm  # noqa: F401
-from utils.modelling.models import decision_tree  # noqa: F401
-from utils.modelling.models import l_regression  # noqa: F401
+from ml2sql.utils.modelling.models import ebm  # noqa: F401
+from ml2sql.utils.modelling.models import decision_tree  # noqa: F401
+from ml2sql.utils.modelling.models import l_regression  # noqa: F401
 
 import logging
 

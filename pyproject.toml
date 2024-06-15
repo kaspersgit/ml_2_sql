@@ -9,7 +9,7 @@ exclude = ["input", "trained_models"]
 namespaces = false
 
 [project]
-name = "ml_2_sql"
+name = "ml2sql"
 version = "0.1.0"
 authors = [
     {name = "Kasper de Harder", email = "kasperde@hotmail.com"},
@@ -42,3 +42,6 @@ dev = [
     "pre-commit",
     "coverage"
 ]
+
+[project.scripts]
+ml2sql = "ml2sql.main:app"

@@ -1,7 +1,4 @@
 import sys
-
-sys.path.append("scripts")
-
 import os
 import shutil
 import subprocess
@@ -50,7 +47,7 @@ def test_main_script(setup_file_structure):
         executable = ".ml2sql\\Scripts\\python.exe"
         command = [
             executable,
-            "scripts\\main.py",
+            "ml2sql\\main.py",
             "--name",
             OUTPUT_PATH,
             "--data_path",
@@ -64,7 +61,7 @@ def test_main_script(setup_file_structure):
         executable = ".ml2sql/bin/python"
         command = [
             executable,
-            "scripts/main.py",
+            "ml2sql/utils/modelcreater.py",
             "--name",
             OUTPUT_PATH,
             "--data_path",
@@ -104,7 +101,7 @@ def test_modeltester_script(setup_file_structure):
         executable = ".ml2sql\\Scripts\\python.exe"
         command = [
             executable,
-            "scripts\\modeltester.py",
+            "ml2sql\\modeltester.py",
             "--model_path",
             f"{OUTPUT_PATH}\\model\\ebm_classification.sav",
             "--data_path",
@@ -116,7 +113,7 @@ def test_modeltester_script(setup_file_structure):
         executable = ".ml2sql/bin/python"
         command = [
             executable,
-            "scripts/modeltester.py",
+            "ml2sql/utils/modeltester.py",
             "--model_path",
             f"{OUTPUT_PATH}/model/ebm_classification.sav",
             "--data_path",

@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from imblearn.over_sampling import RandomOverSampler, SMOTE, SMOTENC
-from utils.feature_selection.correlations import plot_correlations
+from ml2sql.utils.feature_selection.correlations import plot_correlations
 import logging
 from typing import List, Tuple, Dict
 

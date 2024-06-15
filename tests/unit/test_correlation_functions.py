@@ -3,7 +3,7 @@ import numpy as np
 import sys
 import pytest
 
-sys.path.append("scripts")
+sys.path.append("ml2sql")
 
 from utils.feature_selection.correlations import (
     cramers_corrected_stat,

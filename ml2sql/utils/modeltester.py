@@ -4,9 +4,9 @@ import logging
 import random
 import numpy as np
 
-from utils.helper_functions.parsing_arguments import GetArgs
-from utils.helper_functions.setup_logger import setup_logger
-from utils.modelling.performance import (
+from ml2sql.utils.helper_functions.parsing_arguments import GetArgs
+from ml2sql.utils.helper_functions.setup_logger import setup_logger
+from ml2sql.utils.modelling.performance import (
     plotClassificationCurve,
     plotCalibrationCurve,
     plotProbabilityDistribution,

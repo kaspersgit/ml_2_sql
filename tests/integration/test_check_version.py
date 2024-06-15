@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append("scripts")
+sys.path.append("ml2sql")
 
 import os
 import subprocess

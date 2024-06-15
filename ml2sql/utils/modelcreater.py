@@ -4,19 +4,19 @@ import pandas as pd
 import json
 
 # Main modelling function
-from utils.modelling.main_modeler import make_model
+from ml2sql.utils.modelling.main_modeler import make_model
 
 # The translations to SQL (grey as we refer to them dynamically)
-from utils.output_scripts import decision_tree_as_code  # noqa: F401
-from utils.output_scripts import ebm_as_code  # noqa: F401
-from utils.output_scripts import l_regression_as_code  # noqa: F401
+from ml2sql.utils.output_scripts import decision_tree_as_code  # noqa: F401
+from ml2sql.utils.output_scripts import ebm_as_code  # noqa: F401
+from ml2sql.utils.output_scripts import l_regression_as_code  # noqa: F401
 
-from utils.helper_functions.checks import checkInputData
-from utils.helper_functions.setup_logger import setup_logger
+from ml2sql.utils.helper_functions.checks import checkInputData
+from ml2sql.utils.helper_functions.setup_logger import setup_logger
 
-from utils.helper_functions.config_handling import config_handling
-from utils.helper_functions.parsing_arguments import GetArgs
-from utils.pre_processing.pre_process import pre_process_kfold
+from ml2sql.utils.helper_functions.config_handling import config_handling
+from ml2sql.utils.helper_functions.parsing_arguments import GetArgs
+from ml2sql.utils.pre_processing.pre_process import pre_process_kfold
 
 
 def main(args):

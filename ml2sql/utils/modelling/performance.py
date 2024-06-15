@@ -19,9 +19,9 @@ from sklearn.metrics import (
 )
 
 # The actual algorithms (grey as we refer to them dynamically)
-from utils.modelling.models import ebm  # noqa: F401
-from utils.modelling.models import decision_tree  # noqa: F401
-from utils.modelling.models import l_regression  # noqa: F401
+from ml2sql.utils.modelling.models import ebm  # noqa: F401
+from ml2sql.utils.modelling.models import decision_tree  # noqa: F401
+from ml2sql.utils.modelling.models import l_regression  # noqa: F401
 
 import logging
 
