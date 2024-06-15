@@ -40,7 +40,8 @@ dev = [
     "pip-tools",
     "ruff",
     "pre-commit",
-    "coverage"
+    "coverage",
+    "typer"
 ]
 
 [project.scripts]
