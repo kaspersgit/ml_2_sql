@@ -1,11 +1,8 @@
 import pandas as pd
 import numpy as np
-import sys
 import pytest
 
-sys.path.append("ml2sql")
-
-from utils.feature_selection.correlations import (
+from ml2sql.utils.feature_selection.correlations import (
     cramers_corrected_stat,
     xicor,
     create_correlation_matrix,

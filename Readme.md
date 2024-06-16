@@ -7,7 +7,7 @@
 
 # Table of Contents
 
-<img src="docs/media/ml2sql_logo.png" align="right"
+<img src="https://github.com/kaspersgit/ml_2_sql/blob/main/docs/media/ml2sql_logo.png?raw=true" align="right"
      alt="ML2SQL">
 
 1. [What is it?](#what-is-it)
@@ -23,7 +23,7 @@
 An automated machine learning tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from [interpretml](https://github.com/interpretml/interpret/)) to train models which are explainable and interpretable, so called 'glassbox' models. With the outputted model in SQL format which can be used to put a model in 'production' in an SQL environment.
 This tool can be used by anybody, but is aimed for people who want to do a quick analysis and/or deploy a model in an SQL system. 
 
-<center><img src="docs/media/ml2sql_demo.gif"
+<center><img src="https://github.com/kaspersgit/ml_2_sql/blob/main/docs/media/ml2sql_demo.gif?raw=true"
      alt="ML2SQL_demo" height=400 width=600></center>
 
 ## Philosophy:
@@ -256,12 +256,13 @@ Can be found in the created model's folder under `/model`
 
 ## Notes
 - Limited to 3 models (EBM, linear/logistic regression, and Decision Tree).
-- Data imbalance treatments (e.g., oversampling + model calibration) are not fully implemented.
+- Data imbalance treatments (e.g., oversampling + model calibration) are not implemented.
 - Only accepts CSV files.
 - Interactions with more than 2 variables are not supported.
 
 ## TODO list
 Check docs/TODO.md for an extensive list of planned features and improvements.
+Feel free to open an issue in case a feature is missing or not working properly.
 
 # Troubleshooting
 If you encounter an unclear error message after following the instructions above, feel free to create an Issue on the GitHub repository.

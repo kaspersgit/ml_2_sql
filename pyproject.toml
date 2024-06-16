@@ -1,20 +1,20 @@
 [build-system]
 requires = [
-  "setuptools >= 61.10.0",
+    "setuptools >= 61.10.0",
+    "setuptools-scm>=8.0"
 ]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-exclude = ["input", "trained_models"]
-namespaces = false
+where = ["src"]
 
 [project]
 name = "ml2sql"
-version = "0.1.0"
+version = "0.1.2"
 authors = [
     {name = "Kasper de Harder", email = "kasperde@hotmail.com"},
 ]
-description = "Automated ML tool with SQL version of model"
+description = "Automated interpretable ML tool with SQL version of model"
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.8"
@@ -41,7 +41,9 @@ dev = [
     "pip-tools",
     "ruff",
     "pre-commit",
-    "coverage"
+    "coverage",
+    "twine",
+    "wheel"
 ]
 
 [project.scripts]

@@ -1,7 +1,4 @@
 import sys
-
-sys.path.append("ml2sql")
-
 import os
 import shutil
 import json
@@ -9,9 +6,9 @@ import logging
 import pytest
 import pandas as pd
 import numpy as np
-from utils.helper_functions.checks import checkInputData
-from utils.helper_functions.config_handling import config_handling
-from utils.pre_processing.pre_process import pre_process_kfold
+from ml2sql.utils.helper_functions.checks import checkInputData
+from ml2sql.utils.helper_functions.config_handling import config_handling
+from ml2sql.utils.pre_processing.pre_process import pre_process_kfold
 
 
 logger = logging.getLogger(__name__)
