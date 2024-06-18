@@ -339,7 +339,7 @@ salib==1.5.0
     # via
     #   -c docs/requirements.txt
     #   interpret-core
-scikit-learn==1.4.2
+scikit-learn==1.5.0
     # via
     #   -c docs/requirements.txt
     #   imbalanced-learn
