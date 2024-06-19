@@ -4,7 +4,6 @@ import logging
 import random
 import numpy as np
 
-from ml2sql.utils.helper_functions.parsing_arguments import GetArgs
 from ml2sql.utils.helper_functions.setup_logger import setup_logger
 from ml2sql.utils.modelling.performance import (
     plotClassificationCurve,
@@ -17,20 +16,17 @@ from ml2sql.utils.modelling.performance import (
 )
 
 
-def apply_model(args):
-    # Set destination
-    destination = args.destination_path
-
+def modeltester(data_path, model_path, destination_path):
     # Set Logger
-    setup_logger(destination + "/logging.log")
+    setup_logger(destination_path + "/logging.log")
     logger = logging.getLogger(__name__)
 
     # Load in model
-    model = joblib.load(open(args.model_path, "rb"))
+    model = joblib.load(open(model_path, "rb"))
     logger.info("Loaded in model")
 
     # Load in data
-    df = pd.read_csv(args.data_path)
+    df = pd.read_csv(data_path)
     logger.info(f"Loaded in dataset, shape: {df.shape}")
 
     target_col = model.target
@@ -53,7 +49,7 @@ def apply_model(args):
 
             # Threshold dependant
             plotConfusionMatrix(
-                destination,
+                destination_path,
                 y_true,
                 y_prob,
                 y_pred,
@@ -67,7 +63,7 @@ def apply_model(args):
 
             # Threshold independant
             plotClassificationCurve(
-                destination,
+                destination_path,
                 y_true,
                 y_prob,
                 curve_type="roc",
@@ -75,23 +71,25 @@ def apply_model(args):
             )
 
             plotClassificationCurve(
-                destination,
+                destination_path,
                 y_true,
                 y_prob,
                 curve_type="pr",
                 data_type="test_class1",
             )
             plotClassificationCurve(
-                destination,
+                destination_path,
                 y_neg,
                 y_prob_neg,
                 curve_type="pr",
                 data_type="test_class0",
             )
 
-            plotCalibrationCurve(destination, y_true, y_prob, data_type="test")
+            plotCalibrationCurve(destination_path, y_true, y_prob, data_type="test")
 
-            plotProbabilityDistribution(destination, y_true, y_prob, data_type="test")
+            plotProbabilityDistribution(
+                destination_path, y_true, y_prob, data_type="test"
+            )
 
         # If multiclass classification
         elif len(model.classes_) > 2:
@@ -109,7 +107,7 @@ def apply_model(args):
 
                 # Threshold independant
                 plotClassificationCurve(
-                    destination,
+                    destination_path,
                     y_ova,
                     y_prob_ova,
                     curve_type="roc",
@@ -117,7 +115,7 @@ def apply_model(args):
                 )
 
                 plotClassificationCurve(
-                    destination,
+                    destination_path,
                     y_ova,
                     y_prob_ova,
                     curve_type="pr",
@@ -125,14 +123,14 @@ def apply_model(args):
                 )
 
                 plotCalibrationCurve(
-                    destination,
+                    destination_path,
                     y_ova,
                     y_prob_ova,
                     data_type=f"test_class_{c}",
                 )
 
                 plotProbabilityDistribution(
-                    destination,
+                    destination_path,
                     y_ova,
                     y_prob_ova,
                     data_type=f"test_class_{c}",
@@ -140,11 +138,11 @@ def apply_model(args):
 
     # if regression
     else:
-        plotYhatVsYSave(destination, y_true, y_pred, data_type="test")
+        plotYhatVsYSave(destination_path, y_true, y_pred, data_type="test")
 
-        plotQuantileError(destination, y_true, y_pred, data_type="test")
+        plotQuantileError(destination_path, y_true, y_pred, data_type="test")
 
-        regressionMetricsTable(destination, y_true, y_pred, X, data_type="test")
+        regressionMetricsTable(destination_path, y_true, y_pred, X, data_type="test")
 
     # Save local explanations (max 10)
     nr_rows = range(0, len(df))
@@ -157,18 +155,12 @@ def apply_model(args):
         plotly_fig = model.explain_local(df).visualize(s)
         if file_type == "png":
             plotly_fig.write_image(
-                f"{destination}/local_explanations/explain_row_{s}.png"
+                f"{destination_path}/local_explanations/explain_row_{s}.png"
             )
         elif file_type == "html":
             # or as html file
             plotly_fig.write_html(
-                f"{destination}/local_explanations/explain_row_{s}.html"
+                f"{destination_path}/local_explanations/explain_row_{s}.html"
             )
 
-
-if __name__ == "__main__":
-    # Get arguments from the CLI
-    args = GetArgs("test_model", None)
-
-    # Run main with given arguments
-    apply_model(args)
+    logger.info("Script finished.")

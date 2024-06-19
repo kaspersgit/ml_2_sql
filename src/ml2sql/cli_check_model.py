@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+from ml2sql.utils.modeltester import modeltester
 
 
 def cli_check_model():
@@ -76,19 +77,18 @@ def cli_check_model():
         os.makedirs(f"{destination_path}/performance")
         os.makedirs(f"{destination_path}/local_explanations")
 
-    except FileExistsError:
-        sys.exit(f"Error: Dataset is already tested on this model: {destination_path}")
+    except FileExistsError as e:
+        sys.exit(f"{e}\nDataset is already tested on this model: {destination_path}")
 
-    # Trigger python script to do the actual work
-    print("\nRunning command:")
-    if sys.platform == "win32":
-        command = f".ml2sql\Scripts\python.exe ml2sql/modeltester.py --model_path {model_path} --data_path {csv_path} --destination_path {destination_path}"
-    else:
-        command = f".ml2sql/bin/python ml2sql/modeltester.py --model_path {model_path} --data_path {csv_path} --destination_path {destination_path}"
+    print("Starting script to test model")
 
-    print(command)
-
-    os.system(command)
+    modeltester(
+        data_path=csv_path, model_path=model_path, destination_path=destination_path
+    )
 
     print("\nModel performance outputs can be found in folder:")
     print(f"{os.getcwd()}/trained_models/{model_folder}/tested_datasets/{csv_name}/")
+
+
+if __name__ == "__main__":
+    cli_check_model()

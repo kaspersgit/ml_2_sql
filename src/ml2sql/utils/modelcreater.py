@@ -15,34 +15,32 @@ from ml2sql.utils.helper_functions.checks import checkInputData
 from ml2sql.utils.helper_functions.setup_logger import setup_logger
 
 from ml2sql.utils.helper_functions.config_handling import config_handling
-from ml2sql.utils.helper_functions.parsing_arguments import GetArgs
 from ml2sql.utils.pre_processing.pre_process import pre_process_kfold
 
 
-def main(args):
+def modelcreater(data_path, config_path, model_name, project_name):
     """
     Main function to train machine learning models and save the trained model along with its SQL representation.
-
-    Args:
-        args (argparse.Namespace): Command-line arguments parsed by argparse.
     """
 
     # Set logger
-    setup_logger(args.name + "/logging.log")
+    setup_logger(project_name + "/logging.log")
     logger = logging.getLogger(__name__)
-    logger.info(f"Script input arguments: {args}")
+    logger.info(
+        f"Script input arguments: \ndata_path: {data_path} \nconfig_path: {config_path} \nmodel_name: \n {model_name} \nproject_name: {project_name}"
+    )
 
     # Load data
-    logger.info(f"Loading data from {args.data_path}...")
+    logger.info(f"Loading data from {data_path}...")
     data = pd.read_csv(
-        args.data_path,
+        data_path,
         keep_default_na=False,
         na_values=["", "N/A", "NULL", "None", "NONE"],
     )
 
     # Load configuration
-    logger.info(f"Loading configuration from {args.configuration}...")
-    with open(args.configuration) as json_file:
+    logger.info(f"Loading configuration from {config_path}...")
+    with open(config_path) as json_file:
         configuration = json.load(json_file)
 
     # Handle the configuration file
@@ -69,11 +67,11 @@ def main(args):
     # Preprocess data
     logger.info("Preprocessing data...")
     datasets = pre_process_kfold(
-        args.name,
+        project_name,
         data,
         target_col,
         feature_cols,
-        model_name=args.model_name,
+        model_name=model_name,
         model_type=model_type,
         pre_params=pre_params,
         post_params=post_params,
@@ -81,51 +79,20 @@ def main(args):
     )
 
     # Train model
-    logger.info(f"Training {args.model_name} model...")
+    logger.info(f"Training {model_name} model...")
     clf = make_model(
-        args.name,
+        project_name,
         datasets,
-        model_name=args.model_name,
+        model_name=model_name,
         model_type=model_type,
         model_params=model_params,
         post_params=post_params,
     )
 
     # Create SQL version of model and save it
-    logger.info(f"Saving {args.model_name} model and its SQL representation...")
-    globals()[f"{args.model_name}_as_code"].save_model_and_extras(
-        clf, args.name, post_params
+    logger.info(f"Saving {model_name} model and its SQL representation...")
+    globals()[f"{model_name}_as_code"].save_model_and_extras(
+        clf, project_name, post_params
     )
 
     logger.info("Script finished.")
-
-
-# Run function
-if __name__ == "__main__":
-    set_env = "prod"  # either prod or dev
-
-    # Check if this script is run from terminal
-    if set_env == "prod":
-        # (Prod) script is being run through the terminal
-        argvals = None
-    else:
-        # (Dev) script is not being run through the terminal
-        # make sure pwd is the root folder (not in scripts)
-
-        # Command line arguments used for testing
-        argvals = (
-            "--name ../trained_models/test "
-            "--data_path ../input/data/example_binary_titanic.csv "
-            "--configuration ../input/configuration/example_binary_titanic.json "
-            "--model ebm".split()
-        )  # example of passing test params to parser
-
-        # settings
-        pd.set_option("display.max_rows", 500)
-        pd.set_option("display.max_columns", 10)
-
-    # Get arguments from the CLI
-    args = GetArgs("main", argvals)
-
-    # Run main with given arguments
-    main(args)

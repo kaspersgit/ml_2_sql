@@ -38,6 +38,7 @@ keywords = ["SQL", "ML", "automl", "interpret", "ML 2 SQL", "EBM", "Explainable 
 dev = [
     "duckdb",
     "pytest",
+    "pytest-mock",
     "pip-tools",
     "ruff",
     "pre-commit",

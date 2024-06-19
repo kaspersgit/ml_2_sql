@@ -2,7 +2,6 @@ import pandas as pd
 import json
 import random
 from ml2sql.utils.helper_functions.config_handling import select_ml_cols
-from ml2sql.utils.helper_functions.parsing_arguments import GetArgs
 
 
 def get_input(options, message):
@@ -21,10 +20,7 @@ def get_input(options, message):
     return choice
 
 
-def create_config(args):
-    # Load in data
-    csv_path = args.data_path
-
+def create_config(data_path):
     # Read in sample of data
     #  try different %, until the nr of rows is at least 500 (or until we use 50% sample size)
     nrows = 0
@@ -39,7 +35,7 @@ def create_config(args):
 
         # if random from [0,1] interval is greater than p the row will be skipped
         data = pd.read_csv(
-            args.data_path,
+            data_path,
             keep_default_na=False,
             na_values=["", "N/A", "NULL", "None", "NONE"],
             header=0,
@@ -101,7 +97,7 @@ def create_config(args):
             "target": target_column,
         }
 
-        csv_file_name = csv_path.split("/")[-1].split(".")[0]
+        csv_file_name = data_path.split("/")[-1].split(".")[0]
         config_name = f"{csv_file_name}_auto_config"
 
     elif config_creation == "Manual":
@@ -269,11 +265,3 @@ def create_config(args):
     print(f"Config saved in: {config_path}")
 
     return config_path
-
-
-if __name__ == "__main__":
-    # Get arguments from the CLI
-    args = GetArgs("create_config", None)
-
-    # Run main with given arguments
-    create_config(args)

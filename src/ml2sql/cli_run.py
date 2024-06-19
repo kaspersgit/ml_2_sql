@@ -3,6 +3,8 @@ import sys
 import re
 from datetime import datetime
 import time
+from ml2sql.utils.modelcreater import modelcreater
+from ml2sql.utils.create_config import create_config
 
 
 def cli_run():
@@ -48,19 +50,6 @@ def cli_run():
 
     print(f"CSV file {csv_path} will be used for modelling")
 
-    # Function to create a new config file
-    def create_new_config(csv_path):
-        if sys.platform == "win32":
-            command = f".ml2sql\\Scripts\\python.exe ml2sql/create_config.py --data_path {csv_path}"
-        else:
-            command = (
-                f".ml2sql/bin/python ml2sql/create_config.py --data_path {csv_path}"
-            )
-
-        print(command)
-
-        os.system(command)
-
     # Ask for JSONPATH
     while True:
         # List files in input/configuration/ directory
@@ -93,7 +82,7 @@ def cli_run():
             json_file_index = int(json_file_index) - 1
 
             if json_file_index == 0:
-                create_new_config(csv_path)
+                create_config(csv_path)
             else:
                 json_path = os.path.join(configuration_dir, files[json_file_index])
                 break
@@ -108,7 +97,6 @@ def cli_run():
     model_types = [
         "Explainable Boosting Machine",
         "Decision Tree",
-        # "Decision Rule",
         "Logistic/Linear regression",
     ]
     model_type = None
@@ -155,6 +143,8 @@ def cli_run():
         else:
             unique_name = True
 
+    print(f"\nProject name will be: {full_model_name}")
+
     # Make directory with current data and model name
     try:
         os.makedirs(f"trained_models/{full_model_name}")
@@ -165,18 +155,14 @@ def cli_run():
     except FileExistsError:
         sys.exit("Error: Model directory already exists")
 
-    print("Starting script to create model")
+    print("\nStarting script to create model")
 
-    # Run script with given input using python in the venv (so venv does not need to be activated beforehand)
-    print("\nRunning command:")
-    if sys.platform == "win32":
-        command = f".ml2sql\Scripts\python.exe ml2sql/modelcreater.py --name trained_models/{full_model_name} --data_path {csv_path} --configuration {json_path} --model {model_type}"
-    else:
-        command = f".ml2sql/bin/python ml2sql/modelcreater.py --name trained_models/{full_model_name} --data_path {csv_path} --configuration {json_path} --model {model_type}"
-
-    print(command)
-
-    os.system(command)
+    modelcreater(
+        data_path=csv_path,
+        config_path=json_path,
+        model_name=model_type,
+        project_name=f"trained_models/{full_model_name}",
+    )
 
     print("\nModel outputs can be found in folder:")
     print(f"{os.getcwd()}/trained_models/{full_model_name}")
