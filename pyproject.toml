@@ -26,6 +26,7 @@ classifiers = [
 
 dependencies = [
     "interpret == 0.5.1",
+    "numpy<2",
     "imblearn",
     "kaleido",
     "typer",
