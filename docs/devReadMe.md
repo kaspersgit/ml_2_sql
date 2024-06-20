@@ -3,13 +3,19 @@
 Mac/Linux:
 ```
 python3 -m venv .ml2sql
-.ml2sql/bin/python -m pip install --index-url https://pypi.org/simple -r docs/requirements-dev.txt
+source .ml2sql/bin/activate
+python -m pip install --index-url https://pypi.org/simple \
+    -r docs/requirements-dev.txt \
+    -e .  # <- the app/pkg itself
 ```
 
 Windows 
 ```
 python -m venv .ml2sql
-.ml2sql/Scripts/python -m pip install --index-url https://pypi.org/simple -r docs/requirements-dev.txt
+.ml2sql/Script/activate
+python -m pip install --index-url https://pypi.org/simple \
+    -r docs/requirements-dev.txt \
+    -e .  # <- the app/pkg itself
 ```
 
 ### Testing
