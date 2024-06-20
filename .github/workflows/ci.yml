@@ -22,7 +22,6 @@ jobs:
               python -m pip install -e .
         shell: bash
       - name: Install development dependencies
-            if: always()
             run: |
                   pip install ".[dev]"
             shell: bash
