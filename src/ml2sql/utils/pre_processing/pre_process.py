@@ -92,7 +92,7 @@ def impute_and_cast_data(
     # Adjust data types
     for col in data[feature_cols].select_dtypes(include=["object"]).columns:
         # Check if values are true/false/None then boolean
-        if all(val in [True, False, None, np.NaN] for val in data[col].unique()):
+        if all(val in [True, False, None, np.nan] for val in data[col].unique()):
             data[col] = data[col].astype(int)
         else:  # otherwise assume categorical
             data[col] = data[col].astype({col: "category"})

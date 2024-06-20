@@ -132,7 +132,7 @@ def RestructureReduceInteractions(df_):
     # being able for score arrays to be grouped
     # for categorical features do not group by score hence we include value in score_hash
     mask_category = ["categorical" in x for x in lookup_df["feat_type_2"]]
-    mask_inf_bound = [np.PINF == x for x in lookup_df["feat_bound_2"]]
+    mask_inf_bound = [np.inf == x for x in lookup_df["feat_bound_2"]]
     mask = [a or b for a, b in zip(mask_category, mask_inf_bound)]
 
     lookup_df["pre_hash_column"] = np.where(
@@ -243,7 +243,7 @@ def extractLookupTable(ebm, post_params):
                 feat_type = "categorical"
 
             else:
-                feat_bound = np.append(feature_bins, np.PINF)
+                feat_bound = np.append(feature_bins, np.inf)
                 feat_bound = np.append(None, feat_bound)
                 feat_type = "numeric"
 
@@ -287,7 +287,7 @@ def extractLookupTable(ebm, post_params):
                     feat_bound[b].insert(0, None)
                     feat_type[b] = "categorical"
                 else:
-                    feat_bound[b] = np.append(feature_bins, np.PINF)
+                    feat_bound[b] = np.append(feature_bins, np.inf)
                     feat_bound[b] = np.append(None, feat_bound[b])
                     feat_type[b] = "numeric"
 
@@ -454,7 +454,7 @@ def single_feature_2_sql(df, feature):
                 print(" ELSE 0.0")
 
         # check for last numeric bound
-        elif row["feat_bound"] == np.PINF:
+        elif row["feat_bound"] == np.inf:
             print(
                 " WHEN {feature} >= {lb} THEN {score}".format(
                     feature=feature,
@@ -534,7 +534,7 @@ def double_feature_2_sql(df, double_feature):
             )
 
         # check for last numeric bound
-        elif row["feat_bound_1"] == np.PINF:
+        elif row["feat_bound_1"] == np.inf:
             print(
                 " WHEN {feature} >= {lb} THEN \n      CASE".format(
                     feature=row["feat_1"], lb=df.loc[index - 1, "feat_bound_1"]
@@ -589,7 +589,7 @@ def double_feature_2_sql(df, double_feature):
                 )
 
             # check for last numeric bound
-            elif row["feat_bound_2"][sf_index] == np.PINF:
+            elif row["feat_bound_2"][sf_index] == np.inf:
                 print(
                     "         WHEN {feature} >= {lb} THEN {score}".format(
                         feature=row["feat_2"],
@@ -782,7 +782,7 @@ def single_feature_2_sql_multiclass(df, feature, class_nr):
                 print(" ELSE 0.0")
 
         # check for last numeric bound
-        elif row["feat_bound"] == np.PINF:
+        elif row["feat_bound"] == np.inf:
             print(
                 " WHEN {feature} >= {lb} THEN {score}".format(
                     feature=feature,
