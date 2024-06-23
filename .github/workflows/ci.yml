@@ -37,9 +37,9 @@ jobs:
       - name: Test with pytest
         run: |  
               if [ "$RUNNER_OS" == "Windows" ]; then
-                    "pytest" -v -s
+                    python -m "pytest"
               else
-                    coverage run -m pytest -v
+                    python -m "pytest"
               fi  
         shell: bash 
           
