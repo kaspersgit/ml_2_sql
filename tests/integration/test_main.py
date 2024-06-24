@@ -2,6 +2,7 @@ import pytest
 from typer.testing import CliRunner
 from ml2sql.main import app
 import os
+import logging
 from datetime import datetime
 
 runner = CliRunner()
@@ -17,6 +18,9 @@ def setup_environment(tmp_path_factory):
 
     # Run the init command to set up the project
     result = runner.invoke(app, ["init"])
+
+    logging.info(f"Result: {result.output}")
+
     if result.exit_code != 0:
         print(f"Init command failed with exit code {result.exit_code}")
         print(result.output)
@@ -48,6 +52,9 @@ def setup_environment(tmp_path_factory):
 
 def test_version():
     result = runner.invoke(app, ["--version"])
+
+    logging.info(f"Result: {result.output}")
+
     assert result.exit_code == 0
     assert "ml2sql v" in result.output
 
@@ -55,6 +62,9 @@ def test_version():
 def test_init(tmp_path):
     os.chdir(tmp_path)  # Change to temporary directory for testing
     result = runner.invoke(app, ["init"])
+
+    logging.info(f"Result: {result.output}")
+
     assert result.exit_code == 0
     assert "Project initialized successfully!" in result.output
 
@@ -75,9 +85,6 @@ def test_run(mocker, setup_environment):
     tmp_path = setup_environment
     os.chdir(tmp_path)
 
-    # Mock the os.system call to prevent actual execution of commands
-    mocker.patch("os.system")
-
     # Create the input sequence for test_run
     user_inputs = (
         "1\n"  # Select the first CSV file
@@ -87,6 +94,8 @@ def test_run(mocker, setup_environment):
     )
 
     result = runner.invoke(app, ["run"], input=user_inputs)
+
+    logging.info(f"Result: {result.output}")
 
     assert result.exit_code == 0
     assert (
@@ -108,9 +117,6 @@ def test_check_model(mocker, setup_environment):
     tmp_path = setup_environment
     os.chdir(tmp_path)
 
-    # Mock the os.system call to prevent actual execution of commands
-    mocker.patch("os.system")
-
     # Create the input sequence for test_check_model
     user_inputs = (
         "1\n"  # Select the first CSV file
@@ -121,6 +127,8 @@ def test_check_model(mocker, setup_environment):
     result = runner.invoke(
         app, ["check-model"], input=user_inputs, catch_exceptions=False
     )
+
+    logging.info(f"Result: {result.output}")
 
     # get current date for folder name
     # Current date
