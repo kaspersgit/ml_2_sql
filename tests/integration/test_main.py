@@ -59,9 +59,12 @@ def test_version():
     assert "ml2sql v" in result.output
 
 
-def test_init(tmp_path):
+def test_init(mocker, tmp_path):
     os.chdir(tmp_path)  # Change to temporary directory for testing
     result = runner.invoke(app, ["init"])
+
+    # Mock the os.system call to prevent actual execution of commands
+    mocker.patch("os.system")
 
     logging.info(f"Result: {result.output}")
 
@@ -84,6 +87,9 @@ def test_run(mocker, setup_environment):
     # Use the setup_environment fixture to set up the environment and create a model
     tmp_path = setup_environment
     os.chdir(tmp_path)
+
+    # Mock the os.system call to prevent actual execution of commands
+    mocker.patch("os.system")
 
     # Create the input sequence for test_run
     user_inputs = (
@@ -117,6 +123,9 @@ def test_check_model(mocker, setup_environment):
     tmp_path = setup_environment
     os.chdir(tmp_path)
 
+    # Mock the os.system call to prevent actual execution of commands
+    mocker.patch("os.system")
+
     # Create the input sequence for test_check_model
     user_inputs = (
         "1\n"  # Select the first CSV file
@@ -127,8 +136,6 @@ def test_check_model(mocker, setup_environment):
     result = runner.invoke(
         app, ["check-model"], input=user_inputs, catch_exceptions=False
     )
-
-    logging.info(f"Result: {result.output}")
 
     # get current date for folder name
     # Current date
