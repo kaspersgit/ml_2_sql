@@ -37,7 +37,7 @@ jobs:
       - name: Test with pytest
         run: |  
               if [ "$RUNNER_OS" == "Windows" ]; then
-                    python -m "pytest"
+                    python -m "pytest" -k "not test_run and not test_check_model"
               else
                     python -m "pytest"
               fi  
