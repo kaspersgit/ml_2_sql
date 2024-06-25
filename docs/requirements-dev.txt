@@ -13,6 +13,8 @@ asttokens==2.4.1
     # via
     #   -c docs/requirements.txt
     #   stack-data
+backports-tarfile==1.2.0
+    # via jaraco-context
 blinker==1.8.2
     # via
     #   -c docs/requirements.txt
@@ -34,6 +36,7 @@ click==8.1.7
     #   -c docs/requirements.txt
     #   flask
     #   pip-tools
+    #   typer
 cloudpickle==3.0.0
     # via
     #   -c docs/requirements.txt
@@ -47,7 +50,11 @@ contourpy==1.2.1
     #   -c docs/requirements.txt
     #   matplotlib
 coverage==7.5.2
+<<<<<<< HEAD
+    # via ml2sql (pyproject.toml)
+=======
     # via ml_2_sql (pyproject.toml)
+>>>>>>> main
 cycler==0.12.1
     # via
     #   -c docs/requirements.txt
@@ -91,8 +98,10 @@ dill==0.3.8
     #   multiprocess
 distlib==0.3.8
     # via virtualenv
+docutils==0.21.2
+    # via readme-renderer
 duckdb==0.10.2
-    # via ml_2_sql (pyproject.toml)
+    # via ml2sql (pyproject.toml)
 executing==2.0.1
     # via
     #   -c docs/requirements.txt
@@ -128,17 +137,19 @@ imbalanced-learn==0.12.2
 imblearn==0.0
     # via
     #   -c docs/requirements.txt
-    #   ml_2_sql (pyproject.toml)
+    #   ml2sql (pyproject.toml)
 importlib-metadata==7.1.0
     # via
     #   -c docs/requirements.txt
     #   dash
+    #   keyring
+    #   twine
 iniconfig==2.0.0
     # via pytest
 interpret==0.5.1
     # via
     #   -c docs/requirements.txt
-    #   ml_2_sql (pyproject.toml)
+    #   ml2sql (pyproject.toml)
 interpret-core[dash,debug,linear,notebook,plotly,sensitivity,shap]==0.5.1
     # via
     #   -c docs/requirements.txt
@@ -156,6 +167,12 @@ itsdangerous==2.2.0
     # via
     #   -c docs/requirements.txt
     #   flask
+jaraco-classes==3.4.0
+    # via keyring
+jaraco-context==5.3.0
+    # via keyring
+jaraco-functools==4.0.1
+    # via keyring
 jedi==0.19.1
     # via
     #   -c docs/requirements.txt
@@ -182,7 +199,9 @@ jupyter-core==5.7.2
 kaleido==0.2.1
     # via
     #   -c docs/requirements.txt
-    #   ml_2_sql (pyproject.toml)
+    #   ml2sql (pyproject.toml)
+keyring==25.2.1
+    # via twine
 kiwisolver==1.4.5
     # via
     #   -c docs/requirements.txt
@@ -191,6 +210,10 @@ llvmlite==0.42.0
     # via
     #   -c docs/requirements.txt
     #   numba
+markdown-it-py==3.0.0
+    # via
+    #   -c docs/requirements.txt
+    #   rich
 markupsafe==2.1.5
     # via
     #   -c docs/requirements.txt
@@ -205,6 +228,14 @@ matplotlib-inline==0.1.7
     #   -c docs/requirements.txt
     #   ipykernel
     #   ipython
+mdurl==0.1.2
+    # via
+    #   -c docs/requirements.txt
+    #   markdown-it-py
+more-itertools==10.3.0
+    # via
+    #   jaraco-classes
+    #   jaraco-functools
 multiprocess==0.70.16
     # via
     #   -c docs/requirements.txt
@@ -214,6 +245,8 @@ nest-asyncio==1.6.0
     #   -c docs/requirements.txt
     #   dash
     #   ipykernel
+nh3==0.2.17
+    # via readme-renderer
 nodeenv==1.8.0
     # via pre-commit
 numba==0.59.1
@@ -261,7 +294,9 @@ pillow==10.3.0
     #   -c docs/requirements.txt
     #   matplotlib
 pip-tools==7.4.1
-    # via ml_2_sql (pyproject.toml)
+    # via ml2sql (pyproject.toml)
+pkginfo==1.11.1
+    # via twine
 platformdirs==4.2.1
     # via
     #   -c docs/requirements.txt
@@ -275,7 +310,7 @@ plotly==5.22.0
 pluggy==1.5.0
     # via pytest
 pre-commit==3.7.1
-    # via ml_2_sql (pyproject.toml)
+    # via ml2sql (pyproject.toml)
 prompt-toolkit==3.0.43
     # via
     #   -c docs/requirements.txt
@@ -297,6 +332,8 @@ pygments==2.18.0
     # via
     #   -c docs/requirements.txt
     #   ipython
+    #   readme-renderer
+    #   rich
 pyparsing==3.1.2
     # via
     #   -c docs/requirements.txt
@@ -306,7 +343,11 @@ pyproject-hooks==1.1.0
     #   build
     #   pip-tools
 pytest==8.2.0
-    # via ml_2_sql (pyproject.toml)
+    # via
+    #   ml2sql (pyproject.toml)
+    #   pytest-mock
+pytest-mock==3.14.0
+    # via ml2sql (pyproject.toml)
 python-dateutil==2.9.0.post0
     # via
     #   -c docs/requirements.txt
@@ -324,17 +365,30 @@ pyzmq==26.0.3
     #   -c docs/requirements.txt
     #   ipykernel
     #   jupyter-client
+readme-renderer==43.0
+    # via twine
 requests==2.31.0
     # via
     #   -c docs/requirements.txt
     #   dash
     #   interpret-core
+    #   requests-toolbelt
+    #   twine
+requests-toolbelt==1.0.0
+    # via twine
 retrying==1.3.4
     # via
     #   -c docs/requirements.txt
     #   dash
+rfc3986==2.0.0
+    # via twine
+rich==13.7.1
+    # via
+    #   -c docs/requirements.txt
+    #   twine
+    #   typer
 ruff==0.4.4
-    # via ml_2_sql (pyproject.toml)
+    # via ml2sql (pyproject.toml)
 salib==1.5.0
     # via
     #   -c docs/requirements.txt
@@ -357,6 +411,10 @@ shap==0.45.1
     # via
     #   -c docs/requirements.txt
     #   interpret-core
+shellingham==1.5.4
+    # via
+    #   -c docs/requirements.txt
+    #   typer
 six==1.16.0
     # via
     #   -c docs/requirements.txt
@@ -398,11 +456,18 @@ traitlets==5.14.3
     #   jupyter-client
     #   jupyter-core
     #   matplotlib-inline
+twine==5.1.0
+    # via ml2sql (pyproject.toml)
+typer==0.12.3
+    # via
+    #   -c docs/requirements.txt
+    #   ml2sql (pyproject.toml)
 typing-extensions==4.11.0
     # via
     #   -c docs/requirements.txt
     #   dash
     #   ipython
+    #   typer
 tzdata==2024.1
     # via
     #   -c docs/requirements.txt
@@ -411,6 +476,7 @@ urllib3==2.2.1
     # via
     #   -c docs/requirements.txt
     #   requests
+    #   twine
 virtualenv==20.26.2
     # via pre-commit
 wcwidth==0.2.13
@@ -423,7 +489,9 @@ werkzeug==3.0.3
     #   dash
     #   flask
 wheel==0.43.0
-    # via pip-tools
+    # via
+    #   ml2sql (pyproject.toml)
+    #   pip-tools
 zipp==3.18.1
     # via
     #   -c docs/requirements.txt

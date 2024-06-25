@@ -1,18 +1,14 @@
 # Make inference using both the pickled model and the SQL model
 # make sure these two models have the same output
 # use example data for this (titanic, although that will only cover the binary classification)
-import sys
-
-sys.path.append("scripts")
-
 import os
 import joblib
 import json
 import logging
 import pandas as pd
 import pytest
-from utils.test_helpers.sql_model import execute_sql_script
-from utils.output_scripts.ebm_as_code import save_model_and_extras
+from ml2sql.utils.test_helpers.sql_model import execute_sql_script
+from ml2sql.utils.output_scripts.ebm_as_code import save_model_and_extras
 
 # Set logger
 logger = logging.getLogger(__name__)
