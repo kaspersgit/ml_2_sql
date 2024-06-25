@@ -35,6 +35,10 @@ dependencies = [
 
 keywords = ["SQL", "ML", "automl", "interpret", "ML 2 SQL", "EBM", "Explainable Boosting Machine", "ML to SQL"]
 
+[project.urls]
+Homepage = "https://github.com/kaspersgit/ml_2_sql"
+Issues = "https://github.com/kaspersgit/ml_2_sql/issues"
+
 [project.optional-dependencies]
 dev = [
     "duckdb",
