@@ -10,7 +10,7 @@ py-modules = []
 
 [project]
 name = "ml2sql"
-version = "0.1.2"
+dynamic = ["version"]
 authors = [
     {name = "Kasper de Harder", email = "kasperde@hotmail.com"},
 ]
@@ -52,3 +52,8 @@ dev = [
 
 [project.scripts]
 ml2sql = "ml2sql.main:app"
+
+[tool.setuptools.dynamic]
+version = {attr = "ml2sql.__version__"}
+
+[tool.setuptools_scm]

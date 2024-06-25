@@ -20,7 +20,7 @@
 <br>
 
 # What is it?
-An automated machine learning tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from [interpretml](https://github.com/interpretml/interpret/)) to train models which are explainable and interpretable, so called 'glassbox' models. With the outputted model in SQL format which can be used to put a model in 'production' in an SQL environment.
+An automated machine learning cli tool which trains, graphs performance and saves the model in SQL. Using interpretable ML models (from [interpretml](https://github.com/interpretml/interpret/)) to train models which are explainable and interpretable, so called 'glassbox' models. With the outputted model in SQL format which can be used to put a model in 'production' in an SQL environment.
 This tool can be used by anybody, but is aimed for people who want to do a quick analysis and/or deploy a model in an SQL system. 
 
 <center><img src="https://github.com/kaspersgit/ml_2_sql/blob/main/docs/media/ml2sql_demo.gif?raw=true"
@@ -46,30 +46,13 @@ This tool can be used by anybody, but is aimed for people who want to do a quick
 
 # Getting started
 <details> 
-<summary><strong>Installation</strong></summary>
+<summary><strong>Set up</strong></summary>
 <br>
 
-  1. Make sure you have python >= 3.8 and git installed
-  2. Clone Github repo to your local machine and cd into folder, run:
-      ```
-      git clone git@github.com:kaspersgit/ml_2_sql.git
-      cd ml_2_sql
-      ```
-  3. Create virtual environment and install packages, run: 
-        
-        Windows:
-        ```
-        python -m venv .ml2sql
-        .ml2sql/Scripts/python -m pip install -r docs/requirements.txt
-        ```
-        
-        Mac/Linux:
-        ```
-        python3 -m venv .ml2sql
-        .ml2sql/bin/python -m pip install -r docs/requirements.txt
-        ```
-  4. Wait until all packages are installed (could take a few minutes)
-  5. You are ready to go (the virtual env does not need to be activated to use this tool)
+  1. Make sure you have python >= 3.8
+  2. `pip install ml2sql`
+  3. Run: `ml2sql init` 
+    This will create the folders, `input/data/`, `input/configuration/ and `trained_models/` 
 
 <br>
 </details> 
@@ -78,9 +61,7 @@ This tool can be used by anybody, but is aimed for people who want to do a quick
 <br>
 
   1. In the terminal in the root of this folder run: 
-      - `python3 run.py` (Mac/Linux)
-      - `python run.py` (Windows)
-  2. Follow the instructions on screen by selecting the example data and similarly named config file
+    `ml2sql run`, follow the instructions on screen and select the demo data and config
   3. Check the output in the newly created folder
 
 <br>
@@ -90,9 +71,7 @@ This tool can be used by anybody, but is aimed for people who want to do a quick
 <br>
 
   1. Save csv file containing target and all features in the `input/data/` folder (more info on [input data](#data))
-  2. In the terminal in the root of this folder run: 
-      - `python3 run.py` (Mac/Linux)
-      - `python run.py` (Windows)
+  2. Run: `ml2sql run`
   3. Select your CSV file
   4. Select `Create a new config` and choose `Automatic` option (a config file will be made and can be edited later) (more info on [config json](#configuration-json))
   5. Select newly created config
@@ -110,8 +89,7 @@ This tool can be used by anybody, but is aimed for people who want to do a quick
   1. Make sure the new dataset has the same variables as the dataset the model was trained on (same features and target)
   2. Save dataset in the `input/data/` folder (more info on [input data](#data))
   3. In the terminal in the root of this folder run: 
-      - `python3 check_model.py` (Mac/Linux)
-      - `python check_model.py` (Windows)
+     `ml2sql check-model`
   4. Follow the instructions on screen
   5. The output will be saved in the folder `trained_models/<selected_model>/tested_datasets/<selected_dataset>/`
 
