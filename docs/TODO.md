@@ -19,6 +19,7 @@ Checks and config
 
 - Other 
   - Allow for other data file types (apart from csv)
+  - Test generated SQL vs trained model and report on difference
   - Switch decision tree from sklearn to interpret for coherence (wait on [issue 552](https://github.com/interpretml/interpret/issues/522))
   - Add calibration (platt scaling/isotonic regression)
   - Add changelog and versioning
