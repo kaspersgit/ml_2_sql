@@ -4,7 +4,6 @@
 #
 #    pip-compile --constraint=docs/requirements.txt --extra=dev --index-url=https://pypi.org/simple --output-file=docs/requirements-dev.txt pyproject.toml
 #
---trusted-host artifactory.ess.midasplayer.com
 
 appnope==0.1.4
     # via
@@ -51,7 +50,11 @@ contourpy==1.2.1
     #   -c docs/requirements.txt
     #   matplotlib
 coverage==7.5.2
+<<<<<<< HEAD
     # via ml2sql (pyproject.toml)
+=======
+    # via ml_2_sql (pyproject.toml)
+>>>>>>> main
 cycler==0.12.1
     # via
     #   -c docs/requirements.txt
