@@ -2,4 +2,4 @@
 # ml2sql/__init__.py
 
 __app_name__ = "ml2sql"
-__version__ = "0.1.3"
+__version__ = "0.1.4"
