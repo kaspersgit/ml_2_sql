@@ -26,12 +26,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 - In case of vulnerabilities.
 
-## [0.1.4] - 2024-06-26
+## [0.1.6] - 2024-06-27
 
 ### Added
 - Initial release of the package.
 - Use as command line tool (commands: init, run, check-model and clean-data)
 - Automatic ML model training
+- Outputting feature related graphs
 - Outputting several performance graphs
 - Saves model in .sav format and in .sql format
 
