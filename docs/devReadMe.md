@@ -30,3 +30,41 @@ With the virtual env activated
 
 ### Building package
 https://packaging.python.org/en/latest/tutorials/packaging-projects/
+
+### Release process
+PyPI Release Process
+
+Update your package version
+Update the version in your __init__.py or wherever you keep your version number.
+Update CHANGELOG.md
+Document the changes in this new version.
+Commit changes and tag the release
+git add .
+git commit -m "Prepare release X.Y.Z"
+git tag vX.Y.Z
+git push origin main
+git push origin vX.Y.Z
+
+Build your package
+rm -rf dist/*  # Clean old builds
+python -m build
+
+Upload to TestPyPI
+twine upload --repository testpypi dist/*
+
+Test installation from TestPyPI
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ ml2sql
+
+Test the installed package
+Ensure it works as expected.
+Upload to PyPI
+If all tests pass:
+twine upload dist/*
+
+Verify PyPI installation
+pip install ml2sql
+
+Create a GitHub release (if applicable)
+Go to your GitHub repository and create a new release based on the tag you just pushed.
+
+Remember to increment your version number appropriately for each release, following semantic versioning principles.

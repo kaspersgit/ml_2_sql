@@ -10,7 +10,7 @@ py-modules = []
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["ml2sql*"]
+include = ["ml2sql", "ml2sql*"]
 
 [project]
 name = "ml2sql"
