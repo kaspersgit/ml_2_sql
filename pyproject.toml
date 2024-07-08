@@ -16,7 +16,7 @@ include = ["ml2sql", "ml2sql*"]
 name = "ml2sql"
 dynamic = ["version"]
 authors = [
-    {name = "Kasper de Harder", email = "kasperde@hotmail.com"},
+    {name = "Kasper de", email = "kasperde@hotmail.com"},
 ]
 description = "Automated interpretable ML tool with SQL version of model"
 readme = "README.md"
