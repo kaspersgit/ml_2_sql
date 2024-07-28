@@ -12,6 +12,9 @@ py-modules = []
 where = ["."]
 include = ["ml2sql", "ml2sql*"]
 
+[tool.setuptools.package-data]
+"ml2sql.data" = ["**/*"]
+
 [project]
 name = "ml2sql"
 dynamic = ["version"]

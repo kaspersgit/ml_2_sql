@@ -9,7 +9,6 @@ import typer
 from pathlib import Path
 import importlib.resources as pkg_resources
 import shutil
-import os
 
 app = typer.Typer()
 
@@ -35,69 +34,79 @@ def main(
 
 
 @app.command()
-def init():
+def init(
+        dest: Path = typer.Option(
+            Path.cwd(),
+            help="Destination folder for the initialized project. Defaults to current directory.",
+            exists=False,
+            file_okay=False,
+            dir_okay=True,
+            writable=True,
+            readable=True,
+            resolve_path=True,
+        )
+):
     """
     Initialize the project by creating necessary folders
+    and copying demo data to them
     """
 
-    # Get the current working directory
-    current_dir = Path.cwd()
-
     # List of folders to create and their subfolders
-    folders_structure = {"input": ["data", "configuration"], "trained_models": []}
+    folders_structure = {
+        "input": ["data", "configuration"],
+        "trained_models": []
+    }
 
     # Create folders and subfolders
     for folder, subfolders in folders_structure.items():
-        folder_path = current_dir / folder
+        folder_path = dest / folder
         try:
-            os.makedirs(folder_path, exist_ok=True)
-            print(f"Created folder: {folder_path}")
+            folder_path.mkdir(parents=True, exist_ok=True)
+            typer.echo(f"Created folder: {folder_path}")
+
+            for subfolder in subfolders:
+                subfolder_path = folder_path / subfolder
+                subfolder_path.mkdir(parents=True, exist_ok=True)
+                typer.echo(f"Created subfolder: {subfolder_path}")
+
         except OSError as e:
-            print(f"Error creating folder {folder_path}: {e.strerror}")
+            typer.echo(f"Error creating folder {folder_path}: {e}", err=True)
+            raise typer.Exit(code=1)
 
-        for subfolder in subfolders:
-            subfolder_path = folder_path / subfolder
-            try:
-                os.makedirs(subfolder_path, exist_ok=True)
-                print(f"Created subfolder: {subfolder_path}")
-            except OSError as e:
-                print(f"Error creating subfolder {subfolder_path}: {e.strerror}")
+    # Copy demo data from package data to input folder
+    dest_data_path = dest / "input"
 
-    # Function to copy directory contents from source to destination
-    def copy_directory_contents(src, dest):
-        if not dest.exists():
-            os.makedirs(dest)
-        for item in os.listdir(src):
-            s = os.path.join(src, item)
-            d = os.path.join(dest, item)
-            if os.path.isdir(s):
-                copy_directory_contents(s, d)
+    # Using pkg_resources to access package data
+    try:
+        # For Python 3.9+
+        if hasattr(pkg_resources, 'files'):
+            data_path = pkg_resources.files(__app_name__).joinpath("data")
+            if data_path.is_dir():
+                for item in data_path.iterdir():
+                    if item.is_file():
+                        shutil.copy2(item, dest_data_path)
+                    elif item.is_dir():
+                        shutil.copytree(item, dest_data_path / item.name, dirs_exist_ok=True)
+                typer.echo("Copied demo data to input folder")
             else:
-                shutil.copy2(s, d)
-
-    # Copy data directory contents
-    try:
-        with pkg_resources.as_file(
-            pkg_resources.files(f"{__app_name__}.data").joinpath("data")
-        ) as data_src_path:
-            data_dest_path = current_dir / "input" / "data"
-            copy_directory_contents(data_src_path, data_dest_path)
-            print(f"Data directory contents copied to {data_dest_path}")
+                typer.echo(f"Warning: Demo data folder not found in package at {data_path}", err=True)
+        # For Python 3.7-3.8
+        else:
+            with pkg_resources.files(__app_name__).joinpath("data") as data_path:
+                if data_path.is_dir():
+                    for item in data_path.iterdir():
+                        if item.is_file():
+                            shutil.copy2(item, dest_data_path)
+                        elif item.is_dir():
+                            shutil.copytree(item, dest_data_path / item.name, dirs_exist_ok=True)
+                    typer.echo("Copied demo data to input/data folder")
+                else:
+                    typer.echo(f"Warning: Demo data folder not found in package at {data_path}", err=True)
     except Exception as e:
-        print(f"Error copying data directory contents: {e}")
+        typer.echo(f"Error copying demo data: {e}", err=True)
+        raise typer.Exit(code=1)
 
-    # Copy configuration directory contents
-    try:
-        with pkg_resources.as_file(
-            pkg_resources.files(f"{__app_name__}.data").joinpath("configuration")
-        ) as config_src_path:
-            config_dest_path = current_dir / "input" / "configuration"
-            copy_directory_contents(config_src_path, config_dest_path)
-            print(f"Configuration directory contents copied to {config_dest_path}")
-    except Exception as e:
-        print(f"Error copying configuration directory contents: {e}")
-
-    print("Project initialized successfully!")
+    typer.echo(f"ml2sql project initialized in {dest}")
 
 
 @app.command()
