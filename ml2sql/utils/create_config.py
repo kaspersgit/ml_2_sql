@@ -97,7 +97,7 @@ def create_config(data_path):
             "target": target_column,
         }
 
-        csv_file_name = data_path.split("/")[-1].split(".")[0]
+        csv_file_name = data_path.name
         config_name = f"{csv_file_name}_auto_config"
 
     elif config_creation == "Manual":

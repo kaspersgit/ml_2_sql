@@ -1,4 +1,4 @@
-# tests/intergratio/test_cli.py
+# tests/inte    gration/test_cli.py
 
 from typer.testing import CliRunner
 

@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from contextlib import redirect_stdout
+from pathlib import Path
 import logging
 
 logger = logging.getLogger(__name__)
@@ -85,6 +86,7 @@ def ReduceSingleFeature(df_):
 
 
 def RestructureReduceInteractions(df_):
+    ## TODO somewhere in this function None is replaced by nan+
     # for safety
     df = df_.copy()
 
@@ -156,6 +158,12 @@ def RestructureReduceInteractions(df_):
     adj_check = (lookup_df.score_hash != lookup_df.score_hash.shift()).cumsum()
 
     lookup_df["adj_score"] = adj_check
+
+    def last_preserving_none(series):
+        non_none = series[series.notna()]
+        return non_none.iloc[-1] if len(non_none) > 0 else None
+
+    # TODO it seems to be going wrong here (None to nan)
     lookup_df_simple = (
         lookup_df.groupby(
             [
@@ -327,6 +335,7 @@ def extractLookupTable(ebm, post_params):
     if len(df_of_lists_double) > 0:
         # Restructure and reduce double feature df
         lookup_df_double = RestructureReduceInteractions(df_of_lists_double)
+
     else:
         lookup_df_double = None
 
@@ -430,7 +439,7 @@ def single_feature_handling(df):
 def single_feature_2_sql(df, feature):
     for index, row in df.iterrows():
         # Check if bound is for missing values (=None)
-        if row["feat_bound"] is None:
+        if pd.isna(row["feat_bound"]):
             print(
                 " WHEN {feature} IS NULL THEN {score}".format(
                     feature=feature,
@@ -518,7 +527,7 @@ def double_feature_sql_handling(df):
 def double_feature_2_sql(df, double_feature):
     for index, row in df.iterrows():
         # Check if bound is for missing values (=None)
-        if row["feat_bound_1"] is None:
+        if pd.isna(row["feat_bound_1"]):
             print(
                 " WHEN {feature} IS NULL THEN \n      CASE".format(
                     feature=row["feat_1"]
@@ -569,7 +578,7 @@ def double_feature_2_sql(df, double_feature):
         # Looping over the bound values for the second feature
         for sf_index in range(nr_bounds):
             # Check if bound is for missing values (=None)
-            if row["feat_bound_2"][sf_index] is None:
+            if pd.isna(row["feat_bound_2"][sf_index]):
                 print(
                     "         WHEN {feature} IS NULL THEN {score}".format(
                         feature=row["feat_2"],
@@ -758,7 +767,7 @@ def single_feature_2_sql_multiclass(df, feature, class_nr):
 
     for index, row in df.iterrows():
         # Check if bound is for missing values (=None)
-        if row["feat_bound"] is None:
+        if pd.isna(row["feat_bound"]):
             print(
                 " WHEN {feature} IS NULL THEN {score}".format(
                     feature=feature,
@@ -839,15 +848,28 @@ def ebm_to_sql(model_name, df, classes, split=True):
 def save_model_and_extras(ebm, model_name, post_params):
     # extract lookup table from EBM
     lookup_df = extractLookupTable(ebm, post_params)
-
     # In case of regression
     if not hasattr(ebm, "classes_"):
         ebm.classes_ = [0]
         lookup_df["intercept"] = [lookup_df["intercept"]]
 
     # Write printed output to file
-    with open(f"{model_name}/model/ebm_in_sql.sql", "w") as f:
+    output_path = Path(model_name) / "model" / "ebm_in_sql.sql"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(output_path, "w") as f:
         with redirect_stdout(f):
-            model_name = model_name.split("/")[-1]
+            model_name = Path(model_name).name
             ebm_to_sql(model_name, lookup_df, ebm.classes_, post_params["sql_split"])
     logger.info("SQL version of EBM saved")
+
+if __name__ == "__main__":
+    ebm = "../../../trained_models/20240729_test6/model/ebm_classification.sav"
+    model_name = 'test'
+    post_params = {
+        "calibration": "false",
+        "sql_split": "true",
+        "file_type": "png",
+        "sql_decimals": 15
+      }
+    save_model_and_extras(ebm, model_name, post_params)

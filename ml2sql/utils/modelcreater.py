@@ -2,6 +2,7 @@
 import logging
 import pandas as pd
 import json
+from pathlib import Path
 
 # Main modelling function
 from ml2sql.utils.modelling.main_modeler import make_model
@@ -23,11 +24,16 @@ def modelcreater(data_path, config_path, model_name, project_name):
     Main function to train machine learning models and save the trained model along with its SQL representation.
     """
 
+    # Convert to Path objects
+    data_path = Path(data_path)
+    config_path = Path(config_path)
+    project_name = Path(project_name)
+
     # Set logger
-    setup_logger(project_name + "/logging.log")
+    setup_logger(project_name / "logging.log")
     logger = logging.getLogger(__name__)
     logger.info(
-        f"Script input arguments: \ndata_path: {data_path} \nconfig_path: {config_path} \nmodel_name: \n {model_name} \nproject_name: {project_name}"
+        f"Script input arguments: \ndata_path: {data_path} \nconfig_path: {config_path} \nmodel_name: {model_name} \nproject_name: {project_name}"
     )
 
     # Load data
@@ -40,7 +46,7 @@ def modelcreater(data_path, config_path, model_name, project_name):
 
     # Load configuration
     logger.info(f"Loading configuration from {config_path}...")
-    with open(config_path) as json_file:
+    with config_path.open() as json_file:
         configuration = json.load(json_file)
 
     # Handle the configuration file

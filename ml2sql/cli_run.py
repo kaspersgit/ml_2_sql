@@ -3,6 +3,7 @@ import sys
 import re
 from datetime import datetime
 import time
+from pathlib import Path
 from ml2sql.utils.modelcreater import modelcreater
 from ml2sql.utils.create_config import create_config
 
@@ -10,13 +11,13 @@ from ml2sql.utils.create_config import create_config
 def cli_run():
     # ASCII art
     ml2sql = r"""
-    `7MMM.     ,MMF'`7MMF'                        .M"'"bgd   .g8""8q. `7MMF'
+  `7MMM.     ,MMF'`7MMF'                        .M"'"bgd   .g8""8q. `7MMF'
     MMMb    dPMM    MM                         ,MI    "Y .dP'    `YM. MM
     M YM   ,M MM    MM             pd*"*b.     `MMb.     dM'      `MM MM
     M  Mb  M' MM    MM            (O)   j8       `YMMNq. MM        MM MM
     M  YM.P'  MM    MM      ,         ,;j9     .     `MM MM.      ,MP MM      ,
     M  `YM'   MM    MM     ,M      ,-='        Mb     dM `Mb.    ,dP' MM     ,M
-    .JML. `'  .JMML..JMMmmmmMMM     Ammmmmmm     P"Ybmmd"    `"bmmd"' .JMMmmmmMMM
+  .JML. `'  .JMML..JMMmmmmMMM     Ammmmmmm     P"Ybmmd"    `"bmmd"' .JMMmmmmMMM
                                                                 MMb
                                                                 `bood'
     """
@@ -25,71 +26,52 @@ def cli_run():
     print("\n\n")
 
     # List files in input/data/ directory
-    data_dir = "input/data/"
-    files = []
-    for f in os.listdir(data_dir):
-        if f.endswith(".csv"):
-            files.append(f)
-    files.sort()
+    data_dir = Path("input") / "data"
+    files = sorted([f for f in data_dir.glob("*.csv")])
 
     print("Files in input/data/:")
     for i, file in enumerate(files, 1):
-        print(f"{i}. {file}")
+        print(f"{i}. {file.name}")
 
     # Ask for CSVPATH
     while True:
         try:
-            csv_file_index = input("\nSelect CSV file for training the model: ")
-            csv_file_index = int(csv_file_index) - 1
-            csv_path = os.path.join(data_dir, files[csv_file_index])
+            csv_file_index = int(input("\nSelect CSV file for training the model: ")) - 1
+            csv_path = files[csv_file_index]
             break
-        except IndexError:
-            print("Invalid index. Please try again.")
-        except ValueError:
-            print("Invalid input. Please enter an integer.")
+        except (IndexError, ValueError):
+            print("Invalid input. Please enter a valid integer.")
 
     print(f"CSV file {csv_path} will be used for modelling")
 
     # Ask for JSONPATH
     while True:
-        # List files in input/configuration/ directory
-        files = []
-        configuration_dir = "input/configuration/"
-        for f in os.listdir(configuration_dir):
-            if f.endswith(".json"):
-                files.append(f)
-        files.sort()
+        configuration_dir = Path("input") / "configuration"
+        files = sorted(list(configuration_dir.glob("*.json")))
+        files.insert(0, Path("Create New Config File"))
 
-        # Include option to create a new config file
-        files.insert(0, "Create New Config File")
-
-        # List the configuration files
         print(f"\n\nFiles in {configuration_dir}:")
         for i, file in enumerate(files, 1):
-            if file != "Create New Config File":
-                last_mod_ts = os.path.getmtime(configuration_dir + file)
+            if file.name != "Create New Config File":
+                last_mod_ts = file.stat().st_mtime
             else:
                 last_mod_ts = 0
 
             if time.time() - last_mod_ts < 10:
-                print(f"{i}. {file} (New)")
+                print(f"{i}. {file.name} (New)")
             else:
-                print(f"{i}. {file}")
+                print(f"{i}. {file.name}")
 
-        # prompt user to select config file
-        json_file_index = input("\nSelect JSON file for training configuration: ")
         try:
-            json_file_index = int(json_file_index) - 1
+            json_file_index = int(input("\nSelect JSON file for training configuration: ")) - 1
 
             if json_file_index == 0:
                 create_config(csv_path)
             else:
-                json_path = os.path.join(configuration_dir, files[json_file_index])
+                json_path = files[json_file_index]
                 break
-        except IndexError:
-            print("Invalid index. Please try again.")
-        except ValueError:
-            print("Invalid input. Please enter an integer.")
+        except (IndexError, ValueError):
+            print("Invalid input. Please enter a valid integer.")
 
     print(f"Configuration file {json_path} will be used for modelling")
 
@@ -125,20 +107,13 @@ def cli_run():
     # Model name
     unique_name = False
     while not unique_name:
-        # ask user to give model run a name
         model_name = input("\nGive it a name: ")
-
-        # Make sure model name only has letters numbers and underscores
-        model_name = model_name.lower().replace(" ", "_")
-        model_name = re.sub("[^0-9a-zA-Z_]+", "", model_name)
-
-        # Current date
+        model_name = re.sub(r'[^0-9a-zA-Z_]+', '', model_name.lower().replace(" ", "_"))
         current_date = datetime.today().strftime("%Y%m%d")
-
         full_model_name = f"{current_date}_{model_name}"
 
-        # Check if folder already exists with this name
-        if os.path.isdir(f"trained_models/{full_model_name}"):
+        model_dir = Path("trained_models") / full_model_name
+        if model_dir.exists():
             print("Folder with this name already exists please try another")
         else:
             unique_name = True
@@ -147,11 +122,11 @@ def cli_run():
 
     # Make directory with current data and model name
     try:
-        os.makedirs(f"trained_models/{full_model_name}")
-        os.makedirs(f"trained_models/{full_model_name}/feature_importance")
-        os.makedirs(f"trained_models/{full_model_name}/feature_info")
-        os.makedirs(f"trained_models/{full_model_name}/performance")
-        os.makedirs(f"trained_models/{full_model_name}/model")
+        model_dir.mkdir(parents=True)
+        (model_dir / "feature_importance").mkdir()
+        (model_dir / "feature_info").mkdir()
+        (model_dir / "performance").mkdir()
+        (model_dir / "model").mkdir()
     except FileExistsError:
         sys.exit("Error: Model directory already exists")
 
@@ -161,8 +136,8 @@ def cli_run():
         data_path=csv_path,
         config_path=json_path,
         model_name=model_type,
-        project_name=f"trained_models/{full_model_name}",
+        project_name=model_dir,
     )
 
     print("\nModel outputs can be found in folder:")
-    print(f"{os.getcwd()}/trained_models/{full_model_name}")
+    print(model_dir.resolve())

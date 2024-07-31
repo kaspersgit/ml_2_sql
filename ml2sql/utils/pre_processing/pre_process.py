@@ -69,7 +69,7 @@ def remove_one_occurrence_classes(data: pd.DataFrame, target_col: str) -> pd.Dat
 
 def impute_and_cast_data(
     data: pd.DataFrame, feature_cols: List[str], model_name: str
-) -> pd.DataFrame:
+) -> Tuple[pd.DataFrame, List[str]]:
     """
     Impute missing values and cast data types for the feature columns in the DataFrame.
 
@@ -111,7 +111,7 @@ def impute_and_cast_data(
     for col in data[feature_cols].select_dtypes(include=["bool"]).columns:
         data[col] = data[col].astype(int)
 
-    return data
+    return data, feature_cols
 
 
 def cleanAndCastColumns(
@@ -147,9 +147,9 @@ def cleanAndCastColumns(
         _data = remove_one_occurrence_classes(_data, target_col)
 
     # Impute missing values and cast data types
-    _data = impute_and_cast_data(_data, feature_cols, model_name)
+    _data, features_clean = impute_and_cast_data(_data, feature_cols, model_name)
 
-    return _data, feature_cols
+    return _data, features_clean
 
 
 def pre_process_kfold(
@@ -181,18 +181,18 @@ def pre_process_kfold(
         Dict[str, Dict[str, List[pd.DataFrame]]]: A dictionary containing the preprocessed datasets for final training, cross-validation, and out-of-time validation (if applicable).
     """
     # Clean and cast data types
-    data_clean, feature_cols = cleanAndCastColumns(
+    data_clean, features_clean = cleanAndCastColumns(
         data, feature_cols, target_col, model_name, model_type
     )
-
+    logger.info(data_clean.columns)
     # Limit dataset with respect to the max_rows parameter
     if "max_rows" in pre_params:
-        max_rows = min(pre_params["max_rows"], len(data_clean))
+        max_rows = min(int(pre_params["max_rows"]), len(data_clean))
         data_clean = data_clean.sample(n=max_rows).reset_index(drop=True)
         logger.info(f"Limited dataset to {max_rows}")
 
     # Create correlation plots
-    plot_correlations(data_clean[feature_cols], given_name, post_params["file_type"])
+    plot_correlations(data_clean[features_clean], given_name, post_params["file_type"])
 
     # Create cross-validation folds
     from sklearn.model_selection import StratifiedKFold, KFold, TimeSeriesSplit
@@ -214,7 +214,7 @@ def pre_process_kfold(
 
     # Set X and y data apart
     y = data_clean[target_col]
-    X = data_clean[feature_cols]
+    X = data_clean[features_clean]
 
     if pre_params["upsampling"] != "false":
         # Create upsampled version of full dataset for final training
@@ -231,14 +231,14 @@ def pre_process_kfold(
         oot_df = data_clean.sort_values(
             pre_params["time_sensitive_column"], ascending=True
         ).tail(pre_params["oot_rows"])
-        X_oot = oot_df[feature_cols]
+        X_oot = oot_df[features_clean]
         y_oot = oot_df[target_col]
 
         datasets["oot"] = {"X": X_oot, "y": y_oot}
 
         # Set new X and y data apart (excluding OOT)
         data_wo_oot = pd.concat([data_clean, oot_df]).drop_duplicates(keep=False)
-        X = data_wo_oot[feature_cols]
+        X = data_wo_oot[features_clean]
         y = data_wo_oot[target_col]
 
     # Create datasets based on the different folds

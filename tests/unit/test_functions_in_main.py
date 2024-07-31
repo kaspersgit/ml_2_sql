@@ -1,5 +1,6 @@
 import sys
 import os
+from pathlib import Path
 import shutil
 import json
 import logging
@@ -22,7 +23,10 @@ def test_data():
     target = np.random.randint(0, 2, size=100)  # Random binary values (0 or 1)
 
     df = pd.DataFrame({"col1": col1, "col2": col2, "target": target})
-    csv_path = "input/data/test_data.csv"
+
+    csv_path = Path("input") / "data" / "test_data.csv"
+    csv_path.parent.mkdir(parents=True, exist_ok=True)
+
     df.to_csv(csv_path, index=False)
     yield csv_path, df
     os.remove(csv_path)

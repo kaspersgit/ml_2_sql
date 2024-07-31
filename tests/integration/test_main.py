@@ -1,29 +1,54 @@
 import pytest
 from typer.testing import CliRunner
+from pathlib import Path
 from ml2sql.main import app
 import os
-import logging
+import typer
 from datetime import datetime
 
 runner = CliRunner()
 
 
 @pytest.fixture(scope="module")
-def setup_environment(tmp_path_factory):
+def setup_folder_structure(tmp_path_factory):
     # Create a temporary directory
     tmp_path = tmp_path_factory.mktemp("data")
+
+    # Convert to pathlib.Path object
+    tmp_path = Path(tmp_path)
 
     # Set up directories and files
     os.chdir(tmp_path)
 
     # Run the init command to set up the project
-    result = runner.invoke(app, ["init"])
+    result = runner.invoke(app, ["init", "--dest", tmp_path])
 
-    logging.info(f"Result: {result.output}")
+    typer.echo(f"Result: {result.output}")
 
     if result.exit_code != 0:
-        print(f"Init command failed with exit code {result.exit_code}")
-        print(result.output)
+        typer.echo(f"Init command failed with exit code {result.exit_code}")
+        typer.echo(result.output)
+    assert result.exit_code == 0
+
+@pytest.fixture(scope="module")
+def setup_environment(tmp_path_factory):
+    # Create a temporary directory
+    tmp_path = tmp_path_factory.mktemp("data")
+
+    # Convert to pathlib.Path object
+    tmp_path = Path(tmp_path)
+
+    # Set up directories and files
+    os.chdir(tmp_path)
+
+    # Run the init command to set up the project
+    result = runner.invoke(app, ["init", "--dest", tmp_path])
+
+    typer.echo(f"Result: {result.output}")
+
+    if result.exit_code != 0:
+        typer.echo(f"Init command failed with exit code {result.exit_code}")
+        typer.echo(result.output)
     assert result.exit_code == 0
 
     # Create the input sequence for test_run
@@ -37,39 +62,48 @@ def setup_environment(tmp_path_factory):
         "test_model\n"  # Enter model name
     )
 
-    print(f"User inputs: {user_inputs}")
+    typer.echo(f"User inputs: {user_inputs}")
 
     # Run the `run` command to create a model
     result = runner.invoke(app, ["run"], input=user_inputs, catch_exceptions=False)
+
     if result.exit_code != 0:
-        print(f"Run command failed with exit code {result.exit_code}")
-        print(result.output)
-        print(result.exception)
+        typer.echo(f"Run command failed with exit code {result.exit_code}")
+        typer.echo(result.output)
+        typer.echo(result.exception)
     assert result.exit_code == 0
 
-    return tmp_path
+    yield tmp_path
+
+    # Cleanup after tests
+    os.chdir("/")  # Change back to root directory
+    tmp_path.rmdir()  # Remove the temporary directory
 
 
 def test_version():
     result = runner.invoke(app, ["--version"])
 
-    logging.info(f"Result: {result.output}")
+    typer.echo(f"Result: {result.output}")
 
     assert result.exit_code == 0
     assert "ml2sql v" in result.output
 
 
 def test_init(mocker, tmp_path):
+    tmp_path = Path(tmp_path)
     os.chdir(tmp_path)  # Change to temporary directory for testing
-    result = runner.invoke(app, ["init"])
+
+    result = runner.invoke(app, ["init", "--dest", tmp_path])
 
     # Mock the os.system call to prevent actual execution of commands
-    mocker.patch("os.system")
+    # mocker.patch("os.system")
 
-    logging.info(f"Result: {result.output}")
+    typer.echo(f"Result: {result.output}")
+    typer.echo(f"Current working directory: {os.getcwd()}")
+    typer.echo(f"Contents of current directory: {os.listdir()}")
 
     assert result.exit_code == 0
-    assert "Project initialized successfully!" in result.output
+    assert "ml2sql project initialized in" in result.output
 
     # Check if directories are created
     input_dir = tmp_path / "input"
@@ -77,15 +111,19 @@ def test_init(mocker, tmp_path):
     config_dir = input_dir / "configuration"
     trained_models_dir = tmp_path / "trained_models"
 
+    typer.echo(f"input_dir exists: {input_dir.exists()}")
+    typer.echo(f"data_dir exists: {data_dir.exists()}")
+    typer.echo(f"config_dir exists: {config_dir.exists()}")
+    typer.echo(f"trained_models_dir exists: {trained_models_dir.exists()}")
+
     assert input_dir.exists()
     assert data_dir.exists()
     assert config_dir.exists()
     assert trained_models_dir.exists()
 
 
-def test_run(mocker, setup_environment):
-    # Use the setup_environment fixture to set up the environment and create a model
-    tmp_path = setup_environment
+def test_run(mocker, setup_folder_structure):
+    tmp_path = setup_folder_structure
     os.chdir(tmp_path)
 
     # Mock the os.system call to prevent actual execution of commands
@@ -101,7 +139,7 @@ def test_run(mocker, setup_environment):
 
     result = runner.invoke(app, ["run"], input=user_inputs)
 
-    logging.info(f"Result: {result.output}")
+    typer.echo(f"Result: {result.output}")
 
     assert result.exit_code == 0
     assert (
@@ -142,12 +180,12 @@ def test_check_model(mocker, setup_environment):
     current_date = datetime.today().strftime("%Y%m%d")
 
     if result.exit_code != 0:
-        print(f"Check model command failed with exit code {result.exit_code}")
-        print("Output:")
-        print(result.output)
+        typer.echo(f"Check model command failed with exit code {result.exit_code}")
+        typer.echo("Output:")
+        typer.echo(result.output)
         if result.exception:
-            print("Exception:")
-            print(result.exception)
+            typer.echo("Exception:")
+            typer.echo(result.exception)
     assert result.exit_code == 0
     assert (
         "CSV file input/data/example_binary_titanic.csv will be used for testing model"

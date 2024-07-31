@@ -159,4 +159,5 @@ def allClassesHaveLeafNode(clf):
 
 def postModelPlots(clf, given_name, file_type):
     featureImportanceSave(clf, given_name, file_type)
-    allClassesHaveLeafNode(clf)
+    if type(clf).__name__ == "DecisionTreeClassifier":
+        allClassesHaveLeafNode(clf)

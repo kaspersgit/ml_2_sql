@@ -1,5 +1,6 @@
 import numpy as np
 from contextlib import redirect_stdout
+from pathlib import Path
 import logging
 
 logger = logging.getLogger(__name__)
@@ -175,11 +176,12 @@ def format_sql(
 def save_model_and_extras(clf, model_name, post_params):
     model_type, pclasses, features, coefficients, intercept = extract_parameters(clf)
     # Write printed output to file
-    with open(
-        "{model_name}/model/lregression_in_sql.sql".format(model_name=model_name), "w"
-    ) as f:
+    output_path = Path(model_name) / "model" / "lregression_in_sql.sql"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(output_path, "w") as f:
         with redirect_stdout(f):
-            model_name = model_name.split("/")[-1]
+            model_name = Path(model_name).name
             format_sql(
                 model_name,
                 model_type,
