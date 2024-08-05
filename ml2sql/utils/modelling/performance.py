@@ -206,7 +206,9 @@ def plotConfusionMatrixSlider(given_name, y_true, y_prob, data_type):
 
     fig.update_layout(sliders=sliders)
 
-    output_path = Path(given_name) / "performance" / f"{data_type}_confusion_matrix.html"
+    output_path = (
+        Path(given_name) / "performance" / f"{data_type}_confusion_matrix.html"
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.write_html(output_path, auto_play=False)
 
@@ -339,7 +341,9 @@ def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type):
         x=0.5, y=0, text=f"Mean AUC: {np.mean(auc_list)}", showarrow=False, yshift=10
     )
 
-    output_path = Path(given_name) / "performance" / f"{data_type}_{curve_type}_plot.png"
+    output_path = (
+        Path(given_name) / "performance" / f"{data_type}_{curve_type}_plot.png"
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.write_image(output_path)
 
@@ -466,7 +470,6 @@ def plotCalibrationCurve(given_name, y_true, y_prob, data_type):
     logger.info(f"Created and saved calibration plot for {data_type} data")
 
 
-
 # for multiclass classification WIP
 def multiClassPlotCalibrationCurvePlotly(given_name, actuals, probs, title, bins=10):
     """
@@ -587,7 +590,9 @@ def plotProbabilityDistribution(given_name, y_true, y_prob, data_type):
 
     # fig.show(renderer='browser')
 
-    output_path = Path(given_name) / "performance" / f"{data_type}_distribution_plot.png"
+    output_path = (
+        Path(given_name) / "performance" / f"{data_type}_distribution_plot.png"
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.write_image(output_path)
 
@@ -657,7 +662,9 @@ def plotDistribution(given_name, groups, values, data_type):
         bargroupgap=0.1,  # gap between bars of the same location coordinates
     )
 
-    output_path = Path(given_name) / "performance" / f"{data_type}_distribution_plot.png"
+    output_path = (
+        Path(given_name) / "performance" / f"{data_type}_distribution_plot.png"
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.write_image(output_path)
 
@@ -693,7 +700,9 @@ def plotYhatVsYSave(given_name, y_true, y_pred, data_type):
     plot_df = pd.DataFrame({"y_true": y_true, "y_pred": y_pred})
     fig = px.scatter(plot_df, "y_true", "y_pred")
 
-    output_path = Path(given_name) / "performance" / f"{data_type}_scatter_yhat_vs_y.png"
+    output_path = (
+        Path(given_name) / "performance" / f"{data_type}_scatter_yhat_vs_y.png"
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.write_image(output_path)
 
@@ -722,7 +731,9 @@ def plotQuantileError(given_name, y_true, y_pred, data_type):
         height=800,
     )
 
-    output_path = Path(given_name) / "performance" / f"{data_type}_quantile_error_plot.png"
+    output_path = (
+        Path(given_name) / "performance" / f"{data_type}_quantile_error_plot.png"
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.write_image(output_path)
 
@@ -803,7 +814,9 @@ def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type):
     )
 
     # Save table
-    output_path = Path(given_name) / "performance" / f"{data_type}_regression_metrics.png"
+    output_path = (
+        Path(given_name) / "performance" / f"{data_type}_regression_metrics.png"
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.write_image(output_path)
 
@@ -868,7 +881,9 @@ def plotDistributionViolin(given_name, feature_name, groups, values, data_type):
         height=800,
     )
 
-    output_path = Path(given_name) / "feature_info" / f"{feature_name}_distributions.png"
+    output_path = (
+        Path(given_name) / "feature_info" / f"{feature_name}_distributions.png"
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.write_image(output_path)
 

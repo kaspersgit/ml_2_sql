@@ -863,13 +863,14 @@ def save_model_and_extras(ebm, model_name, post_params):
             ebm_to_sql(model_name, lookup_df, ebm.classes_, post_params["sql_split"])
     logger.info("SQL version of EBM saved")
 
+
 if __name__ == "__main__":
     ebm = "../../../trained_models/20240729_test6/model/ebm_classification.sav"
-    model_name = 'test'
+    model_name = "test"
     post_params = {
         "calibration": "false",
         "sql_split": "true",
         "file_type": "png",
-        "sql_decimals": 15
-      }
+        "sql_decimals": 15,
+    }
     save_model_and_extras(ebm, model_name, post_params)

@@ -2,7 +2,6 @@ import numpy as np
 from pathlib import Path
 import logging
 from sklearn.tree import _tree
-from contextlib import redirect_stdout
 import sys
 
 logger = logging.getLogger(__name__)
@@ -53,12 +52,12 @@ def tree_to_sql(tree, file=sys.stdout):
                 if np.issubdtype(type(predicted_class), np.integer):
                     print(
                         f"{indent}{predicted_class} -- train data precision: {max_value / samples:.2f} ({max_value}/{samples})",
-                        file=file
+                        file=file,
                     )
                 else:
                     print(
                         f"{indent}'{predicted_class}' -- train data precision: {max_value / samples:.2f} ({max_value}/{samples})",
-                        file=file
+                        file=file,
                     )
             else:
                 prediction = tree_.value[node][0, 0]

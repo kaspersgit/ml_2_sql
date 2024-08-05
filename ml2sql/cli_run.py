@@ -1,4 +1,3 @@
-import os
 import sys
 import re
 from datetime import datetime
@@ -36,7 +35,9 @@ def cli_run():
     # Ask for CSVPATH
     while True:
         try:
-            csv_file_index = int(input("\nSelect CSV file for training the model: ")) - 1
+            csv_file_index = (
+                int(input("\nSelect CSV file for training the model: ")) - 1
+            )
             csv_path = files[csv_file_index]
             break
         except (IndexError, ValueError):
@@ -63,7 +64,9 @@ def cli_run():
                 print(f"{i}. {file.name}")
 
         try:
-            json_file_index = int(input("\nSelect JSON file for training configuration: ")) - 1
+            json_file_index = (
+                int(input("\nSelect JSON file for training configuration: ")) - 1
+            )
 
             if json_file_index == 0:
                 create_config(csv_path)
@@ -108,7 +111,7 @@ def cli_run():
     unique_name = False
     while not unique_name:
         model_name = input("\nGive it a name: ")
-        model_name = re.sub(r'[^0-9a-zA-Z_]+', '', model_name.lower().replace(" ", "_"))
+        model_name = re.sub(r"[^0-9a-zA-Z_]+", "", model_name.lower().replace(" ", "_"))
         current_date = datetime.today().strftime("%Y%m%d")
         full_model_name = f"{current_date}_{model_name}"
 

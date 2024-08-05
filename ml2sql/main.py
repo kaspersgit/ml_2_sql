@@ -8,8 +8,6 @@ from ml2sql.quick_clean_data import quick_clean_data
 from ml2sql import __version__, __app_name__
 import typer
 from pathlib import Path
-import importlib.resources as pkg_resources
-import shutil
 
 app = typer.Typer()
 
@@ -36,16 +34,16 @@ def main(
 
 @app.command()
 def init(
-        dest: Path = typer.Option(
-            Path.cwd(),
-            help="Destination folder for the initialized project. Defaults to current directory.",
-            exists=False,
-            file_okay=False,
-            dir_okay=True,
-            writable=True,
-            readable=True,
-            resolve_path=True,
-        )
+    dest: Path = typer.Option(
+        Path.cwd(),
+        help="Destination folder for the initialized project. Defaults to current directory.",
+        exists=False,
+        file_okay=False,
+        dir_okay=True,
+        writable=True,
+        readable=True,
+        resolve_path=True,
+    ),
 ):
     """
     Initialize the project by creating necessary folders
