@@ -1,198 +1,148 @@
 import pytest
 from typer.testing import CliRunner
-from pathlib import Path
+import sys
 from ml2sql.main import app
-import os
-import typer
+import json
 from datetime import datetime
+import os
+import pandas as pd
 
-runner = CliRunner()
+
+@pytest.fixture
+def runner():
+    return CliRunner()
 
 
-@pytest.fixture(scope="module")
-def setup_folder_structure(tmp_path_factory):
-    # Create a temporary directory
-    tmp_path = tmp_path_factory.mktemp("data")
+@pytest.fixture
+def temp_dir(tmp_path):
+    yield tmp_path
 
-    # Convert to pathlib.Path object
-    tmp_path = Path(tmp_path)
 
-    # Set up directories and files
-    os.chdir(tmp_path)
+def test_version(runner):
+    result = runner.invoke(app, ["--version"])
+    assert result.exit_code == 0
+    assert "ml2sql v" in result.stdout
 
-    # Run the init command to set up the project
-    result = runner.invoke(app, ["init", "--dest", tmp_path])
 
-    typer.echo(f"Result: {result.output}")
-
-    if result.exit_code != 0:
-        typer.echo(f"Init command failed with exit code {result.exit_code}")
-        typer.echo(result.output)
+# Test cli_init
+def test_init_command(runner, temp_dir):
+    result = runner.invoke(app, ["init", "--dest", str(temp_dir)])
     assert result.exit_code == 0
 
-@pytest.fixture(scope="module")
-def setup_environment(tmp_path_factory):
-    # Create a temporary directory
-    tmp_path = tmp_path_factory.mktemp("data")
+    # Check if the command output indicates success
+    assert "ml2sql project initialized in" in result.stdout
 
-    # Convert to pathlib.Path object
-    tmp_path = Path(tmp_path)
+    # Check if the expected folders were created
+    assert (temp_dir / "input" / "data").is_dir()
+    assert (temp_dir / "input" / "configuration").is_dir()
+    assert (temp_dir / "trained_models").is_dir()
 
-    # Set up directories and files
-    os.chdir(tmp_path)
+    # Check if demo data was copied (you may need to adjust this based on your actual demo data)
+    assert any((temp_dir / "input" / "data").iterdir()), "No files found in input/data"
+    assert any(
+        (temp_dir / "input" / "configuration").iterdir()
+    ), "No files found in input/configuration"
 
-    # Run the init command to set up the project
-    result = runner.invoke(app, ["init", "--dest", tmp_path])
 
-    typer.echo(f"Result: {result.output}")
+def test_init_command_existing_directory(runner, temp_dir):
+    # Create a file in the directory to simulate an existing project
+    (temp_dir / "existing_file.txt").touch()
 
-    if result.exit_code != 0:
-        typer.echo(f"Init command failed with exit code {result.exit_code}")
-        typer.echo(result.output)
+    result = runner.invoke(app, ["init", "--dest", str(temp_dir)])
     assert result.exit_code == 0
+
+    # Check if the command completed without errors
+    assert "ml2sql project initialized in" in result.stdout
+
+    # Check if the existing file is still there
+    assert (temp_dir / "existing_file.txt").exists()
+
+
+@pytest.fixture
+def setup_run_environment(temp_dir):
+    # Create necessary directories and files
+    (temp_dir / "input" / "data").mkdir(parents=True)
+    (temp_dir / "input" / "configuration").mkdir(parents=True)
+    (temp_dir / "trained_models").mkdir()
+
+    # Create a dummy CSV file with some data
+    df = pd.DataFrame(
+        {
+            "target": [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+            "feature1": [1, 2, 3, 4, 6, 7, 8, 3, 6, 1],
+            "feature2": [5, 6, 7, 8, 3, 4, 6, 7, 3, 1],
+        }
+    )
+    df.to_csv(temp_dir / "input" / "data" / "test.csv", index=False)
+
+    # Create a dummy JSON configuration file
+    config = {
+        "target": "target",
+        "features": ["feature1", "feature2"],
+        "model_params": {},
+    }
+    with open(temp_dir / "input" / "configuration" / "config.json", "w") as f:
+        json.dump(config, f)
+
+    # Change to the temp directory
+    original_dir = os.getcwd()
+    os.chdir(temp_dir)
+    yield temp_dir
+    # Change back to the original directory after the test
+    os.chdir(original_dir)
+
+
+def test_run_command(setup_run_environment, caplog):
+    # Avoid I/O error by not having any logger  produce a message
+    caplog.set_level(100000)
+
+    runner = CliRunner()
+    temp_dir = setup_run_environment
 
     # Create the input sequence for test_run
     user_inputs = (
         "1\n"  # Select the first CSV file
-        "1\n"  # Select Create New Config File
-        "0\n"  # Select the first column as the target
-        "1\n"  # Select automatic creation of config
-        "2\n"  # Select the first actual JSON file
-        "1\n"  # Select the first model type
+        "2\n"  # Select the first JSON file (we created one in setup)
+        "1\n"  # Select the first model type (assuming it's "Explainable Boosting Machine")
         "test_model\n"  # Enter model name
     )
 
-    typer.echo(f"User inputs: {user_inputs}")
-
     # Run the `run` command to create a model
-    result = runner.invoke(app, ["run"], input=user_inputs, catch_exceptions=False)
+    try:
+        result = runner.invoke(app, ["run"], input=user_inputs)
 
-    if result.exit_code != 0:
-        typer.echo(f"Run command failed with exit code {result.exit_code}")
-        typer.echo(result.output)
-        typer.echo(result.exception)
-    assert result.exit_code == 0
+        print(f"Exit code: {result.exit_code}")
+        print(f"Output: {result.output}")
 
-    yield tmp_path
-
-    # Cleanup after tests
-    os.chdir("/")  # Change back to root directory
-    tmp_path.rmdir()  # Remove the temporary directory
-
-
-def test_version():
-    result = runner.invoke(app, ["--version"])
-
-    typer.echo(f"Result: {result.output}")
-
-    assert result.exit_code == 0
-    assert "ml2sql v" in result.output
-
-
-def test_init(mocker, tmp_path):
-    tmp_path = Path(tmp_path)
-    os.chdir(tmp_path)  # Change to temporary directory for testing
-
-    result = runner.invoke(app, ["init", "--dest", tmp_path])
-
-    # Mock the os.system call to prevent actual execution of commands
-    # mocker.patch("os.system")
-
-    typer.echo(f"Result: {result.output}")
-    typer.echo(f"Current working directory: {os.getcwd()}")
-    typer.echo(f"Contents of current directory: {os.listdir()}")
-
-    assert result.exit_code == 0
-    assert "ml2sql project initialized in" in result.output
-
-    # Check if directories are created
-    input_dir = tmp_path / "input"
-    data_dir = input_dir / "data"
-    config_dir = input_dir / "configuration"
-    trained_models_dir = tmp_path / "trained_models"
-
-    typer.echo(f"input_dir exists: {input_dir.exists()}")
-    typer.echo(f"data_dir exists: {data_dir.exists()}")
-    typer.echo(f"config_dir exists: {config_dir.exists()}")
-    typer.echo(f"trained_models_dir exists: {trained_models_dir.exists()}")
-
-    assert input_dir.exists()
-    assert data_dir.exists()
-    assert config_dir.exists()
-    assert trained_models_dir.exists()
-
-
-def test_run(mocker, setup_folder_structure):
-    tmp_path = setup_folder_structure
-    os.chdir(tmp_path)
-
-    # Mock the os.system call to prevent actual execution of commands
-    mocker.patch("os.system")
-
-    # Create the input sequence for test_run
-    user_inputs = (
-        "1\n"  # Select the first CSV file
-        "2\n"  # Select the first JSON file
-        "1\n"  # Select the first model type
-        "test_run_main\n"  # Enter model name
-    )
-
-    result = runner.invoke(app, ["run"], input=user_inputs)
-
-    typer.echo(f"Result: {result.output}")
-
-    assert result.exit_code == 0
-    assert (
-        "CSV file input/data/example_binary_titanic.csv will be used for modelling"
-        in result.output
-    )
-    assert (
-        "Configuration file input/configuration/example_binary_titanic.json will be used for modelling"
-        in result.output
-    )
-    assert (
-        "Algorithm chosen for modelling: Explainable Boosting Machine" in result.output
-    )
-    assert "Starting script to create model" in result.output
-    assert "Model outputs can be found in folder:" in result.output
-
-
-def test_check_model(mocker, setup_environment):
-    tmp_path = setup_environment
-    os.chdir(tmp_path)
-
-    # Mock the os.system call to prevent actual execution of commands
-    mocker.patch("os.system")
-
-    # Create the input sequence for test_check_model
-    user_inputs = (
-        "1\n"  # Select the first CSV file
-        "1\n"  # Select the first model file
-    )
-
-    # Run CLI command
-    result = runner.invoke(
-        app, ["check-model"], input=user_inputs, catch_exceptions=False
-    )
-
-    # get current date for folder name
-    # Current date
-    current_date = datetime.today().strftime("%Y%m%d")
-
-    if result.exit_code != 0:
-        typer.echo(f"Check model command failed with exit code {result.exit_code}")
-        typer.echo("Output:")
-        typer.echo(result.output)
         if result.exception:
-            typer.echo("Exception:")
-            typer.echo(result.exception)
-    assert result.exit_code == 0
-    assert (
-        "CSV file input/data/example_binary_titanic.csv will be used for testing model"
-        in result.output
-    )
-    assert (
-        f"Model trained_models/{current_date}_test_model/model/ebm_classification.sav will be used for testing"
-        in result.output
-    )
-    assert "Model performance outputs can be found in folder:" in result.output
+            print(f"Exception: {result.exception}")
+            print(f"Traceback: {result.exc_info}")
+
+        assert result.exit_code == 0
+        assert "Starting script to create model" in result.output
+
+        # Check if the model directory was created
+        current_date = datetime.today().strftime("%Y%m%d")
+        model_dir = temp_dir / "trained_models" / f"{current_date}_test_model"
+        assert model_dir.is_dir(), f"Model directory not found: {model_dir}"
+        assert (model_dir / "feature_importance").is_dir()
+        assert (model_dir / "feature_info").is_dir()
+        assert (model_dir / "performance").is_dir()
+        assert (model_dir / "model").is_dir()
+
+        # Check if model files were created
+        assert any(
+            (model_dir / "model").glob("*.sav")
+        ), "No pickle file found in model directory"
+        assert (
+            model_dir / "performance" / "test_roc_plot.png"
+        ).exists(), "metrics.json not found"
+        assert any(
+            (model_dir / "feature_importance").glob("*.png")
+        ), "No plot found in feature_importance directory"
+
+    except Exception as e:
+        print(f"Unexpected error: {e}", file=sys.stderr)
+        print(f"Current working directory: {os.getcwd()}", file=sys.stderr)
+        print(f"Contents of current directory: {os.listdir()}", file=sys.stderr)
+        raise

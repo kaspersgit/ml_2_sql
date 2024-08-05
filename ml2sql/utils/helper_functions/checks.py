@@ -1,5 +1,6 @@
 import pandas as pd
 import logging
+from ml2sql.utils.test_helpers.sql_model import execute_sql_script
 
 logger = logging.getLogger(__name__)
 
@@ -35,3 +36,19 @@ def checkInputData(data, config):
     """
     checkTargetHard(data[config["target"]])
     checkFeatures(data[config["features"]])
+
+
+def check_sql(loaded_sql, data, prob_column, model_pred):
+    sql_pred = execute_sql_script(loaded_sql, data, prob_column)
+
+    # Add assertions to check if the results are as expected
+    assert sql_pred is not None
+
+    logger.info(
+        f"Max difference SQL - pickled model: {(abs((sql_pred - model_pred)/model_pred)).max()}"
+    )
+
+    # Check if SQL model prediction is same as pickled model prediction
+    # use a tolerance of 0.001%
+    tolerance = 0.00001
+    assert (abs((sql_pred - model_pred) / model_pred) <= tolerance).all()
