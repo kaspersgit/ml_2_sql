@@ -20,7 +20,8 @@ python -m pip install --index-url https://pypi.org/simple \
 
 ### Testing
 - Activate `.ml2sql` venv
-- Run `pytest`
+- Run `pytest` (or testing with logger showing `python -m "pytest" --log-cli-level=DEBUG`
+)
 
 ### Package management (pinning)
 With the virtual env activated

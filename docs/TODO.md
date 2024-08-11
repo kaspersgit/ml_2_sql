@@ -18,6 +18,7 @@ Checks and config
   - Add hyperlinks to metrics and other technical topics in readme
 
 - Other 
+  - Add APLR (new model in interpretml)
   - Allow for other data file types (apart from csv)
   - Test generated SQL vs trained model and report on difference
   - Switch decision tree from sklearn to interpret for coherence (wait on [issue 552](https://github.com/interpretml/interpret/issues/522))
@@ -29,5 +30,5 @@ Checks and config
   - Improve feature importance logistic/linear regression for multiclass classification
   - Create a script which cleans a dataset so that it can be used by the tool
   - Next to SQL, have a model be outputted in python using only if else statements
-  - Have some local explainations of actual predictions (as part of modeltester script)
+  - Have some local explanations of actual predictions (as part of modeltester script)
   - Have the model instance save feature names under model.feature_names

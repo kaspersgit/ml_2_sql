@@ -23,8 +23,17 @@ jobs:
         shell: bash
       - name: Install development dependencies
         run: |
-              python -m pip install ".[dev]"
+              python -m pip install -e ".[dev]"
         shell: bash
+      - name: Initialise ml2sql folder structure
+        run: |
+              ml2sql init
+        shell: bash
+      - name: Pip listing
+        run: |
+              pip list
+        shell: bash
+        continue-on-error: true
       - name: Lint with Ruff  
         run: |
               if [ "$RUNNER_OS" == "Windows" ]; then

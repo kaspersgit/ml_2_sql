@@ -112,7 +112,7 @@ The csv file containing the data has to fulfill some basic assumptions:
 ## Configuration json ([example](https://github.com/kaspersgit/ml_2_sql/blob/main/input/configuration/example_binary_titanic.json))
 This file will inform the script which column is the target, which are the features and several other parameters for pre and post training.
 You can copy and edit a config file from the already existing example in `input/configuration/` or select `Create a new config` file in the second step 
-when running the `run.py` file.
+when running `ml2sql run`.
 
 Configs are saved in `input/configuration/`.
 

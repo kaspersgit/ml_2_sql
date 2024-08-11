@@ -33,7 +33,7 @@
   "post_params": {
     "calibration": "false",
     "sql_split": "true",
-    "file_type": "html",
+    "file_type": "png",
     "sql_decimals": 15
   },
   "pre_params": {

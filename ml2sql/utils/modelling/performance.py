@@ -1,5 +1,9 @@
+from pathlib import Path
 import pandas as pd
 import numpy as np
+import matplotlib
+
+matplotlib.use("Agg")
 from matplotlib import pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
@@ -29,42 +33,16 @@ logger = logging.getLogger(__name__)
 
 
 def plotConfusionMatrixStatic(given_name, y_true, y_pred, data_type):
-    """
-    Plot and save a confusion matrix for given predictions.
-
-    Parameters
-    ----------
-    given_name : str
-        The name of the experiment or model.
-    y_true : array-like of shape (n_samples,)
-        True labels of the samples.
-    y_pred : array-like of shape (n_samples,)
-        Predicted labels of the samples.
-    data_type : str
-        The type of the data (train, val, test, etc.)
-
-    Returns
-    -------
-    None
-
-    Notes
-    -----
-    Saves the confusion matrix in {given_name}/performance/{data_type}_confusion_matrix.png
-
-    """
-
     from sklearn.metrics import ConfusionMatrixDisplay
 
     fig, ax = plt.subplots(figsize=(10, 8))
 
     disp = ConfusionMatrixDisplay.from_predictions(y_true, y_pred, ax=ax)  # noqa: F841
     plt.xticks(rotation=90)
-    plt.savefig(
-        "{given_name}/performance/{data_type}_confusion_matrix.png".format(
-            given_name=given_name, data_type=data_type
-        ),
-        bbox_inches="tight",
-    )
+
+    output_path = Path(given_name) / "performance" / f"{data_type}_confusion_matrix.png"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(output_path, bbox_inches="tight")
 
     logger.info(f"Created and saved confusion matrix for {data_type} data")
 
@@ -231,9 +209,11 @@ def plotConfusionMatrixSlider(given_name, y_true, y_prob, data_type):
 
     fig.update_layout(sliders=sliders)
 
-    fig.write_html(
-        f"{given_name}/performance/{data_type}_confusion_matrix.html", auto_play=False
+    output_path = (
+        Path(given_name) / "performance" / f"{data_type}_confusion_matrix.html"
     )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.write_html(output_path, auto_play=False)
 
     logger.info(f"Created and saved confusion matrix for {data_type} data")
 
@@ -364,7 +344,11 @@ def plotClassificationCurve(given_name, y_true, y_prob, curve_type, data_type):
         x=0.5, y=0, text=f"Mean AUC: {np.mean(auc_list)}", showarrow=False, yshift=10
     )
 
-    fig.write_image(f"{given_name}/performance/{data_type}_{curve_type}_plot.png")
+    output_path = (
+        Path(given_name) / "performance" / f"{data_type}_{curve_type}_plot.png"
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.write_image(output_path)
 
     logger.info(f"Created and saved {curve_type} plot for {data_type} data")
 
@@ -482,11 +466,11 @@ def plotCalibrationCurve(given_name, y_true, y_prob, data_type):
         yshift=10,
     )
 
-    fig.write_image(f"{given_name}/performance/{data_type}_calibration_plot.png")
+    output_path = Path(given_name) / "performance" / f"{data_type}_calibration_plot.png"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.write_image(output_path)
 
     logger.info(f"Created and saved calibration plot for {data_type} data")
-
-    return
 
 
 # for multiclass classification WIP
@@ -609,11 +593,13 @@ def plotProbabilityDistribution(given_name, y_true, y_prob, data_type):
 
     # fig.show(renderer='browser')
 
-    fig.write_image(f"{given_name}/performance/{data_type}_distribution_plot.png")
+    output_path = (
+        Path(given_name) / "performance" / f"{data_type}_distribution_plot.png"
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.write_image(output_path)
 
     logger.info("Created and saved probability distribution plot")
-
-    return
 
 
 def plotDistribution(given_name, groups, values, data_type):
@@ -679,11 +665,13 @@ def plotDistribution(given_name, groups, values, data_type):
         bargroupgap=0.1,  # gap between bars of the same location coordinates
     )
 
-    fig.write_image(f"{given_name}/performance/{data_type}_distribution_plot.png")
+    output_path = (
+        Path(given_name) / "performance" / f"{data_type}_distribution_plot.png"
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.write_image(output_path)
 
     logger.info("Created and saved probability distribution plot")
-
-    return
 
 
 """
@@ -714,11 +702,12 @@ def plotYhatVsYSave(given_name, y_true, y_pred, data_type):
 
     plot_df = pd.DataFrame({"y_true": y_true, "y_pred": y_pred})
     fig = px.scatter(plot_df, "y_true", "y_pred")
-    fig.write_image(
-        "{given_name}/performance/{data_type}_scatter_yhat_vs_y.png".format(
-            given_name=given_name, data_type=data_type
-        )
+
+    output_path = (
+        Path(given_name) / "performance" / f"{data_type}_scatter_yhat_vs_y.png"
     )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.write_image(output_path)
 
     logger.info(f"Scatter plot of yhat vs y saved for {data_type}")
 
@@ -745,11 +734,11 @@ def plotQuantileError(given_name, y_true, y_pred, data_type):
         height=800,
     )
 
-    fig.write_image(
-        "{given_name}/performance/{data_type}_quantile_error_plot.png".format(
-            given_name=given_name, data_type=data_type
-        )
+    output_path = (
+        Path(given_name) / "performance" / f"{data_type}_quantile_error_plot.png"
     )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.write_image(output_path)
 
     logger.info(f"Quantile error plot saved for {data_type}")
 
@@ -828,11 +817,13 @@ def regressionMetricsTable(given_name, y_true, y_pred, X_all, data_type):
     )
 
     # Save table
-    fig.write_image(f"{given_name}/performance/{data_type}_regression_metrics.png")
+    output_path = (
+        Path(given_name) / "performance" / f"{data_type}_regression_metrics.png"
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.write_image(output_path)
 
     logger.info("Created and saved regression metrics table")
-
-    return
 
 
 # To be used for feature exploration (TODO add more colors)
@@ -893,11 +884,13 @@ def plotDistributionViolin(given_name, feature_name, groups, values, data_type):
         height=800,
     )
 
-    fig.write_image(f"{given_name}/feature_info/{feature_name}_distributions.png")
+    output_path = (
+        Path(given_name) / "feature_info" / f"{feature_name}_distributions.png"
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.write_image(output_path)
 
     logger.info("Created and saved feature distribution plot")
-
-    return
 
 
 def modelPerformancePlots(
@@ -1127,8 +1120,11 @@ def postModellingPlots(
         )
 
     # Post modeling plots, specific per model but includes feature importance among others
+    output_path = Path(given_name) / "feature_importance"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
     globals()[model_name].postModelPlots(
         clf["final"],
-        given_name + "/feature_importance",
+        output_path,
         post_params["file_type"],
     )
