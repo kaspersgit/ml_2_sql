@@ -18,6 +18,13 @@ from ml2sql.utils.helper_functions.setup_logger import setup_logger
 from ml2sql.utils.helper_functions.config_handling import config_handling
 from ml2sql.utils.pre_processing.pre_process import pre_process_kfold
 
+# to avoid odd tkinter related error
+import sys
+import os
+
+sys.modules["tkinter"] = None
+os.environ["PYTHON_TKINTER_SKIP"] = "1"
+
 
 def modelcreater(data_path, config_path, model_name, project_name):
     """

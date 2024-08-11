@@ -81,6 +81,7 @@ def setup_run_environment(temp_dir):
         "features": ["feature1", "feature2"],
         "model_params": {},
     }
+
     with open(temp_dir / "input" / "configuration" / "config.json", "w") as f:
         json.dump(config, f)
 
@@ -136,7 +137,7 @@ def test_run_command(setup_run_environment, caplog):
         ), "No pickle file found in model directory"
         assert (
             model_dir / "performance" / "test_roc_plot.png"
-        ).exists(), "metrics.json not found"
+        ).exists(), "At least one metrics file not found"
         assert any(
             (model_dir / "feature_importance").glob("*.png")
         ), "No plot found in feature_importance directory"

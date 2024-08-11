@@ -71,7 +71,7 @@ def tree_to_sql(tree, file=sys.stdout):
 
 
 def save_model_and_extras(clf, model_name, post_params):
-    output_path = Path(model_name) / "model" / "tree_in_sql.sql"
+    output_path = Path(model_name) / "model" / "decisiontree_in_sql.sql"
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     with open(output_path, "w") as f:
