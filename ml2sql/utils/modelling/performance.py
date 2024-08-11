@@ -1,6 +1,9 @@
 from pathlib import Path
 import pandas as pd
 import numpy as np
+import matplotlib
+
+matplotlib.use("Agg")
 from matplotlib import pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go

@@ -86,7 +86,6 @@ def ReduceSingleFeature(df_):
 
 
 def RestructureReduceInteractions(df_):
-    ## TODO somewhere in this function None is replaced by nan+
     # for safety
     df = df_.copy()
 
@@ -159,11 +158,6 @@ def RestructureReduceInteractions(df_):
 
     lookup_df["adj_score"] = adj_check
 
-    def last_preserving_none(series):
-        non_none = series[series.notna()]
-        return non_none.iloc[-1] if len(non_none) > 0 else None
-
-    # TODO it seems to be going wrong here (None to nan)
     lookup_df_simple = (
         lookup_df.groupby(
             [
