@@ -23,6 +23,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed error related to tkinter
 - Fixed tests failing due to different reasons
 
+## [0.1.7] - 2024-08-12
+
+### Added
+- Support for interpretml 0.6.3
+
+### Changed
+- Testing flow to do end to end for all model problem types combinations
+
+### Fixed
+- Fixed error of not working on certain platforms
+- Fixed error related to tkinter
+- Fixed tests failing due to different reasons
+
 ## [0.1.6] - 2024-06-27
 
 ### Added
