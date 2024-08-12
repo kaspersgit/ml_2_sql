@@ -34,6 +34,7 @@ classifiers = [
 dependencies = [
     "interpret == 0.6.3",
     "numpy",
+    "duckdb",
     "scikit-learn",
     "imblearn",
     "kaleido",
@@ -49,7 +50,6 @@ Issues = "https://github.com/kaspersgit/ml_2_sql/issues"
 
 [project.optional-dependencies]
 dev = [
-    "duckdb",
     "pytest",
     "pytest-mock",
     "pip-tools",

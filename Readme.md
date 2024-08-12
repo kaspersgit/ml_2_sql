@@ -1,7 +1,9 @@
 # Machine learning to SQL
+![pypi](https://img.shields.io/pypi/v/ml2sql.svg)
 ![GitHub Repo stars](https://img.shields.io/github/stars/kaspersgit/ml_2_sql?style=flat-square)
 ![GitHub last commit](https://img.shields.io/github/last-commit/kaspersgit/ml_2_sql?style=flat-square)
-![interpret](https://img.shields.io/badge/interpret-v0.5.1-blue)
+![Pypi downloads](https://img.shields.io/pypi/dm/ml2sql)
+![interpret](https://img.shields.io/badge/interpret-v0.6.3-blue)
 ![Python Version](https://img.shields.io/pypi/pyversions/interpret.svg?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/kaspersgit/ml_2_sql?style=flat-square)
 
