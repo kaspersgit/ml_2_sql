@@ -50,8 +50,7 @@ This tool can be used by anybody, but is aimed for people who want to do a quick
 
   1. Make sure you have python >= 3.8
   2. `pip install ml2sql`
-  3. Run: `ml2sql init` 
-    This will create the folders, `input/data/`, `input/configuration/ and `trained_models/` 
+  3. `ml2sql init` (creates folder structure for in- and output)
 
 <br>
 </details> 
@@ -59,8 +58,8 @@ This tool can be used by anybody, but is aimed for people who want to do a quick
 <summary><strong>Quick Demo</strong></summary>
 <br>
 
-  1. In the terminal in the root of this folder run: 
-    `ml2sql run`, follow the instructions on screen and select the demo data and config
+  1. `ml2sql run`
+  2. Follow the instructions and select the demo data and related config
   3. Check the output in the newly created folder
 
 <br>
@@ -87,8 +86,7 @@ This tool can be used by anybody, but is aimed for people who want to do a quick
 
   1. Make sure the new dataset has the same variables as the dataset the model was trained on (same features and target)
   2. Save dataset in the `input/data/` folder (more info on [input data](#data))
-  3. In the terminal in the root of this folder run: 
-     `ml2sql check-model`
+  3. Run: `ml2sql check-model`
   4. Follow the instructions on screen
   5. The output will be saved in the folder `trained_models/<selected_model>/tested_datasets/<selected_dataset>/`
 
@@ -106,7 +104,7 @@ The csv file containing the data has to fulfill some basic assumptions:
 
 #### Additional information
 - EBM can handle categorical values (these will be excluded when choosing decision tree or linear/logistic regression)
-- EBM can handle missing values
+- EBM can handle missing values (tool will error out for other models)
 
 ## Configuration json ([example](https://github.com/kaspersgit/ml_2_sql/blob/main/input/configuration/example_binary_titanic.json))
 This file will inform the script which column is the target, which are the features and several other parameters for pre and post training.
@@ -166,11 +164,11 @@ The output consists of 4 parts:
 ## Correlation matrices 
 Can be found in the created model's folder under `/feature_info`
 
-### Pearson Correlation Matrix (Numerical Features)
+### Pearson Correlation Matrix
 - A Pearson correlation matrix for numerical features in the input data.
 - Visualized as a clustermap and saved as `numeric_clustermap.png` or `numeric_clustermap.html`.
 
-### Cramer's V Correlation Matrix (Categorical Features)
+### Cramer's V Correlation Matrix
 - A Cramer's V correlation matrix for categorical features (object, category, boolean) in the input data.
 - Visualized as a clustermap and saved as `categorical_clustermap.png` or `categorical_clustermap.html`.
 
@@ -242,4 +240,4 @@ Check docs/TODO.md for an extensive list of planned features and improvements.
 Feel free to open an issue in case a feature is missing or not working properly.
 
 # Troubleshooting
-If you encounter an unclear error message after following the instructions above, feel free to create an Issue on the GitHub repository.
+Feel free to open an issue if anything unexpected happens
