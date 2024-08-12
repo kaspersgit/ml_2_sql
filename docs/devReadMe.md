@@ -35,11 +35,13 @@ https://packaging.python.org/en/latest/tutorials/packaging-projects/
 ### Release process
 PyPI Release Process
 
-Update your package version
-Update the version in your __init__.py or wherever you keep your version number.
-Update CHANGELOG.md
-Document the changes in this new version.
-Commit changes and tag the release
+In dev branch:
+- Update your package version (in __init__.py)
+- Update CHANGELOG.md
+- Commit changes
+- Merge to master on github (name "Prepare release X.Y.Z")
+- Pull master locally
+- Add tag (git tag -a vX.Y.Z -m "Release version X.Y.Z")
 git add .
 git commit -m "Prepare release X.Y.Z"
 git tag vX.Y.Z
