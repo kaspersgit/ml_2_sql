@@ -42,13 +42,11 @@ In dev branch:
 - Merge to master on github (name "Prepare release X.Y.Z")
 - Pull master locally
 - Add tag (git tag -a vX.Y.Z -m "Release version X.Y.Z")
-git add .
-git commit -m "Prepare release X.Y.Z"
-git tag vX.Y.Z
-git push origin main
-git push origin vX.Y.Z
+- git push origin vX.Y.Z
 
-Build your package
+Build your package 
+(should be done by github action on tag push directly to pypi)
+```
 rm -rf dist/*  # Clean old builds
 python -m build
 
@@ -63,11 +61,7 @@ Ensure it works as expected.
 Upload to PyPI
 If all tests pass:
 twine upload dist/*
+```
 
-Verify PyPI installation
-pip install ml2sql
-
-Create a GitHub release (if applicable)
-Go to your GitHub repository and create a new release based on the tag you just pushed.
-
-Remember to increment your version number appropriately for each release, following semantic versioning principles.
+Verify PyPI installation \
+`pip install ml2sql`
