@@ -1123,8 +1123,14 @@ def postModellingPlots(
     output_path = Path(given_name) / "feature_importance"
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    globals()[model_name].postModelPlots(
-        clf["final"],
-        output_path,
-        post_params["file_type"],
-    )
+    # Check if the model has the post_model_plots method (new OO approach)
+    if hasattr(clf["final"], 'post_model_plots'):
+        # Use the object-oriented approach
+        clf["final"].post_model_plots(output_path, post_params["file_type"])
+    else:
+        # Fallback to the old approach for backward compatibility
+        globals()[model_name].postModelPlots(
+            clf["final"],
+            output_path,
+            post_params["file_type"],
+        )

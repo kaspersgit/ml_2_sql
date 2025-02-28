@@ -840,11 +840,17 @@ def ebm_to_sql(model_name, df, classes, split=True):
 
 
 def save_model_and_extras(ebm, model_name, post_params):
+    # Check if this is our custom model wrapper
+    if hasattr(ebm, 'model'):
+        actual_ebm = ebm.model
+    else:
+        actual_ebm = ebm
+        
     # extract lookup table from EBM
-    lookup_df = extractLookupTable(ebm, post_params)
+    lookup_df = extractLookupTable(actual_ebm, post_params)
     # In case of regression
-    if not hasattr(ebm, "classes_"):
-        ebm.classes_ = [0]
+    if not hasattr(actual_ebm, "classes_"):
+        actual_ebm.classes_ = [0]
         lookup_df["intercept"] = [lookup_df["intercept"]]
 
     # Write printed output to file
@@ -854,7 +860,7 @@ def save_model_and_extras(ebm, model_name, post_params):
     with open(output_path, "w") as f:
         with redirect_stdout(f):
             model_name = Path(model_name).name
-            ebm_to_sql(model_name, lookup_df, ebm.classes_, post_params["sql_split"])
+            ebm_to_sql(model_name, lookup_df, actual_ebm.classes_, post_params["sql_split"])
     logger.info("SQL version of EBM saved")
 
 

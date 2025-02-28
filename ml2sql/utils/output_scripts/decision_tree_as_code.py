@@ -13,15 +13,20 @@ def tree_to_sql(tree, file=sys.stdout):
 
     Parameters:
     -----------
-    tree: sklearn decision tree model
+    tree: sklearn decision tree model or DecisionTreeModel
         The decision tree to represent as an SQL function
     file: file object, optional (default=sys.stdout)
         The file to write the output to. If not specified, prints to console.
     """
+    # Check if this is our custom model wrapper
+    if hasattr(tree, 'model'):
+        actual_tree = tree.model
+    else:
+        actual_tree = tree
 
-    tree_ = tree.tree_
+    tree_ = actual_tree.tree_
     feature_name = [
-        tree.feature_names_in_[i] if i != _tree.TREE_UNDEFINED else "undefined!"
+        actual_tree.feature_names_in_[i] if i != _tree.TREE_UNDEFINED else "undefined!"
         for i in tree_.feature
     ]
 
@@ -43,11 +48,11 @@ def tree_to_sql(tree, file=sys.stdout):
             recurse(tree_.children_right[node], depth + 1)
             print(f"{indent}END", file=file)
         else:
-            if hasattr(tree, "classes_"):
+            if hasattr(actual_tree, "classes_"):
                 class_values = tree_.value[node]
                 samples = tree_.n_node_samples[node]
                 max_value = int(np.max(class_values))
-                predicted_class = tree.classes_[np.argmax(class_values)]
+                predicted_class = actual_tree.classes_[np.argmax(class_values)]
 
                 if np.issubdtype(type(predicted_class), np.integer):
                     print(
