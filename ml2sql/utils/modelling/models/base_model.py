@@ -172,3 +172,43 @@ class BaseModel(ABC):
         if hasattr(self.model, 'get_params'):
             return self.model.get_params(deep)
         return self.params
+    
+    def __sklearn_tags__(self):
+        """
+        Get the sklearn tags for this model.
+        
+        This method is required for compatibility with scikit-learn's estimator interface.
+        It delegates to the underlying model if it exists, otherwise returns a default set of tags.
+        
+        Returns
+        -------
+        dict
+            Dictionary of tags describing the model.
+        """
+        if self.model is not None and hasattr(self.model, '__sklearn_tags__'):
+            return self.model.__sklearn_tags__()
+        elif self.model is not None and hasattr(self.model, '_get_tags'):
+            # For older scikit-learn versions
+            return self.model._get_tags()
+        else:
+            # Default tags
+            return {
+                'allow_nan': False,
+                'binary_only': False,
+                'multilabel': False,
+                'multioutput': False,
+                'multioutput_only': False,
+                'no_validation': False,
+                'non_deterministic': False,
+                'pairwise': False,
+                'preserves_dtype': [],
+                'poor_score': False,
+                'requires_fit': True,
+                'requires_positive_X': False,
+                'requires_positive_y': False,
+                'requires_y': True,
+                'stateless': False,
+                'X_types': ['2darray'],
+                '_skip_test': False,
+                '_xfail_checks': False
+            }

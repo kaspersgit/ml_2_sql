@@ -13,6 +13,78 @@ class LinearRegressionModel(BaseModel):
     models from the interpret package.
     """
     
+    def __sklearn_tags__(self):
+        """
+        Get the sklearn tags for this model.
+        
+        This method is required for compatibility with scikit-learn's estimator interface.
+        It delegates to the underlying model if it exists, otherwise returns a default set of tags.
+        
+        Returns
+        -------
+        dict
+            Dictionary of tags describing the model.
+        """
+        if self.model is not None and hasattr(self.model, '__sklearn_tags__'):
+            return self.model.__sklearn_tags__()
+        elif self.model is not None and hasattr(self.model, '_get_tags'):
+            # For older scikit-learn versions
+            return self.model._get_tags()
+        else:
+            # Default tags
+            return {
+                'allow_nan': False,
+                'binary_only': False,
+                'multilabel': False,
+                'multioutput': False,
+                'multioutput_only': False,
+                'no_validation': False,
+                'non_deterministic': False,
+                'pairwise': False,
+                'preserves_dtype': [],
+                'poor_score': False,
+                'requires_fit': True,
+                'requires_positive_X': False,
+                'requires_positive_y': False,
+                'requires_y': True,
+                'stateless': False,
+                'X_types': ['2darray'],
+                '_skip_test': False,
+                '_xfail_checks': False
+            }
+    
+    @property
+    def coef_(self):
+        """
+        Get the coefficients of the model.
+        
+        Returns
+        -------
+        numpy.ndarray
+            Coefficients of the model.
+        """
+        if self.model is None:
+            raise ValueError("Model has not been trained yet.")
+        if not hasattr(self.model, 'sk_model_'):
+            raise AttributeError("Model does not have sk_model_ attribute.")
+        return self.model.sk_model_.coef_
+
+    @property
+    def intercept_(self):
+        """
+        Get the intercept of the model.
+        
+        Returns
+        -------
+        float or numpy.ndarray
+            Intercept of the model.
+        """
+        if self.model is None:
+            raise ValueError("Model has not been trained yet.")
+        if not hasattr(self.model, 'sk_model_'):
+            raise AttributeError("Model does not have sk_model_ attribute.")
+        return self.model.sk_model_.intercept_
+    
     def train(self, X_train, y_train, model_type):
         """
         Train a Linear/Logistic Regression model on the given training data.
@@ -133,7 +205,7 @@ def trainModel(X_train, y_train, params, model_type):
     """
     Legacy function for backward compatibility.
     
-    Creates and trains a LinearRegressionModel instance.
+    Creates and trains a Linear/Logistic Regression model directly without using the LinearRegressionModel wrapper.
     
     Parameters
     ----------
@@ -151,8 +223,24 @@ def trainModel(X_train, y_train, params, model_type):
     clf : LinearRegression or LogisticRegression
         Trained model.
     """
-    model = LinearRegressionModel(params)
-    return model.train(X_train, y_train, model_type).model
+    if model_type == "regression":
+        clf = LinearRegression(**params)
+        clf_name = "Linear regression"
+    elif model_type == "classification":
+        clf = LogisticRegression(**params)
+        # Hard code classes_
+        clf.classes_ = list(set(y_train))
+        clf_name = "Logistic regression"
+    else:
+        logger.warning("Only regression or classification available")
+        raise ValueError("Invalid model_type. Must be 'regression' or 'classification'.")
+
+    clf.fit(X_train, y_train)
+    
+    logger.info(f"Model non default params:\n {clf.kwargs}")
+    logger.info(f"Trained {clf_name.lower()}")
+
+    return clf
 
 
 def featureExplanationSave(clf, given_name, file_type):

@@ -16,6 +16,46 @@ class EBMModel(BaseModel):
     model from the interpret package.
     """
     
+    def __sklearn_tags__(self):
+        """
+        Get the sklearn tags for this model.
+        
+        This method is required for compatibility with scikit-learn's estimator interface.
+        It delegates to the underlying model if it exists, otherwise returns a default set of tags.
+        
+        Returns
+        -------
+        dict
+            Dictionary of tags describing the model.
+        """
+        if self.model is not None and hasattr(self.model, '__sklearn_tags__'):
+            return self.model.__sklearn_tags__()
+        elif self.model is not None and hasattr(self.model, '_get_tags'):
+            # For older scikit-learn versions
+            return self.model._get_tags()
+        else:
+            # Default tags
+            return {
+                'allow_nan': False,
+                'binary_only': False,
+                'multilabel': False,
+                'multioutput': False,
+                'multioutput_only': False,
+                'no_validation': False,
+                'non_deterministic': False,
+                'pairwise': False,
+                'preserves_dtype': [],
+                'poor_score': False,
+                'requires_fit': True,
+                'requires_positive_X': False,
+                'requires_positive_y': False,
+                'requires_y': True,
+                'stateless': False,
+                'X_types': ['2darray'],
+                '_skip_test': False,
+                '_xfail_checks': False
+            }
+    
     def train(self, X_train, y_train, model_type):
         """
         Train an Explainable Boosting Machine (EBM) model on the given training data.
@@ -142,7 +182,7 @@ def trainModel(X_train, y_train, params, model_type):
     """
     Legacy function for backward compatibility.
     
-    Creates and trains an EBMModel instance.
+    Creates and trains an EBM model directly without using the EBMModel wrapper.
     
     Parameters
     ----------
@@ -157,11 +197,26 @@ def trainModel(X_train, y_train, params, model_type):
         
     Returns
     -------
-    clf : EBMModel
+    clf : ExplainableBoostingClassifier or ExplainableBoostingRegressor
         Trained EBM model.
     """
-    model = EBMModel(params)
-    return model.train(X_train, y_train, model_type).model
+    if "feature_names" not in params.keys():
+        params["feature_names"] = X_train.columns
+    
+    if model_type == "regression":
+        clf = ExplainableBoostingRegressor(**params)
+    elif model_type == "classification":
+        clf = ExplainableBoostingClassifier(**params)
+    else:
+        logger.warning("Only regression or classification available")
+        raise ValueError("Invalid model_type. Must be 'regression' or 'classification'.")
+
+    clf.fit(X_train, y_train)
+    
+    logger.info(f"Model params:\n {clf.get_params}")
+    logger.info("Trained explainable boosting machine")
+
+    return clf
 
 
 def featureExplanationSave(clf, given_name, file_type):
