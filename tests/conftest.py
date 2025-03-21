@@ -56,6 +56,3 @@ def find_data_file(directory, keyword):
             f"No .csv file containing '{keyword}' found in {directory}"
         )
     return str(matching_files[0])
-
-
-PROBLEM_TYPE = ["binary", "multiclass", "regression"]
