@@ -33,13 +33,14 @@ classifiers = [
 
 dependencies = [
     "interpret == 0.6.3",
-    "numpy",
-    "duckdb",
-    "scikit-learn",
+    "numpy~=1.24.4",
+    "duckdb~=1.2.1",
+    "scikit-learn~=1.3.2",
     "imblearn",
-    "kaleido",
-    "typer",
+    "kaleido==0.2.0",
+    "typer~=0.15.2",
     'pywin32 ; platform_system == "Windows"',
+    "pytest~=8.3.5",
 ]
 
 keywords = ["SQL", "ML", "automl", "interpret", "ML 2 SQL", "EBM", "Explainable Boosting Machine", "ML to SQL"]

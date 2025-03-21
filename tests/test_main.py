@@ -6,16 +6,53 @@ import json
 from datetime import datetime
 import os
 import pandas as pd
+from tests.test_constants import PROBLEM_TYPE
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def runner():
     return CliRunner()
 
 
+@pytest.fixture(scope="session")
+def temp_dir(tmp_path_factory):
+    temp_dir = tmp_path_factory.mktemp("session_temp")
+    yield temp_dir
+
+
 @pytest.fixture
-def temp_dir(tmp_path):
-    yield tmp_path
+def setup_run_environment(temp_dir):
+    # Create necessary directories and files
+    (temp_dir / "input" / "data").mkdir(parents=True, exist_ok=True)
+    (temp_dir / "input" / "configuration").mkdir(parents=True, exist_ok=True)
+    (temp_dir / "trained_models").mkdir(exist_ok=True)
+
+    # Create a dummy CSV file with some data
+    df = pd.DataFrame(
+        {
+            "target": [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+            "feature1": [1, 2, 3, 4, 6, 7, 8, 3, 6, 1],
+            "feature2": [5, 6, 7, 8, 3, 4, 6, 7, 3, 1],
+        }
+    )
+    df.to_csv(temp_dir / "input" / "data" / "AA_test.csv", index=False)
+
+    # Create a dummy JSON configuration file
+    config = {
+        "target": "target",
+        "features": ["feature1", "feature2"],
+        "model_params": {},
+    }
+
+    with open(temp_dir / "input" / "configuration" / "AA_config.json", "w") as f:
+        json.dump(config, f)
+
+    # Change to the temp directory
+    original_dir = os.getcwd()
+    os.chdir(temp_dir)
+    yield temp_dir
+    # Change back to the original directory after the test
+    os.chdir(original_dir)
 
 
 def test_version(runner):
@@ -25,7 +62,7 @@ def test_version(runner):
 
 
 # Test cli_init
-def test_init_command(runner, temp_dir):
+def test_init_command(temp_dir, runner):
     result = runner.invoke(app, ["init", "--dest", str(temp_dir)])
     assert result.exit_code == 0
 
@@ -44,7 +81,7 @@ def test_init_command(runner, temp_dir):
     ), "No files found in input/configuration"
 
 
-def test_init_command_existing_directory(runner, temp_dir):
+def test_init_command_existing_directory(temp_dir, runner):
     # Create a file in the directory to simulate an existing project
     (temp_dir / "existing_file.txt").touch()
 
@@ -58,51 +95,15 @@ def test_init_command_existing_directory(runner, temp_dir):
     assert (temp_dir / "existing_file.txt").exists()
 
 
-@pytest.fixture
-def setup_run_environment(temp_dir):
-    # Create necessary directories and files
-    (temp_dir / "input" / "data").mkdir(parents=True)
-    (temp_dir / "input" / "configuration").mkdir(parents=True)
-    (temp_dir / "trained_models").mkdir()
-
-    # Create a dummy CSV file with some data
-    df = pd.DataFrame(
-        {
-            "target": [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-            "feature1": [1, 2, 3, 4, 6, 7, 8, 3, 6, 1],
-            "feature2": [5, 6, 7, 8, 3, 4, 6, 7, 3, 1],
-        }
-    )
-    df.to_csv(temp_dir / "input" / "data" / "test.csv", index=False)
-
-    # Create a dummy JSON configuration file
-    config = {
-        "target": "target",
-        "features": ["feature1", "feature2"],
-        "model_params": {},
-    }
-
-    with open(temp_dir / "input" / "configuration" / "config.json", "w") as f:
-        json.dump(config, f)
-
-    # Change to the temp directory
-    original_dir = os.getcwd()
-    os.chdir(temp_dir)
-    yield temp_dir
-    # Change back to the original directory after the test
-    os.chdir(original_dir)
-
-
-def test_run_command(setup_run_environment, caplog):
+def test_run_command(setup_run_environment, runner, caplog):
     # Avoid I/O error by not having any logger  produce a message
     caplog.set_level(100000)
 
-    runner = CliRunner()
     temp_dir = setup_run_environment
 
     # Create the input sequence for test_run
     user_inputs = (
-        "1\n"  # Select the first CSV file
+        "1\n"  # Select the first CSV file (AA_test.csv)
         "2\n"  # Select the first JSON file (we created one in setup)
         "1\n"  # Select the first model type (assuming it's "Explainable Boosting Machine")
         "test_model\n"  # Enter model name

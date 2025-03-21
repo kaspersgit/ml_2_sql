@@ -6,14 +6,10 @@ import pandas as pd
 from ml2sql.main import app
 from ml2sql.utils.test_helpers.sql_model import execute_sql_script
 from datetime import datetime
-from test_utils import (
-    runner,  # noqa: F401
-    temp_dir,  # noqa: F401
-    init_ml2sql,  # noqa: F401
-    change_test_dir,  # noqa: F401
+from tests.test_constants import PROBLEM_TYPE
+from tests.conftest import (
     find_sav_file,
     find_data_file,
-    PROBLEM_TYPE,
 )
 
 

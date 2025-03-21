@@ -54,6 +54,11 @@ This tool can be used by anybody, but is aimed for people who want to do a quick
   2. `pip install ml2sql`
   3. `ml2sql init` (creates folder structure for in- and output)
 
+1. Or use UV:
+   - to install the package: `uv sync`
+   - to run the tool: `uv run ml2sql`
+2. Or even UVX to run directly without installing:
+   - to run the tool: `uvx ml2sql run` (just add `uvx` in front of the commands specified below in the demo section)
 <br>
 </details> 
 <details> 
