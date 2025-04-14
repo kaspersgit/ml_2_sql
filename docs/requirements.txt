@@ -201,7 +201,7 @@ rich==13.7.1
     # via typer
 salib==1.5.0
     # via interpret-core
-scikit-learn==1.4.2
+scikit-learn==1.5.0
     # via
     #   imbalanced-learn
     #   interpret-core
