@@ -11,7 +11,7 @@ def extract_parameters(model):
     Extracts model_type, features, coefficients, and intercept from a trained logistic regression model.
 
     Parameters:
-    - trained_model: The trained logistic regression model object.
+    - model: The trained model object, either a direct scikit-learn model or our custom wrapper.
 
     Returns:
     - model_type: String, either regression of classification
@@ -20,30 +20,36 @@ def extract_parameters(model):
     - intercept: Intercept of the logistic regression model.
     """
     try:
+        # Check if this is our custom model wrapper
+        if hasattr(model, 'model'):
+            actual_model = model.model
+        else:
+            actual_model = model
+
         # Extract model type
-        if model.__class__.__name__ == "LinearRegression":
+        if actual_model.__class__.__name__ == "LinearRegression":
             model_type = "regression"
             pclasses = None
-        elif len(model.classes_) > 2:
+        elif len(actual_model.classes_) > 2:
             model_type = "multiclass"
-            pclasses = model.classes_
-        elif len(model.classes_) == 2:
+            pclasses = actual_model.classes_
+        elif len(actual_model.classes_) == 2:
             model_type = "binary"
-            pclasses = model.classes_
+            pclasses = actual_model.classes_
 
         # Extract features
-        features = model.feature_names_in_
+        features = actual_model.feature_names_in_
 
         if model_type == "binary":
-            coefficients = model.sk_model_.coef_[0]
+            coefficients = actual_model.coef_[0]
         else:
-            coefficients = model.sk_model_.coef_
+            coefficients = actual_model.coef_
 
         # Extract intercept
         if model_type == "binary":
-            intercept = model.sk_model_.intercept_[0]
+            intercept = actual_model.intercept_[0]
         else:
-            intercept = model.sk_model_.intercept_
+            intercept = actual_model.intercept_
 
         return model_type, pclasses, features, coefficients, intercept
 

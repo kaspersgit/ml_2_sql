@@ -1,20 +1,65 @@
 import joblib
 import random
 import numpy as np
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Optional, Type, Union
 
 from sklearn.model_selection import train_test_split
 from ml2sql.utils.modelling.performance import postModellingPlots
 from ml2sql.utils.modelling.calibration import calibrateModel
 
-# Algorithms (imported dynamically)
-from ml2sql.utils.modelling.models import ebm  # noqa: F401
-from ml2sql.utils.modelling.models import decision_tree  # noqa: F401
-from ml2sql.utils.modelling.models import l_regression  # noqa: F401
+# Import model classes
+from ml2sql.utils.modelling.models.base_model import BaseModel
+from ml2sql.utils.modelling.models import MODEL_CLASSES
 
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+class ModelFactory:
+    """
+    Factory class for creating model instances based on model name.
+    """
+    
+    @staticmethod
+    def get_model_class(model_name: str) -> Type[BaseModel]:
+        """
+        Get the model class based on the model name.
+        
+        Parameters
+        ----------
+        model_name : str
+            Name of the model.
+            
+        Returns
+        -------
+        Type[BaseModel]
+            Model class.
+        """
+        if model_name not in MODEL_CLASSES:
+            raise ValueError(f"Unknown model name: {model_name}")
+        
+        return MODEL_CLASSES[model_name]
+    
+    @staticmethod
+    def create_model(model_name: str, model_params: Dict[str, Any]) -> BaseModel:
+        """
+        Create a model instance based on the model name and parameters.
+        
+        Parameters
+        ----------
+        model_name : str
+            Name of the model.
+        model_params : Dict[str, Any]
+            Model parameters.
+            
+        Returns
+        -------
+        BaseModel
+            Model instance.
+        """
+        model_class = ModelFactory.get_model_class(model_name)
+        return model_class(model_params)
 
 
 def train_model(
@@ -23,7 +68,7 @@ def train_model(
     model_params: Dict[str, Any],
     model_type: str,
     model_name: str,
-):
+) -> BaseModel:
     """
     Train a machine learning model.
 
@@ -38,13 +83,12 @@ def train_model(
         Trained machine learning model.
     """
     try:
-        clf = globals()[model_name].trainModel(
-            X_train, y_train, model_params, model_type
-        )
+        model = ModelFactory.create_model(model_name, model_params)
+        model.train(X_train, y_train, model_type)
     except Exception as e:
         logger.error(f"Error training model: {e}")
         raise
-    return clf
+    return model
 
 
 def predict(clf, X_test: np.ndarray, model_type: str) -> Tuple[np.ndarray, np.ndarray]:
@@ -291,6 +335,6 @@ if __name__ == "__main__":
     post_params = {...}
 
     # Train and save the model
-    trained_model, post_datasets = make_model(
+    trained_model = make_model(
         "my_model", datasets, model_name, model_type, model_params, post_params
     )
